@@ -62,7 +62,7 @@ php artisan key:generate
 Jalankan migration untuk membuat tabel database:
 
 ```bash
-php artisan migrate
+php artisan migrate --seed
 ```
 
 ### 6. Jalankan Project
