@@ -16,7 +16,7 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
             </div>
             <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalUsers ?? 4 }}</h3>
+                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalUsers ?? 0 }}</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total User</p>
             </div>
         </div>
@@ -25,7 +25,7 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             </div>
             <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalClubs ?? 1 }}</h3>
+                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalClubs ?? 0 }}</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Klub</p>
             </div>
         </div>
@@ -34,7 +34,7 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
             </div>
             <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalPlayers ?? 2 }}</h3>
+                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalPlayers ?? 0 }}</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pemain</p>
             </div>
         </div>
@@ -43,7 +43,7 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </div>
             <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalMatches ?? 1 }}</h3>
+                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalMatches ?? 0 }}</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Match</p>
             </div>
         </div>
@@ -57,30 +57,24 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
                 <a href="{{ route('matches.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Lihat Semua</a>
             </div>
             <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-lg bg-slate-200/50 text-slate-500 flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                @forelse($recentMatches ?? [] as $match)
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-slate-200/50 text-slate-500 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-[13px] font-bold text-[#1e293b]">{{ $match->title }}</h4>
+                                <p class="text-[11px] text-slate-400 font-medium mt-0.5">{{ \Carbon\Carbon::parse($match->match_date)->format('d M Y, H:i') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-[13px] font-bold text-[#1e293b]">Liga1</h4>
-                            <p class="text-[11px] text-slate-400 font-medium mt-0.5">29 Jun 2026, 00:00</p>
-                        </div>
+                        <span class="px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 rounded-full text-[9px] font-bold tracking-widest uppercase">{{ $match->status }}</span>
                     </div>
-                    <span class="px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 rounded-full text-[9px] font-bold tracking-widest uppercase">Upcoming</span>
-                </div>
-                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-lg bg-slate-200/50 text-slate-500 flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <div>
-                            <h4 class="text-[13px] font-bold text-[#1e293b]">Liga2</h4>
-                            <p class="text-[11px] text-slate-400 font-medium mt-0.5">15 Jul 2026, 15:00</p>
-                        </div>
+                @empty
+                    <div class="p-6 text-center border border-dashed border-slate-200 rounded-xl">
+                        <p class="text-[13px] font-medium text-slate-400">Belum ada jadwal pertandingan.</p>
                     </div>
-                    <span class="px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 rounded-full text-[9px] font-bold tracking-widest uppercase">Upcoming</span>
-                </div>
+                @endforelse
             </div>
         </div>
 
@@ -90,26 +84,22 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
                 <a href="{{ route('players.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Manajemen</a>
             </div>
             <div class="space-y-4">
-                <div class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <div class="w-10 h-10 rounded-full bg-[#1e293b] text-white flex items-center justify-center text-[12px] font-bold shrink-0">10</div>
-                    <div>
-                        <h4 class="text-[13px] font-bold text-[#1e293b]">Yazid Ardiyan Wicaksono</h4>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                            <span class="text-[11px] font-medium text-slate-400">Aktif</span>
+                @forelse($recentPlayers ?? [] as $player)
+                    <div class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                        <div class="w-10 h-10 rounded-full bg-[#1e293b] text-white flex items-center justify-center text-[12px] font-bold shrink-0">{{ $player->number ?? 'P' }}</div>
+                        <div>
+                            <h4 class="text-[13px] font-bold text-[#1e293b]">{{ $player->name }}</h4>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                <span class="text-[11px] font-medium text-slate-400">{{ $player->status ?? 'Aktif' }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <div class="w-10 h-10 rounded-full bg-[#1e293b] text-white flex items-center justify-center text-[12px] font-bold shrink-0">69</div>
-                    <div>
-                        <h4 class="text-[13px] font-bold text-[#1e293b]">Arif Paradigma</h4>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                            <span class="text-[11px] font-medium text-slate-400">Aktif</span>
-                        </div>
+                @empty
+                    <div class="p-6 text-center border border-dashed border-slate-200 rounded-xl">
+                        <p class="text-[13px] font-medium text-slate-400">Belum ada pemain yang ditambahkan.</p>
                     </div>
-                </div>
+                @endforelse
             </div>
         </div>
     </div>
@@ -579,7 +569,7 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
     <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-[#4062D6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <svg class="w-5 h-5 text-[#4062D6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 02-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                 <h3 class="font-bold text-[#1e293b]">Riwayat Pertandingan Anda</h3>
             </div>
             <a href="#" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Semua &gt;</a>
