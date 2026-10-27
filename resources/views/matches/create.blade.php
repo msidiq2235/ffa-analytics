@@ -15,8 +15,10 @@
 <label for="title" class="block text-[13px] font-bold text-[#334155] mb-2">Nama Tim</label>
 <div class="relative">
 <select id="title" name="title" required class="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[13px] text-[#334155] appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-shadow shadow-sm cursor-pointer">
-<option value="" disabled selected>Nama Tim</option>
-<option value="GhostClub">GhostClub</option>
+<option value="" disabled selected>Pilih Nama Tim</option>
+@foreach($clubs as $club)
+    <option value="{{ $club->name }}">{{ $club->name }}</option>
+@endforeach
 </select>
 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -59,6 +61,7 @@
 </div>
 </form>
 </div>
+
 <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-8">
 <div class="flex items-center justify-between mb-6">
 <h3 class="text-[11px] font-black text-slate-400 tracking-widest uppercase">Set Line-Up Tim</h3>
@@ -67,7 +70,9 @@
 <label class="text-[13px] font-bold text-[#334155]">Nama Tim</label>
 <div class="relative w-64">
 <select class="w-full px-4 py-2 bg-slate-50 border border-[#e2e8f0] rounded-lg text-[12px] text-[#334155] appearance-none focus:outline-none focus:border-[#4062D6] cursor-pointer">
-<option value="GhostClub">GhostClub</option>
+@foreach($clubs as $club)
+    <option value="{{ $club->name }}">{{ $club->name }}</option>
+@endforeach
 </select>
 <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
