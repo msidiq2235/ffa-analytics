@@ -30,12 +30,10 @@ Route::middleware('auth')->group(function () {
     
     // Fitur Switch Role (Khusus Super Admin)
     Route::post('/switch-role', function (Request $request) {
-        // Validasi input untuk keamanan
         $request->validate([
             'active_role' => 'required|string|in:Super Admin,Pelatih,Analis,Pemain'
         ]);
 
-        // Simpan hanya jika user aslinya adalah Super Admin
         if (auth()->user()->role === 'Super Admin') {
             session(['active_role' => $request->active_role]);
         }
@@ -43,7 +41,7 @@ Route::middleware('auth')->group(function () {
         return back();
     })->name('switch.role');
 
-    // Modul Live Analytics & Line-up (Harus diletakkan SEBELUM route resource matches)
+    // Modul Live Analytics & Line-up
     Route::get('/matches/{match}/lineup', [MatchController::class, 'lineup'])->name('matches.lineup');
     Route::post('/matches/{match}/lineup', [MatchController::class, 'updateLineup'])->name('matches.updateLineup');
     Route::get('/matches/{match}/live', [MatchController::class, 'live'])->name('matches.live');
@@ -53,6 +51,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/matches/{match}/vector', [MatchController::class, 'vector'])->name('matches.vector');
     Route::get('/matches/{match}/player-stats/{player}', [MatchController::class, 'getPlayerStats'])->name('matches.getPlayerStats');
     Route::get('/reports/matches/{match}', [ReportController::class, 'showMatchReport'])->name('reports.match.show');
+
+    // Modul Laporan Performa Pemain (BARU)
+    Route::get('/performa', [PlayerController::class, 'performance'])->name('performa.index');
 
     // Modul CRUD Master & Transaksi
     Route::resource('users', UserController::class);

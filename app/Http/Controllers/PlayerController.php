@@ -56,4 +56,37 @@ class PlayerController extends Controller
 
         return redirect()->route('players.index')->with('success', 'Data pemain berhasil diperbarui!');
     }
+
+    public function performance(Request $request)
+    {
+        // Mengambil query dasar pemain beserta relasi club/team
+        $query = \App\Models\Player::with('club');
+
+        // 1. Filter Nama Pemain
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '\%' .$request->name . '%');
+        }
+
+        // 2. Filter Posisi Pemain
+        if ($request->filled('position')) {
+            $query->where('position',$request->position);
+        }
+
+        // 3. Filter Nomor Punggung Pemain
+        if ($request->filled('number')) {
+            $query->where('number',$request->number);
+        }
+
+        // 4. Filter Tim / Klub
+        if ($request->filled('club_id')) {
+            $query->where('club_id',$request->club_id);
+        }
+
+        $players =$query->get();
+
+        // Mengambil daftar klub untuk opsi dropdown filter tim
+        $clubs = \App\Models\Club::orderBy('name', 'asc')->get();
+
+        return view('performa.index', compact('players', 'clubs'));
+    }
 }

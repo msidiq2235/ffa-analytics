@@ -83,8 +83,9 @@ $activeRole = session('active_role', $realRole);
 <p class="px-3 text-[10px] font-bold text-blue-200/50 uppercase tracking-widest mb-3 sidebar-title whitespace-nowrap transition-all">Analitik</p>
 <ul class="space-y-1">
 <li>
-<a href="#" title="Performance" class="flex items-center gap-3 px-3 py-2.5 rounded-xl sidebar-item transition-all text-blue-100/70 hover:text-white hover:bg-white/10 text-xs font-medium">
-<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+<!-- PERUBAHAN LINK PERFORMANCE DI SINI -->
+<a href="{{ route('performa.index') }}" title="Performance" class="flex items-center gap-3 px-3 py-2.5 rounded-xl sidebar-item transition-all {{ request()->routeIs('performa.index') ? 'bg-white/15 text-white text-xs font-semibold shadow-sm' : 'text-blue-100/70 hover:text-white hover:bg-white/10 text-xs font-medium' }}">
+<svg class="w-4 h-4 {{ request()->routeIs('performa.index') ? 'text-blue-300' : '' }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
 <span class="sidebar-text whitespace-nowrap">Performance</span>
 </a>
 </li>
