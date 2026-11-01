@@ -7,16 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-{
-    Schema::table('players', function (Blueprint $table) {
-        $table->string('position', 50)->nullable();
-    });
-}
+    {
+        Schema::table('players', function (Blueprint $table) {
+            if (!Schema::hasColumn('players', 'position')) {
+                $table->string('position', 50)->nullable();
+            }
+        });
+    }
 
-public function down(): void
-{
-    Schema::table('players', function (Blueprint $table) {
-        $table->dropColumn('position');
-    });
-}
+    public function down(): void
+    {
+        Schema::table('players', function (Blueprint $table) {
+            if (Schema::hasColumn('players', 'position')) {
+                $table->dropColumn('position');
+            }
+        });
+    }
 };
