@@ -16,13 +16,13 @@ class PlayerController extends Controller
 
     public function create()
     {
-        $clubs = \App\Models\Club::orderBy('name', 'asc')->get();
+        $clubs = Club::orderBy('name', 'asc')->get();
         return view('players.create', compact('clubs'));
     }
 
-    public function edit(\App\Models\Player $player)
+    public function edit(Player $player)
     {
-        $clubs = \App\Models\Club::orderBy('name', 'asc')->get();
+        $clubs = Club::orderBy('name', 'asc')->get();
         return view('players.edit', compact('player', 'clubs'));
     }
 
@@ -30,6 +30,7 @@ class PlayerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'position' => 'required|string|max:50',
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
             'status' => 'nullable|string',
@@ -44,13 +45,17 @@ class PlayerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'position' => 'required|string|max:50',
             'jersey_number' => 'nullable|integer',
-            'status' => 'required|string|in:Aktif,Tidak Aktif,Cedera',
+            'club_id' => 'required|exists:clubs,id',
+            'status' => 'required|string|in:Aktif,Tidak Aktif,Cedera,Nonaktif',
         ]);
 
         $player->update([
             'name' => $request->name,
+            'position' => $request->position,
             'jersey_number' => $request->jersey_number,
+            'club_id' => $request->club_id,
             'status' => $request->status,
         ]);
 
@@ -58,36 +63,31 @@ class PlayerController extends Controller
     }
 
     public function performance(Request $request)
-{
-    // Mengambil data pemain beserta relasi klubnya
-    $query = \App\Models\Player::with('club');
+    {
+        $query = Player::with('club');
 
-    // Filter berdasarkan Nama Pemain
-    if ($request->filled('name')) {
-        $query->where('name', 'like', '%' . $request->name . '%');
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('position')) {
+            $query->where('position', $request->position);
+        }
+
+        if ($request->filled('number')) {
+            $query->where(function($q) use ($request) {
+                $q->where('number', $request->number)
+                  ->orWhere('back_number', $request->number);
+            });
+        }
+
+        if ($request->filled('club_id')) {
+            $query->where('club_id', $request->club_id);
+        }
+
+        $players = $query->get();
+        $clubs = Club::orderBy('name', 'asc')->get();
+
+        return view('performa.index', compact('players', 'clubs'));
     }
-
-    // Filter berdasarkan Posisi
-    if ($request->filled('position')) {
-        $query->where('position', $request->position);
-    }
-
-    // Filter berdasarkan Nomor Punggung (mendukung kolom 'number' atau 'back_number')
-    if ($request->filled('number')) {
-        $query->where(function($q) use ($request) {
-            $q->where('number', $request->number)
-              ->orWhere('back_number', $request->number);
-        });
-    }
-
-    // Filter berdasarkan Tim / Klub
-    if ($request->filled('club_id')) {
-        $query->where('club_id', $request->club_id);
-    }
-
-    $players = $query->get();
-    $clubs = \App\Models\Club::orderBy('name', 'asc')->get();
-
-    return view('performa.index', compact('players', 'clubs'));
-}
 }
