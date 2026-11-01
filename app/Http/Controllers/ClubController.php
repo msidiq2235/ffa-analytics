@@ -59,12 +59,24 @@ class ClubController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'logo_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validasi file logo saat edit
         ]);
 
         $club = \App\Models\Club::findOrFail($id);
-        $club->update([
-            'name' => $request->name,
-        ]);
+        
+        $data = ['name' => $request->name];
+
+        // Cek apakah ada file logo baru yang di-upload saat edit
+        if ($request->hasFile('logo_path')) {
+            // Hapus logo lama jika ada agar tidak menumpuk di storage
+            if ($club->logo_path && Storage::disk('public')->exists($club->logo_path)) {
+                Storage::disk('public')->delete($club->logo_path);
+            }
+            // Simpan logo baru
+            $data['logo_path'] = $request->file('logo_path')->store('club_logos', 'public');
+        }
+
+        $club->update($data);
 
         return redirect()->route('clubs.index')->with('success', 'Informasi klub berhasil diperbarui!');
     }
