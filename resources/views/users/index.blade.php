@@ -34,9 +34,9 @@
 </div>
 </div>
 
-<!-- Tombol Tambah User di antara kotak statistik dan tabel, posisi di sebelah kanan -->
+<!-- Tombol Tambah User dengan ukuran semula & gradasi warna di sebelah kanan -->
 <div class="flex justify-end mb-6">
-<a href="{{ route('users.create') }}" class="bg-[#2d5096] hover:bg-[#183262] text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors shadow-sm flex items-center gap-2">
+<a href="{{ route('users.create') }}" class="bg-gradient-to-r from-[#1e40af] via-[#2563eb] to-[#3b82f6] hover:opacity-90 text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all shadow-[0_4px_12px_rgba(37,99,235,0.2)] flex items-center gap-2">
 <span>+</span> Tambah User
 </a>
 </div>
