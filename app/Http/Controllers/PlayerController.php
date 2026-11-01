@@ -8,10 +8,32 @@ use Illuminate\Http\Request;
 
 class PlayerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $players = Player::with('club')->get();
-        return view('players.index', compact('players'));
+        $query = Player::with('club');
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('position')) {
+            $query->where('position', $request->position);
+        }
+
+        if ($request->filled('jersey')) {
+            $query->where('jersey_number', $request->jersey);
+        }
+
+        if ($request->filled('club')) {
+            $query->whereHas('club', function($q) use ($request) {
+                $q->where('name', $request->club);
+            });
+        }
+
+        $players = $query->get();
+        $clubs = Club::orderBy('name', 'asc')->get();
+
+        return view('players.index', compact('players', 'clubs'));
     }
 
     public function create()
@@ -27,6 +49,7 @@ class PlayerController extends Controller
             'position' => 'required|string|max:50',
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
+            'second_club' => 'nullable|string|max:255',
             'status' => 'nullable|string',
         ]);
 
@@ -35,7 +58,6 @@ class PlayerController extends Controller
         return redirect()->route('players.index')->with('success', 'Data pemain berhasil ditambahkan!');
     }
 
-    // --- TAMBAHKAN METHOD SHOW DI SINI ---
     public function show($id)
     {
         $player = Player::with('club')->findOrFail($id);
@@ -55,6 +77,7 @@ class PlayerController extends Controller
             'position' => 'required|string|max:50',
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
+            'second_club' => 'nullable|string|max:255',
             'status' => 'required|string|in:Aktif,Tidak Aktif,Cedera,Nonaktif',
         ]);
 
@@ -63,10 +86,19 @@ class PlayerController extends Controller
             'position' => $request->position,
             'jersey_number' => $request->jersey_number,
             'club_id' => $request->club_id,
+            'second_club' => $request->second_club,
             'status' => $request->status,
         ]);
 
         return redirect()->route('players.index')->with('success', 'Data pemain berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        $player = Player::findOrFail($id);
+        $player->delete();
+
+        return redirect()->route('players.index')->with('success', 'Data pemain berhasil dihapus!');
     }
 
     public function performance(Request $request)
@@ -98,10 +130,9 @@ class PlayerController extends Controller
         return view('performa.index', compact('players', 'clubs'));
     }
 
-public function performanceShow($id)
-{
-    $player = Player::with(['club'])->findOrFail($id);
-    
-    return view('performa.show', compact('player'));
-}
+    public function performanceShow($id)
+    {
+        $player = Player::with(['club'])->findOrFail($id);
+        return view('performa.show', compact('player'));
+    }
 }

@@ -12,19 +12,32 @@
             <div class="space-y-6">
                 <div>
                     <label for="name" class="block text-[13px] font-bold text-slate-700 mb-2">Nama Pemain</label>
-                    <input type="text" id="name" name="name" placeholder="Nama Lengkap Pemain" required 
+                    <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="Nama Lengkap Pemain" required 
                            class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
                 </div>
                 
                 <div>
                     <label for="position" class="block text-[13px] font-bold text-slate-700 mb-2">Posisi</label>
-                    <input type="text" id="position" name="position" placeholder="Contoh: ST, GK, CM, CB" required 
-                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    <div class="relative">
+                        <select id="position" name="position" required 
+                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
+                            <option value="" disabled selected class="text-slate-400">Pilih Posisi</option>
+                            <option value="ST" {{ old('position') == 'ST' ? 'selected' : '' }}>ST (Striker)</option>
+                            <option value="GK" {{ old('position') == 'GK' ? 'selected' : '' }}>GK (Goalkeeper)</option>
+                            <option value="CM" {{ old('position') == 'CM' ? 'selected' : '' }}>CM (Central Midfielder)</option>
+                            <option value="CB" {{ old('position') == 'CB' ? 'selected' : '' }}>CB (Centre-Back)</option>
+                            <option value="LW" {{ old('position') == 'LW' ? 'selected' : '' }}>LW (Left Winger)</option>
+                            <option value="RW" {{ old('position') == 'RW' ? 'selected' : '' }}>RW (Right Winger)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
                     <label for="jersey_number" class="block text-[13px] font-bold text-slate-700 mb-2">Nomor Punggung</label>
-                    <input type="number" id="jersey_number" name="jersey_number" placeholder="Contoh: 10" required 
+                    <input type="number" id="jersey_number" name="jersey_number" value="{{ old('jersey_number') }}" placeholder="Contoh: 10" required 
                            class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
                 </div>
             </div>
@@ -32,13 +45,30 @@
             <!-- Kolom Kanan -->
             <div class="space-y-6">
                 <div>
-                    <label for="club_id" class="block text-[13px] font-bold text-slate-700 mb-2">Tim / Klub</label>
+                    <label for="club_id" class="block text-[13px] font-bold text-slate-700 mb-2">Tim / Klub Utama</label>
                     <div class="relative">
                         <select id="club_id" name="club_id" required 
                                 class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
-                            <option value="" disabled selected class="text-slate-400">Pilih Klub</option>
+                            <option value="" disabled selected class="text-slate-400">Pilih Klub Utama</option>
                             @foreach($clubs as $club)
-                                <option value="{{ $club->id }}">{{ $club->name }}</option>
+                                <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>{{ $club->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Klub Kedua Berbentuk Dropdown -->
+                <div>
+                    <label for="second_club" class="block text-[13px] font-bold text-slate-700 mb-2">Klub Kedua (Opsional)</label>
+                    <div class="relative">
+                        <select id="second_club" name="second_club" 
+                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
+                            <option value="">Pilih Klub Kedua (Opsional)</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->name }}" {{ old('second_club') == $club->name ? 'selected' : '' }}>{{ $club->name }}</option>
                             @endforeach
                         </select>
                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
@@ -53,8 +83,8 @@
                         <select id="status" name="status" required 
                                 class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
                             <option value="" disabled selected class="text-slate-400">Pilih Status</option>
-                            <option value="Aktif">Aktif</option>
-                            <option value="Nonaktif">Nonaktif</option>
+                            <option value="Aktif" {{ old('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="Nonaktif" {{ old('status') == 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                         </select>
                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>

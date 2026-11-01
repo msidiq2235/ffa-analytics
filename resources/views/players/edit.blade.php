@@ -47,36 +47,39 @@
             <!-- Kolom Kanan -->
             <div class="space-y-6">
                 <div>
-                    <label class="block text-[13px] font-bold text-slate-700 mb-2">Tim</label>
-                    <!-- Kotak Checklist Tim -->
-                    <div class="w-full bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
-                        <div class="text-[12px] font-medium text-slate-400 border-b border-slate-100 pb-2">
-                            Checklist Tim yang Terdaftar oleh Pemain
+                    <label for="club_id" class="block text-[13px] font-bold text-slate-700 mb-2">Tim / Klub Utama</label>
+                    <div class="relative">
+                        <select id="club_id" name="club_id" required 
+                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
+                            <option value="" disabled class="text-slate-400">Pilih Klub Utama</option>
+                            @foreach($clubs ?? [] as $club)
+                                <option value="{{ $club->id }}" {{ (old('club_id', $player->club_id) == $club->id) ? 'selected' : '' }}>
+                                    {{ $club->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
-                        
-                        @php
-                            // Mengambil ID klub yang sudah diikuti pemain ini (jika menggunakan relasi many-to-many / pivot)
-                            $playerClubs = isset($player->clubs) ? $player->clubs->pluck('id')->toArray() : [];
-                        @endphp
+                    </div>
+                </div>
 
-                        @forelse($clubs ?? [] as $club)
-                        <label class="flex items-center gap-3 cursor-pointer select-none">
-                            <input type="checkbox" name="clubs[]" value="{{ $club->id }}" 
-                                   {{ in_array($club->id, $playerClubs) ? 'checked' : '' }}
-                                   class="w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                            <span class="text-[13px] font-medium text-slate-700">{{ $club->name }}</span>
-                        </label>
-                        @empty
-                        <!-- Fallback jika variabel clubs belum dikirim dari controller -->
-                        <label class="flex items-center gap-3 cursor-pointer select-none">
-                            <input type="checkbox" name="clubs[]" value="BunnyTim" checked class="w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                            <span class="text-[13px] font-medium text-slate-700">BunnyTim</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer select-none">
-                            <input type="checkbox" name="clubs[]" value="GhostTim" class="w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                            <span class="text-[13px] font-medium text-slate-700">GhostTim</span>
-                        </label>
-                        @endforelse
+                <!-- Klub Kedua Berbentuk Dropdown -->
+                <div>
+                    <label for="second_club" class="block text-[13px] font-bold text-slate-700 mb-2">Klub Kedua (Opsional)</label>
+                    <div class="relative">
+                        <select id="second_club" name="second_club" 
+                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
+                            <option value="">Pilih Klub Kedua (Opsional)</option>
+                            @foreach($clubs ?? [] as $club)
+                                <option value="{{ $club->name }}" {{ (old('second_club', $player->second_club) == $club->name) ? 'selected' : '' }}>
+                                    {{ $club->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
                     </div>
                 </div>
 
