@@ -50,7 +50,21 @@ class MatchController extends Controller
 
     public function lineup(MatchSession $match)
     {
-        $players = \App\Models\Player::where('status', 'Aktif')->get();
+        $players = \App\Models\Player::where('status', 'Aktif')
+            ->where(function($query) use ($match) {
+                $query->whereHas('club', function($q) use ($match) {
+                    $q->where('name', 'like', '%' . $match->title . '%')
+                    ->orWhere('name', 'like', '%' . $match->opponent . '%');
+                })
+                ->orWhere('second_club', 'like', '%' . $match->title . '%')
+                ->orWhere('second_club', 'like', '%' . $match->opponent . '%');
+            })->get();
+
+        // Fallback: Jika setelah difilter pemainnya kosong (misal nama klub di pertandingan tidak persis sama),
+        // kita tampilkan seluruh pemain aktif agar tabel tidak kosong melompong.
+        if ($players->isEmpty()) {
+            $players = \App\Models\Player::where('status', 'Aktif')->get();
+        }
 
         $match->load('players');
 

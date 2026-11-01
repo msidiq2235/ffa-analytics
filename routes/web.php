@@ -43,7 +43,9 @@ Route::middleware('auth')->group(function () {
 
     // Modul Live Analytics & Line-up
     Route::get('/matches/{match}/lineup', [MatchController::class, 'lineup'])->name('matches.lineup');
-    Route::post('/matches/{match}/lineup', [MatchController::class, 'updateLineup'])->name('matches.updateLineup');
+    Route::match(['post', 'put'], '/matches/{match}/lineup', [MatchController::class, 'updateLineup'])->name('matches.updateLineup');
+    Route::match(['post', 'put'], '/matches/{match}/lineup-update', [MatchController::class, 'updateLineup'])->name('matches.lineup.update');
+    
     Route::get('/matches/{match}/live', [MatchController::class, 'live'])->name('matches.live');
     Route::post('/matches/{match}/statistics', [MatchController::class, 'storeStatistic'])->name('matches.storeStatistic');
     Route::post('/matches/{match}/lock', [MatchController::class, 'lockMatch'])->name('matches.lock');

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Edit Line-Up - FFA Analytics')
 @section('header', 'Edit Line-Up')
-@section('subheader', 'Kelola jadwal pertandingan akademi')
+@section('subheader', 'Kelola jadwal dan susunan pemain pertandingan akademi')
 @section('content')
 
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] overflow-hidden">
@@ -9,13 +9,22 @@
         <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SET LINE-UP TIM</h3>
     </div>
     
-    <form action="{{ route('matches.updateLineup', $match->id) }}" method="POST" class="p-8">
-    @csrf
+    <form action="{{ route('matches.lineup.update', $match->id) }}" method="POST" class="p-8">
+        @csrf
         @method('PUT')
         
-        <div class="flex items-center justify-between mb-6">
-            <h4 class="text-[15px] font-bold text-[#1e293b]">Daftar Pemain Aktif</h4>
-            <p class="text-[11px] text-slate-400 font-medium">Pilih pemain dan tentukan posisi bermainnya.</p>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h4 class="text-[15px] font-bold text-[#1e293b]">Daftar Pemain Aktif</h4>
+                <p class="text-[11px] text-slate-400 font-medium">Pilih pemain yang dibawa dan tentukan posisi bermainnya di pertandingan ini.</p>
+            </div>
+            
+            <!-- Pilihan Formasi Tim -->
+            <div class="w-full md:w-auto max-w-[250px]">
+                <label for="formation" class="block text-[11px] font-bold text-slate-400 mb-1">Formasi Tim</label>
+                <input type="text" id="formation" name="formation" value="{{ old('formation', $match->formation) }}" placeholder="Contoh: 4-3-3" 
+                       class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+            </div>
         </div>
 
         <div class="overflow-x-auto mb-10">
@@ -23,37 +32,48 @@
                 <thead>
                     <tr class="border-b border-slate-100">
                         <th class="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-[10%]">BAWA</th>
-                        <th class="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-[40%]">NAMA PEMAIN</th>
-                        <th class="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-[20%]">NO. PUNGGUNG</th>
-                        <th class="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-[30%]">POSISI DI PERTANDINGAN</th>
+                        <th class="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-[35%]">NAMA PEMAIN</th>
+                        <th class="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-[15%]">NO. PUNGGUNG</th>
+                        <th class="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-[40%]">POSISI DI PERTANDINGAN</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                    <!-- Loop Pemain 1 -->
+                    @forelse($players ?? [] as $player)
+                    @php
+                        // Mengecek apakah pemain ini sudah dipilih sebelumnya di database
+                        $isSel = in_array($player->id, $selectedPlayerIds ?? []);
+                        // Mengambil posisi pivot jika sudah ada
+                        $pivotPos = $isSel ? optional($match->players->find($player->id))->pivot->position : $player->position;
+                    @endphp
                     <tr class="hover:bg-slate-50/50 transition-colors">
+                        <!-- Checkbox: Menggunakan format players[ID][selected] sesuai controller -->
                         <td class="py-4 px-4">
                             <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" name="players[]" value="1" checked 
+                                <input type="checkbox" name="players[{{ $player->id }}][selected]" value="1" {{ $isSel ? 'checked' : '' }}
                                        class="w-5 h-5 text-[#4062D6] border-slate-200 rounded focus:ring-[#4062D6]">
                             </label>
                         </td>
+                        <!-- Nama Pemain -->
                         <td class="py-4 px-4 text-[13px] font-bold text-[#1e293b]">
-                            Yazid Ardiyan Wicaksono
+                            {{ $player->name }}
                         </td>
+                        <!-- Nomor Punggung -->
                         <td class="py-4 px-4 text-[12px] font-bold text-[#1e293b]">
-                            #10
+                            #{{ $player->jersey_number ?? '-' }}
                         </td>
+                        <!-- Dropdown Posisi: Menggunakan format players[ID][position] sesuai controller -->
                         <td class="py-4 px-4">
-                            <div class="relative w-full max-w-[200px]">
-                                <select name="positions[1]" 
+                            <div class="relative w-full max-w-[220px]">
+                                <select name="players[{{ $player->id }}][position]" 
                                         class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
                                     <option value="" disabled>Pilih Posisi</option>
-                                    <option value="ST" selected>ST</option>
-                                    <option value="LW">LW</option>
-                                    <option value="RW">RW</option>
-                                    <option value="CM">CM</option>
-                                    <option value="CB">CB</option>
-                                    <option value="GK">GK</option>
+                                    <option value="ST" {{ $pivotPos == 'ST' ? 'selected' : '' }}>ST</option>
+                                    <option value="LW" {{ $pivotPos == 'LW' ? 'selected' : '' }}>LW</option>
+                                    <option value="RW" {{ $pivotPos == 'RW' ? 'selected' : '' }}>RW</option>
+                                    <option value="CM" {{ $pivotPos == 'CM' ? 'selected' : '' }}>CM</option>
+                                    <option value="CB" {{ $pivotPos == 'CB' ? 'selected' : '' }}>CB</option>
+                                    <option value="GK" {{ $pivotPos == 'GK' ? 'selected' : '' }}>GK</option>
+                                    <option value="Cadangan" {{ $pivotPos == 'Cadangan' ? 'selected' : '' }}>Cadangan</option>
                                 </select>
                                 <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,41 +83,13 @@
                             </div>
                         </td>
                     </tr>
-                    
-                    <!-- Loop Pemain 2 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="py-4 px-4">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" name="players[]" value="2" 
-                                       class="w-5 h-5 text-[#4062D6] border-slate-200 rounded focus:ring-[#4062D6]">
-                            </label>
-                        </td>
-                        <td class="py-4 px-4 text-[13px] font-bold text-[#1e293b]">
-                            Arif Paradigma
-                        </td>
-                        <td class="py-4 px-4 text-[12px] font-bold text-[#1e293b]">
-                            #69
-                        </td>
-                        <td class="py-4 px-4">
-                            <div class="relative w-full max-w-[200px]">
-                                <select name="positions[2]" 
-                                        class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
-                                    <option value="" disabled selected>Pilih Posisi</option>
-                                    <option value="ST">ST</option>
-                                    <option value="LW">LW</option>
-                                    <option value="RW">RW</option>
-                                    <option value="CM">CM</option>
-                                    <option value="CB">CB</option>
-                                    <option value="GK">GK</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </div>
-                            </div>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="py-8 text-center text-slate-400 text-[13px]">
+                            Belum ada data pemain aktif yang terdaftar di sistem.
                         </td>
                     </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
