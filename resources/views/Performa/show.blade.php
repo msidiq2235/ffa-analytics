@@ -62,7 +62,7 @@
                             <p class="text-[11px] font-medium text-slate-400">{{ \Carbon\Carbon::parse($match->match_date)->format('d F Y') }}</p>
                         </div>
                         <a href="{{ route('reports.match.show', $match->id) }}" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors">
-                            Lihat Laporan
+                            Lihat Laporan Match
                         </a>
                     </div>
                 @empty

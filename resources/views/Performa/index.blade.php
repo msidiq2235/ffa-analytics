@@ -9,7 +9,6 @@
     <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
         <h3 class="text-[13px] font-bold text-[#334155] mb-4">Pilih Pemain</h3>
         <form method="GET" action="{{ route('performa.index') }}" class="space-y-4">
-            <!-- Baris Utama (Search Input + Tombol Filter & Cari) -->
             <div class="flex flex-wrap items-center gap-3">
                 <div class="flex-1 min-w-[240px]">
                     <input type="text" name="name" value="{{ request('name') }}" placeholder="Cari nama pemain..." class="w-full px-4 py-2.5 bg-white border border-[#e2e8f0] rounded-xl text-[13px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
@@ -28,7 +27,6 @@
                 @endif
             </div>
 
-            <!-- Baris Detail Filter (Nama Pemain, Posisi, Nomor Punggung, Tim) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nama Pemain</label>
@@ -96,8 +94,8 @@
                             <td class="py-4 px-6 text-[13px] font-medium text-slate-600">{{ $player->position ?? '-' }}</td>
                             <td class="py-4 px-6 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <!-- Tombol Ikon Mata (Menuju Match Report / Export Laporan) -->
-                                    <a href="{{ route('reports.match.show', $player->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors" title="Lihat Laporan">
+                                    <!-- Tombol Ikon Mata (Menuju Detail Performa Pemain) -->
+                                    <a href="{{ route('performa.show', $player->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors" title="Lihat Detail Performa">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     </a>
 

@@ -98,11 +98,10 @@ class PlayerController extends Controller
         return view('performa.index', compact('players', 'clubs'));
     }
 
-    public function performanceShow($id)
-    {
-        $player = Player::with('club')->findOrFail($id);
-        
-        // Mengarahkan ke view khusus detail performa (misal: resources/views/performa/show.blade.php)
-        return view('performa.show', compact('player'));
-    }
+public function performanceShow($id)
+{
+    $player = Player::with(['club'])->findOrFail($id);
+    
+    return view('performa.show', compact('player'));
+}
 }
