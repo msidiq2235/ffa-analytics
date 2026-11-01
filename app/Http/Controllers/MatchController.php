@@ -174,6 +174,7 @@ class MatchController extends Controller
             'venue'      => 'nullable|string|max:255',
             'match_date' => 'required|date',
             'status'     => 'required|in:Upcoming,Live,Selesai',
+            'formation'  => 'nullable|string|max:50', // Ditambahkan validasi formasi
         ]);
 
         $match = MatchSession::findOrFail($id);
@@ -183,6 +184,7 @@ class MatchController extends Controller
             'venue'      => $request->venue,
             'match_date' => $request->match_date,
             'status'     => $request->status,
+            'formation'  => $request->formation, // Disimpan ke database
         ]);
 
         return redirect()->route('matches.index')->with('success', 'Jadwal pertandingan berhasil diperbarui!');

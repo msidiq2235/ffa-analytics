@@ -15,13 +15,16 @@
             <!-- Kolom Kiri -->
             <div class="space-y-6">
                 <div>
-                    <label for="team_id" class="block text-[12px] font-bold text-slate-700 mb-2">Nama Tim</label>
+                    <label for="title" class="block text-[12px] font-bold text-slate-700 mb-2">Nama Tim</label>
                     <div class="relative">
-                        <select id="team_id" name="team_id" required 
+                        <select id="title" name="title" required 
                                 class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
-                            <option value="" disabled selected class="text-slate-300">Nama Tim</option>
-                            <!-- Looping data klub di sini, contoh: -->
-                            <!-- <option value="1">GhostClub</option> -->
+                            <option value="" disabled selected class="text-slate-300">Pilih Nama Tim</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->name }}" {{ old('title') == $club->name ? 'selected' : '' }}>
+                                    {{ $club->name }}
+                                </option>
+                            @endforeach
                         </select>
                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-300">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,8 +42,22 @@
 
                 <div>
                     <label for="formation" class="block text-[12px] font-bold text-slate-700 mb-2">Formasi</label>
-                    <input type="text" id="formation" name="formation" required 
-                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    <div class="relative">
+                        <select id="formation" name="formation" required 
+                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
+                            <option value="" disabled selected class="text-slate-300">Pilih Formasi</option>
+                            <option value="4-3-3" {{ old('formation') == '4-3-3' ? 'selected' : '' }}>4-3-3</option>
+                            <option value="4-4-2" {{ old('formation') == '4-4-2' ? 'selected' : '' }}>4-4-2</option>
+                            <option value="3-5-2" {{ old('formation') == '3-5-2' ? 'selected' : '' }}>3-5-2</option>
+                            <option value="4-2-3-1" {{ old('formation') == '4-2-3-1' ? 'selected' : '' }}>4-2-3-1</option>
+                            <option value="3-4-3" {{ old('formation') == '3-4-3' ? 'selected' : '' }}>3-4-3</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -53,8 +70,8 @@
                 </div>
 
                 <div>
-                    <label for="location" class="block text-[12px] font-bold text-slate-700 mb-2">Tempat Pertandingan</label>
-                    <input type="text" id="location" name="location" required 
+                    <label for="venue" class="block text-[12px] font-bold text-slate-700 mb-2">Tempat Pertandingan</label>
+                    <input type="text" id="venue" name="venue" required 
                            class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
                 </div>
             </div>
