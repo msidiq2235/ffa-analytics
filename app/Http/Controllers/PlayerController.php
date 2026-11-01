@@ -20,12 +20,6 @@ class PlayerController extends Controller
         return view('players.create', compact('clubs'));
     }
 
-    public function edit(Player $player)
-    {
-        $clubs = Club::orderBy('name', 'asc')->get();
-        return view('players.edit', compact('player', 'clubs'));
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -39,6 +33,19 @@ class PlayerController extends Controller
         Player::create($request->all());
 
         return redirect()->route('players.index')->with('success', 'Data pemain berhasil ditambahkan!');
+    }
+
+    // --- TAMBAHKAN METHOD SHOW DI SINI ---
+    public function show($id)
+    {
+        $player = Player::with('club')->findOrFail($id);
+        return view('players.show', compact('player'));
+    }
+
+    public function edit(Player $player)
+    {
+        $clubs = Club::orderBy('name', 'asc')->get();
+        return view('players.edit', compact('player', 'clubs'));
     }
 
     public function update(Request $request, Player $player)
@@ -89,5 +96,13 @@ class PlayerController extends Controller
         $clubs = Club::orderBy('name', 'asc')->get();
 
         return view('performa.index', compact('players', 'clubs'));
+    }
+
+    public function performanceShow($id)
+    {
+        $player = Player::with('club')->findOrFail($id);
+        
+        // Mengarahkan ke view khusus detail performa (misal: resources/views/performa/show.blade.php)
+        return view('performa.show', compact('player'));
     }
 }

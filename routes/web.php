@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
 
     // Modul Laporan Performa Pemain (BARU)
     Route::get('/performa', [PlayerController::class, 'performance'])->name('performa.index');
+    Route::get('/performa/{player}', [PlayerController::class, 'performanceShow'])->name('performa.show');
 
     // Modul CRUD Master & Transaksi
     Route::resource('users', UserController::class);
