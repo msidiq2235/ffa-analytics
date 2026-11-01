@@ -105,7 +105,7 @@
 @endif
 </td>
 <td class="py-4 px-6 text-right">
-<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="flex items-center justify-end gap-2">
 <a href="{{ route('users.edit', $user->id) }}" class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-400 hover:text-[#2d5096] hover:border-[#2d5096] flex items-center justify-center transition-colors" title="Edit">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
 </a>
