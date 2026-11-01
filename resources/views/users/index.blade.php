@@ -2,11 +2,7 @@
 @section('title', 'Kelola User - FFA Analytics')
 @section('header', 'Kelola User')
 @section('subheader', 'Manajemen akun Football')
-@section('header_action')
-<a href="{{ route('users.create') }}" class="bg-[#2d5096] hover:bg-[#183262] text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors shadow-sm flex items-center gap-2">
-<span>+</span> Tambah User
-</a>
-@endsection
+
 @section('content')
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center justify-between transition-transform hover:-translate-y-1 duration-300">
@@ -37,6 +33,14 @@
 </div>
 </div>
 </div>
+
+<!-- Tombol Tambah User di antara kotak statistik dan tabel, posisi di sebelah kanan -->
+<div class="flex justify-end mb-6">
+<a href="{{ route('users.create') }}" class="bg-[#2d5096] hover:bg-[#183262] text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors shadow-sm flex items-center gap-2">
+<span>+</span> Tambah User
+</a>
+</div>
+
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] overflow-hidden">
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse">
