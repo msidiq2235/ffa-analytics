@@ -86,7 +86,10 @@
                         </a>
                         <a href="{{ route('reports.player.match.pdf', [$player->id, $match->id]) }}"
                            target="_blank" rel="noopener"
-                           class="px-3 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-lg transition-colors">
+                           class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-full transition-colors shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
                             PDF
                         </a>
                     </div>
@@ -111,7 +114,10 @@
                     </div>
                     <a href="{{ route('reports.player.season.pdf', [$player->id, $season->start]) }}"
                        target="_blank" rel="noopener"
-                       class="px-3 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-lg transition-colors">
+                       class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-full transition-colors shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
                         PDF
                     </a>
                 </div>
