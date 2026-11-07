@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Jadwal Pertandingan - FFA Analytics')
 @section('header', 'Jadwal Pertandingan')
-@section('subheader', 'Kelola jadwal pertandingan akademi — diurutkan dari jadwal terdekat')
+@section('subheader', 'Kelola jadwal pertandingan akademi. Tambahkan, edit, atau hapus jadwal pertandingan sesuai kebutuhan.')
 @section('content')
 
 @php

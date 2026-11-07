@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Tambah Tim - FFA Analytics')
 @section('header', 'Tambah Tim')
-@section('subheader', 'Daftarkan klub atau akademi baru ke dalam database')
+@section('subheader', 'Daftarkan tim atau klub baru di sini. Pastikan data yang dimasukkan akurat dan sesuai dengan profil tim.')
 @section('content')
 
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-8">

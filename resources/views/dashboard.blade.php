@@ -4,7 +4,7 @@
 $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
 @endphp
 @section('header', 'Dashboard ' . $activeRole)
-@section('subheader', 'Overview data, jadwal, dan statistik performa platform')
+@section('subheader', 'Selamat datang di FFA Analytics. Di sini Anda dapat mengelola data pemain, tim, dan pertandingan dengan mudah. Gunakan menu navigasi untuk mengakses fitur-fitur yang tersedia.')
 @section('content')
 
 @if($activeRole === 'Super Admin' || $activeRole === 'Admin')

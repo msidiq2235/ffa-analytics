@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Tambah Pemain Baru - FFA Analytics')
 @section('header', 'Tambah Pemain Baru')
-@section('subheader', 'Daftarkan pemain baru ke dalam sistem dan tentukan klubnya')
+@section('subheader', 'Daftarkan pemain baru dan tentukan klubnya')
 @section('content')
 
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-8">
@@ -48,50 +48,56 @@
 
             <!-- Kolom Kanan -->
             <div class="space-y-6">
+                <!-- Dropdown Tim Utama -->
                 <div>
-                    <label for="club_id" class="block text-[13px] font-bold text-slate-700 mb-2">Tim / Klub Utama</label>
-                    <div class="relative">
-                        <select id="club_id" name="club_id" required 
-                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
-                            <option value="" disabled selected class="text-slate-400">Pilih Klub Utama</option>
+                    <label class="block text-[13px] font-bold text-slate-700 mb-2">Tim Utama</label>
+                    <div class="relative" id="club-dropdown-container">
+                        <input type="hidden" id="club_id" name="club_id" value="{{ old('club_id') }}" required>
+                        <button type="button" onclick="toggleDropdown('club-options-box', event)" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 flex items-center justify-between focus:outline-none focus:border-[#4062D6] shadow-sm">
+                            <span id="club-selected-text" class="text-slate-400">Pilih Tim Utama</span>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        
+                        <div id="club-options-box" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-20 max-h-48 overflow-y-auto">
                             @foreach($clubs as $club)
-                                <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>{{ $club->name }}</option>
+                                <div onclick="selectClub('{{ $club->id }}', '{{ $club->name }}')" class="px-4 py-2.5 hover:bg-blue-50 hover:text-[#4062D6] cursor-pointer text-[13px] text-slate-700 transition-colors">
+                                    {{ $club->name }}
+                                </div>
                             @endforeach
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
 
+                <!-- Dropdown Tim Kedua -->
                 <div>
-                    <label for="second_club" class="block text-[13px] font-bold text-slate-700 mb-2">Klub Kedua (Opsional)</label>
-                    <div class="relative">
-                        <select id="second_club" name="second_club" 
-                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
-                            <option value="">Pilih Klub Kedua (Opsional)</option>
+                    <label class="block text-[13px] font-bold text-slate-700 mb-2">Tim Kedua</label>
+                    <div class="relative" id="second-club-dropdown-container">
+                        <input type="hidden" id="second_club" name="second_club" value="{{ old('second_club') }}">
+                        <button type="button" onclick="toggleDropdown('second-club-options-box', event)" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 flex items-center justify-between focus:outline-none focus:border-[#4062D6] shadow-sm">
+                            <span id="second-club-selected-text" class="text-slate-400">Pilih Tim Kedua (Opsional)</span>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        
+                        <div id="second-club-options-box" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-20 max-h-48 overflow-y-auto">
+                            <div onclick="selectSecondClub('', 'Pilih Tim Kedua (Opsional)', true)" class="px-4 py-2.5 hover:bg-slate-50 cursor-pointer text-[13px] text-slate-400 transition-colors italic">
+                                -- Tidak ada --
+                            </div>
                             @foreach($clubs as $club)
-                                <option value="{{ $club->name }}" {{ old('second_club') == $club->name ? 'selected' : '' }}>{{ $club->name }}</option>
+                                <div onclick="selectSecondClub('{{ $club->name }}', '{{ $club->name }}', false)" class="px-4 py-2.5 hover:bg-blue-50 hover:text-[#4062D6] cursor-pointer text-[13px] text-slate-700 transition-colors">
+                                    {{ $club->name }}
+                                </div>
                             @endforeach
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
 
+                <!-- Status Default Aktif -->
                 <div>
-                    <label for="status" class="block text-[13px] font-bold text-slate-700 mb-2">Status</label>
-                    <div class="relative">
-                        <select id="status" name="status" required 
-                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
-                            <option value="" disabled selected class="text-slate-400">Pilih Status</option>
-                            <option value="Aktif" {{ old('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="Nonaktif" {{ old('status') == 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
+                    <label class="block text-[13px] font-bold text-slate-700 mb-2">Status</label>
+                    <input type="hidden" name="status" value="Aktif">
+                    <div class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-600 flex items-center gap-2 shadow-sm">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="font-semibold">Aktif (Default)</span>
                     </div>
                 </div>
             </div>
@@ -110,5 +116,46 @@
         </div>
     </form>
 </div>
+
+<script>
+    function toggleDropdown(boxId, e) {
+        e.stopPropagation();
+        // Tutup dropdown lain terlebih dahulu
+        document.querySelectorAll('[id$="-options-box"]').forEach(box => {
+            if (box.id !== boxId) box.classList.add('hidden');
+        });
+        document.getElementById(boxId).classList.toggle('hidden');
+    }
+
+    function selectClub(id, name) {
+        document.getElementById('club_id').value = id;
+        const textSpan = document.getElementById('club-selected-text');
+        textSpan.textContent = name;
+        textSpan.classList.remove('text-slate-400');
+        textSpan.classList.add('text-slate-700');
+        document.getElementById('club-options-box').classList.add('hidden');
+    }
+
+    function selectSecondClub(val, name, isPlaceholder) {
+        document.getElementById('second_club').value = val;
+        const textSpan = document.getElementById('second-club-selected-text');
+        textSpan.textContent = name;
+        if (isPlaceholder) {
+            textSpan.classList.add('text-slate-400');
+            textSpan.classList.remove('text-slate-700');
+        } else {
+            textSpan.classList.remove('text-slate-400');
+            textSpan.classList.add('text-slate-700');
+        }
+        document.getElementById('second-club-options-box').classList.add('hidden');
+    }
+
+    // Tutup dropdown jika area luar diklik
+    document.addEventListener('click', function() {
+        document.querySelectorAll('[id$="-options-box"]').forEach(box => {
+            box.classList.add('hidden');
+        });
+    });
+</script>
 
 @endsection

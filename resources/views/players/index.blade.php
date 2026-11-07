@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Database Pemain - FFA Analytics')
 @section('header', 'Database Pemain')
-@section('subheader', 'Kelola data dan profil pemain akademi')
+@section('subheader', 'Kelola data dan profil pemain di sini. Tambahkan, edit, atau hapus data pemain sesuai kebutuhan.')
 @section('content')
 
 @php

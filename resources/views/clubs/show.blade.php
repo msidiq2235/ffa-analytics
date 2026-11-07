@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Daftar Anggota Tim - FFA Analytics')
 @section('header', 'Daftar Anggota Tim')
-@section('subheader', 'Daftarkan Pemain ke dalam skuad klub atau akademi')
+@section('subheader', 'Daftarkan Pemain ke dalam tim klub. Tambahkan pemain baru, edit data pemain, atau keluarkan pemain dari tim sesuai kebutuhan.')
 @section('content')
 
 @php

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Profil Tim - FFA Analytics')
 @section('header', 'Profil Tim')
-@section('subheader', 'Kelola data klub dan akademi')
+@section('subheader', 'Kelola data klub dan tim Anda di sini. Tambahkan, edit, atau hapus profil tim sesuai kebutuhan.')
 @section('content')
 
 @if(session('success'))
@@ -14,7 +14,7 @@
     <!-- Action Top Bar -->
     <div class="flex justify-end">
         <a href="{{ route('clubs.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm active:scale-95">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <i data-lucide="plus" class="w-4 h-4"></i>
             Tambah Klub
         </a>
     </div>
@@ -24,7 +24,7 @@
         
         @forelse($clubs as $club)
         <div class="bg-white rounded-[24px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6 flex flex-col items-center text-center h-full">
-            <!-- Logo Tim (Sudah diperbaiki ke logo_path) -->
+            <!-- Logo Tim -->
             <div class="w-24 h-24 mb-4 flex items-center justify-center">
                 @if($club->logo_path)
                     <img src="{{ asset('storage/' . $club->logo_path) }}" alt="Logo {{ $club->name }}" class="w-full h-full object-contain">
@@ -44,21 +44,21 @@
                 <div class="grid grid-cols-2 gap-3">
                     <!-- Tombol Edit Tim -->
                     <a href="{{ route('clubs.edit', $club->id) }}" class="flex items-center justify-center gap-1.5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                         Edit Tim
                     </a>
                     <!-- Tombol Daftar Squad -->
                     <a href="{{ route('clubs.show', $club->id) }}" class="flex items-center justify-center gap-1.5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i>
                         Daftar Squad
                     </a>
                 </div>
                 <!-- Tombol Hapus Tim -->
-                <form action="{{ route('clubs.destroy', $club->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tim ini? Data pemain di dalamnya mungkin terpengaruh.');" class="w-full">
+                <form action="{{ route('clubs.destroy', $club->id) }}" method="POST" class="w-full m-0">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="w-full flex items-center justify-center gap-1.5 py-2.5 bg-white border border-rose-200 hover:bg-rose-50 text-rose-500 text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <button type="button" onclick="openDeleteModal(this.form)" class="w-full flex items-center justify-center gap-1.5 py-2.5 bg-white border border-rose-200 hover:bg-rose-50 text-rose-500 text-[12px] font-bold rounded-xl transition-colors shadow-sm">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                         Hapus Tim
                     </button>
                 </form>
@@ -66,12 +66,54 @@
         </div>
         @empty
         <!-- State jika belum ada klub -->
-        <div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 font-medium">
+        <div class="col-span-full bg-white p-10 rounded-2xl border border-slate-200 text-center text-slate-500 font-medium">
             Belum ada profil tim/klub yang ditambahkan. Silakan klik tombol "Tambah Klub" untuk memulai.
         </div>
         @endforelse
 
     </div>
 </div>
+
+<!-- Modal Konfirmasi Hapus Kustom -->
+<div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-xl max-w-md w-full mx-4 p-6 transform transition-all">
+        <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 border border-rose-100 flex items-center justify-center mb-4 mx-auto">
+            <i data-lucide="trash-2" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800 text-center mb-1">Konfirmasi Penghapusan</h3>
+        <p class="text-xs text-slate-500 text-center mb-6 leading-relaxed">Apakah Anda yakin ingin menghapus tim ini? Data pemain di dalamnya mungkin terpengaruh dan tindakan ini tidak dapat dibatalkan.</p>
+        <div class="flex items-center gap-3">
+            <button type="button" onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
+            <button type="button" id="confirm-delete-btn" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-sm">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+
+<!-- Script Lucide Icons & Modal -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    // Inisialisasi Lucide Icons
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+    });
+
+    let targetFormToSubmit = null;
+
+    function openDeleteModal(form) {
+        targetFormToSubmit = form;
+        document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').classList.add('hidden');
+        targetFormToSubmit = null;
+    }
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', function () {
+        if (targetFormToSubmit) {
+            targetFormToSubmit.submit();
+        }
+    });
+</script>
 
 @endsection

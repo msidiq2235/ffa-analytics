@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('matches', function (Blueprint $table) {
         $table->id();
         $table->string('title', 255);
-        $table->date('match_date');
+        $table->dateTime('match_date');
         $table->string('venue', 255)->nullable();
         $table->string('opponent', 255)->nullable();
         $table->string('formation', 50)->nullable();

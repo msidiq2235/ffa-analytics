@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Edit Tim - FFA Analytics')
 @section('header', 'Edit Tim')
-@section('subheader', 'Perbarui Informasi Tim')
+@section('subheader', 'Perbarui informasi profil tim di sini. Pastikan data yang dimasukkan akurat dan sesuai dengan profil tim.')
 @section('content')
 
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-8">

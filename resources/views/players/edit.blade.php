@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Edit Data Pemain - FFA Analytics')
 @section('header', 'Edit Data Pemain')
-@section('subheader', 'Perbarui Informasi profil, transfer klub, dan status pemain')
+@section('subheader', 'Perbarui Informasi profil, posisi, dan tim pemain di sini. Pastikan data yang dimasukkan akurat dan sesuai dengan profil pemain.')
 @section('content')
 
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-8">

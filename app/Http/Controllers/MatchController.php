@@ -6,6 +6,7 @@ use App\Models\MatchSession;
 use App\Models\Club;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class MatchController extends Controller
 {
@@ -45,9 +46,12 @@ class MatchController extends Controller
             'formation' => 'nullable|string|max:50',
         ]);
 
+        // Menggunakan toDateTimeString() agar jam dan menit ikut tersimpan secara utuh
+        $matchDate = Carbon::parse($request->match_date)->toDateTimeString();
+
         MatchSession::create([
             'title' => $request->title,
-            'match_date' => $request->match_date,
+            'match_date' => $matchDate,
             'venue' => $request->venue,
             'opponent' => $request->opponent,
             'formation' => $request->formation,
@@ -72,8 +76,7 @@ class MatchController extends Controller
                 ->orWhere('second_club', 'like', '%' . $match->opponent . '%');
             })->get();
 
-        // Fallback: Jika setelah difilter pemainnya kosong (misal nama klub di pertandingan tidak persis sama),
-        // kita tampilkan seluruh pemain aktif agar tabel tidak kosong melompong.
+        // Fallback: Jika setelah difilter pemainnya kosong, tampilkan seluruh pemain aktif
         if ($players->isEmpty()) {
             $players = \App\Models\Player::where('status', 'Aktif')->get();
         }
@@ -200,17 +203,20 @@ class MatchController extends Controller
             'venue'      => 'nullable|string|max:255',
             'match_date' => 'required|date',
             'status'     => 'required|in:Upcoming,Live,Selesai',
-            'formation'  => 'nullable|string|max:50', // Ditambahkan validasi formasi
+            'formation'  => 'nullable|string|max:50',
         ]);
+
+        // Menggunakan toDateTimeString() agar jam dan menit ikut tersimpan saat update
+        $matchDate = Carbon::parse($request->match_date)->toDateTimeString();
 
         $match = MatchSession::findOrFail($id);
         $match->update([
             'title'      => $request->title,
             'opponent'   => $request->opponent,
             'venue'      => $request->venue,
-            'match_date' => $request->match_date,
+            'match_date' => $matchDate,
             'status'     => $request->status,
-            'formation'  => $request->formation, // Disimpan ke database
+            'formation'  => $request->formation,
         ]);
 
         return redirect()->route('matches.index')->with('success', 'Jadwal pertandingan berhasil diperbarui!');
