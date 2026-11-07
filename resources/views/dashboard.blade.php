@@ -8,98 +8,268 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
 @section('content')
 
 @if($activeRole === 'Super Admin' || $activeRole === 'Admin')
-<div class="space-y-6">
-    <!-- Top Cards (Admin) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-5">
-            <div class="w-14 h-14 rounded-xl bg-blue-50 text-[#4062D6] flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+@php
+    // ===== Data tampilan Admin (semua punya fallback agar card/tabel tetap tampil walau data kosong) =====
+    $nextMatches = \App\Models\MatchSession::where('status', 'Upcoming')->orderBy('match_date', 'asc')->take(4)->get();
+    $nextMatch   = $nextMatches->first();
+    $otherNext   = $nextMatches->slice(1);
+
+    $cntTotal    = $totalMatches ?? \App\Models\MatchSession::count();
+    $cntUpcoming = \App\Models\MatchSession::where('status', 'Upcoming')->count();
+    $cntLive     = \App\Models\MatchSession::where('status', 'Live')->count();
+    $cntDone     = max($cntTotal - $cntUpcoming - $cntLive, 0);
+    $pct         = fn($n) => $cntTotal > 0 ? round($n / $cntTotal * 100) : 0;
+
+    $statGoals    = $totalGoals ?? 0;
+    $statAssists  = $totalAssists ?? 0;
+    $statAvgGoals = $cntTotal > 0 ? number_format($statGoals / $cntTotal, 1) : '0.0';
+    $topScorers   = $topScorers ?? [];
+@endphp
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+
+    <!-- ================= KOLOM KIRI (2/3) ================= -->
+    <div class="xl:col-span-2 space-y-6">
+
+        <!-- Jadwal Terdekat (Upcoming) -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#4062D6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <h3 class="font-bold text-[#1e293b] text-[14px]">Pertandingan Terdekat</h3>
+                </div>
+                <a href="{{ route('matches.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Lihat Jadwal</a>
             </div>
-            <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalUsers ?? 0 }}</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total User</p>
+
+            <!-- Hero: pertandingan terdekat -->
+            <div class="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/70 to-white p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-[11px] font-bold text-slate-500">{{ $nextMatch->title ?? 'Belum ada kompetisi' }}</span>
+                    @if($nextMatch)
+                        <span class="px-3 py-1 bg-blue-50 border border-blue-100 text-[#4062D6] rounded-full text-[10px] font-bold">
+                            {{ \Carbon\Carbon::parse($nextMatch->match_date)->diffForHumans() }}
+                        </span>
+                    @else
+                        <span class="px-3 py-1 bg-slate-50 border border-slate-200 text-slate-400 rounded-full text-[10px] font-bold">Belum dijadwalkan</span>
+                    @endif
+                </div>
+
+                <div class="flex items-center justify-center gap-8 md:gap-16 mb-6">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-16 h-16 rounded-full bg-[#183262] text-white flex items-center justify-center text-lg font-black">{{ $nextMatch ? strtoupper(substr($nextMatch->title, 0, 3)) : '-' }}</div>
+                        <span class="text-[13px] font-bold text-[#1e293b] text-center">{{ $nextMatch->title ?? 'Tim Kita' }}</span>
+                    </div>
+                    <div class="text-2xl font-black text-slate-300">VS</div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-16 h-16 rounded-full bg-blue-100 text-[#4062D6] flex items-center justify-center text-xl font-black">{{ $nextMatch ? strtoupper(substr($nextMatch->opponent ?? 'L', 0, 1)) : '-' }}</div>
+                        <span class="text-[13px] font-bold text-[#1e293b] text-center">{{ $nextMatch->opponent ?? 'Tim Lawan' }}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Tanggal</p>
+                        <p class="text-[12px] font-bold text-[#1e293b]">{{ $nextMatch ? \Carbon\Carbon::parse($nextMatch->match_date)->format('d M Y') : '-' }}</p>
+                    </div>
+                    <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Kick-off</p>
+                        <p class="text-[12px] font-bold text-[#1e293b]">{{ $nextMatch ? \Carbon\Carbon::parse($nextMatch->match_date)->format('H:i') . ' WIB' : '-' }}</p>
+                    </div>
+                    <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5 col-span-2 md:col-span-1">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Lokasi</p>
+                        <p class="text-[12px] font-bold text-[#1e293b] truncate">{{ $nextMatch->venue ?? '-' }}</p>
+                    </div>
+                    <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5 col-span-2 md:col-span-1">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Formasi</p>
+                        <p class="text-[12px] font-bold text-[#1e293b]">{{ $nextMatch->formation ?? '-' }}</p>
+                    </div>
+                </div>
+
+                @unless($nextMatch)
+                    <p class="text-center text-[12px] text-slate-400 mt-5">Belum ada jadwal pertandingan mendatang.</p>
+                @endunless
+            </div>
+
+            <!-- Jadwal berikutnya -->
+            <div class="mt-5">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Jadwal Berikutnya</p>
+                <div class="space-y-2">
+                    @forelse($otherNext as $match)
+                        <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-center gap-4 min-w-0">
+                                <div class="w-12 shrink-0 text-center bg-white border border-slate-100 rounded-xl py-1.5">
+                                    <p class="text-[12px] font-bold text-[#4062D6] leading-none">{{ \Carbon\Carbon::parse($match->match_date)->format('d M') }}</p>
+                                    <p class="text-[9px] font-bold text-slate-400 mt-1">{{ \Carbon\Carbon::parse($match->match_date)->format('H:i') }}</p>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-[13px] font-bold text-[#1e293b] truncate">{{ $match->title }} vs {{ $match->opponent ?? 'Tim Lawan' }}</h4>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Formasi {{ $match->formation ?? '-' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-slate-500 bg-white border border-slate-100 px-3 py-1.5 rounded-lg shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span class="text-[10px] font-bold">{{ $match->venue ?? 'Lokasi belum diisi' }}</span>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-4 text-center border border-dashed border-slate-200 rounded-xl text-[12px] text-slate-400">Belum ada jadwal berikutnya.</div>
+                    @endforelse
+                </div>
             </div>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-5">
-            <div class="w-14 h-14 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+
+        <!-- Pemain Baru Ditambahkan -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-bold text-[#1e293b] text-[14px]">Pemain Baru Ditambahkan</h3>
+                <a href="{{ route('players.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Manajemen</a>
             </div>
-            <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalClubs ?? 0 }}</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Klub</p>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-5">
-            <div class="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
-            </div>
-            <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalPlayers ?? 0 }}</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pemain</p>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-5">
-            <div class="w-14 h-14 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            </div>
-            <div>
-                <h3 class="text-3xl font-black text-[#1e293b] leading-none mb-1">{{ $totalMatches ?? 0 }}</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Match</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[640px]">
+                    <thead>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pemain</th>
+                            <th class="py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">No.</th>
+                            <th class="py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Posisi</th>
+                            <th class="py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Klub</th>
+                            <th class="py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Usia</th>
+                            <th class="py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Status</th>
+                            <th class="py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Ditambahkan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @forelse($recentPlayers ?? [] as $player)
+                            @php
+                                $pNumber = $player->jersey_number ?? $player->no_punggung ?? $player->number ?? null;
+                                $pBirth  = $player->birth_date ?? $player->date_of_birth ?? $player->tanggal_lahir ?? null;
+                                $pAge    = $pBirth ? \Carbon\Carbon::parse($pBirth)->age : null;
+                                $pClub   = $player->club->name ?? $player->club_name ?? null;
+                                $pStatus = $player->status ?? 'Aktif';
+                            @endphp
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full bg-[#1e293b] text-white flex items-center justify-center text-[11px] font-bold shrink-0">{{ strtoupper(substr($player->name, 0, 1)) }}</div>
+                                        <span class="text-[13px] font-bold text-[#1e293b]">{{ $player->name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-3 text-[12px] font-bold text-slate-500 text-center">{{ $pNumber ?? '-' }}</td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-[#4062D6] border border-blue-100 rounded text-[10px] font-bold">{{ $player->position ?? '-' }}</span>
+                                </td>
+                                <td class="py-3 px-3 text-[12px] font-medium text-slate-500">{{ $pClub ?? '-' }}</td>
+                                <td class="py-3 px-3 text-[12px] font-bold text-slate-500 text-center">{{ $pAge !== null ? $pAge . ' th' : '-' }}</td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ strtolower($pStatus) === 'aktif' ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>{{ $pStatus }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-[11px] font-medium text-slate-400 text-right">{{ $player->created_at ? $player->created_at->format('d M Y') : '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="py-10 text-center text-[13px] font-medium text-slate-400">Belum ada pemain yang ditambahkan.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Middle Panels (Admin) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+    <!-- ================= KOLOM KANAN (1/3) ================= -->
+    <div class="space-y-6">
+
+        <!-- Statistik Pertandingan -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="font-bold text-[#1e293b] text-[14px]">Jadwal Pertandingan Terbaru</h3>
-                <a href="{{ route('matches.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Lihat Semua</a>
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-bold text-[#1e293b] text-[14px]">Informasi Pertandingan</h3>
+                <a href="{{ route('matches.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Lihat semua</a>
             </div>
-            <div class="space-y-4">
-                @forelse($recentMatches ?? [] as $match)
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-slate-200/50 text-slate-500 flex items-center justify-center shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-[13px] font-bold text-[#1e293b]">{{ $match->title }}</h4>
-                                <p class="text-[11px] text-slate-400 font-medium mt-0.5">{{ \Carbon\Carbon::parse($match->match_date)->format('d M Y, H:i') }}</p>
-                            </div>
+            <div class="flex h-2 rounded-full overflow-hidden bg-slate-100 mb-5">
+                <div class="bg-orange-400" style="width: {{ $pct($cntUpcoming) }}%"></div>
+                <div class="bg-rose-400" style="width: {{ $pct($cntLive) }}%"></div>
+                <div class="bg-emerald-500" style="width: {{ $pct($cntDone) }}%"></div>
+            </div>
+            <div class="grid grid-cols-4 text-center">
+                <div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntTotal }}</p></div>
+                <div><p class="text-[9px] font-bold text-orange-500 uppercase tracking-widest">Akan</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntUpcoming }}</p></div>
+                <div><p class="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Live</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntLive }}</p></div>
+                <div><p class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Selesai</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntDone }}</p></div>
+            </div>
+        </div>
+
+        <!-- Ringkasan: User, Klub, Pemain, Match -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#4062D6] flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total User</p>
+                <h3 class="text-2xl font-black text-[#1e293b] mt-1">{{ $totalUsers ?? 0 }}</h3>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Klub</p>
+                <h3 class="text-2xl font-black text-[#1e293b] mt-1">{{ $totalClubs ?? 0 }}</h3>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                </div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pemain</p>
+                <h3 class="text-2xl font-black text-[#1e293b] mt-1">{{ $totalPlayers ?? 0 }}</h3>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Match</p>
+                <h3 class="text-2xl font-black text-[#1e293b] mt-1">{{ $cntTotal }}</h3>
+            </div>
+        </div>
+
+        <!-- Statistik Pemain -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+            <h3 class="font-bold text-[#1e293b] text-[14px] mb-5">Statistik Pemain</h3>
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <div class="bg-orange-50 rounded-xl py-3 text-center">
+                    <p class="text-[18px] font-black text-orange-600">{{ $statGoals }}</p>
+                    <p class="text-[9px] font-bold text-orange-500 uppercase tracking-wider mt-0.5">Total Gol</p>
+                </div>
+                <div class="bg-emerald-50 rounded-xl py-3 text-center">
+                    <p class="text-[18px] font-black text-emerald-600">{{ $statAssists }}</p>
+                    <p class="text-[9px] font-bold text-emerald-500 uppercase tracking-wider mt-0.5">Assist</p>
+                </div>
+                <div class="bg-blue-50 rounded-xl py-3 text-center">
+                    <p class="text-[18px] font-black text-blue-600">{{ $statAvgGoals }}</p>
+                    <p class="text-[9px] font-bold text-blue-500 uppercase tracking-wider mt-0.5">Gol / Match</p>
+                </div>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Top Skor</p>
+            <div class="divide-y divide-slate-50">
+                @forelse($topScorers as $i => $scorer)
+                    <div class="flex items-center justify-between py-2.5">
+                        <div class="flex items-center gap-3">
+                            <span class="w-5 text-[11px] font-bold text-slate-400">{{ $i + 1 }}</span>
+                            <span class="text-[12px] font-bold text-[#1e293b]">{{ $scorer->name }}</span>
                         </div>
-                        <span class="px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 rounded-full text-[9px] font-bold tracking-widest uppercase">{{ $match->status }}</span>
+                        <span class="text-[12px] font-black text-[#4062D6]">{{ $scorer->goals ?? 0 }} gol</span>
                     </div>
                 @empty
-                    <div class="p-6 text-center border border-dashed border-slate-200 rounded-xl">
-                        <p class="text-[13px] font-medium text-slate-400">Belum ada jadwal pertandingan.</p>
-                    </div>
+                    <div class="py-6 text-center border border-dashed border-slate-200 rounded-xl text-[12px] text-slate-400">Belum ada data statistik pemain.</div>
                 @endforelse
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="font-bold text-[#1e293b] text-[14px]">Pemain Baru Ditambahkan</h3>
-                <a href="{{ route('players.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Manajemen</a>
-            </div>
-            <div class="space-y-4">
-                @forelse($recentPlayers ?? [] as $player)
-                    <div class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                        <div class="w-10 h-10 rounded-full bg-[#1e293b] text-white flex items-center justify-center text-[12px] font-bold shrink-0">{{ $player->number ?? 'P' }}</div>
-                        <div>
-                            <h4 class="text-[13px] font-bold text-[#1e293b]">{{ $player->name }}</h4>
-                            <div class="flex items-center gap-1.5 mt-1">
-                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                <span class="text-[11px] font-medium text-slate-400">{{ $player->status ?? 'Aktif' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="p-6 text-center border border-dashed border-slate-200 rounded-xl">
-                        <p class="text-[13px] font-medium text-slate-400">Belum ada pemain yang ditambahkan.</p>
-                    </div>
-                @endforelse
+        <!-- Aksi cepat -->
+        <div class="rounded-2xl bg-gradient-to-br from-[#183262] to-[#4062D6] p-6 text-white shadow-md">
+            <p class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Jangan Lupa</p>
+            <h3 class="text-[18px] font-black leading-snug mb-4">Atur jadwal & data pemain terbaru</h3>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('matches.index') }}" class="px-4 py-2 bg-white text-[#183262] rounded-lg text-[11px] font-bold hover:bg-slate-100 transition-colors">Kelola Jadwal</a>
+                <a href="{{ route('players.index') }}" class="px-4 py-2 border border-white/40 text-white rounded-lg text-[11px] font-bold hover:bg-white/10 transition-colors">Kelola Pemain</a>
             </div>
         </div>
     </div>
