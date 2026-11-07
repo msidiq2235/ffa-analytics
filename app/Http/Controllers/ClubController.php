@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Club;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ClubController extends Controller
 {
@@ -42,11 +43,19 @@ class ClubController extends Controller
         $club->delete();
         return redirect()->route('clubs.index')->with('success', 'Klub berhasil dihapus!');
     }
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        // Muat klub beserta data relasi pemainnya (asumsi nama relasi di model Club adalah 'players')
-        $club = \App\Models\Club::with('players')->findOrFail($id);
-        return view('clubs.show', compact('club'));
+        $club = \App\Models\Club::findOrFail($id);
+
+        // Daftar squad klub ini (mendukung pencarian nama lewat ?search=)
+        $players = $club->players()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->orderBy('jersey_number')
+            ->get();
+
+        return view('clubs.show', compact('club', 'players'));
     }
 
     public function edit($id)
