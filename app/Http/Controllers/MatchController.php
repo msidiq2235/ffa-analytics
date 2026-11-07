@@ -9,11 +9,23 @@ use Illuminate\Support\Facades\Auth;
 
 class MatchController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $matches = MatchSession::orderBy('match_date', 'desc')->get();
+        $now = now();
+        $view = $request->query('view', 'table') === 'card' ? 'card' : 'table';
+        $perPage = $view === 'card' ? 9 : 10; // card: 3x3, tabel: 10 baris
 
-        return view('matches.index', compact('matches'));
+        // Urutan: (1) pertandingan Live, (2) jadwal mendatang dari yang paling dekat,
+        // (3) jadwal yang sudah lewat dari yang paling baru.
+        $matches = MatchSession::query()
+            ->orderByRaw("CASE WHEN status = 'Live' THEN 0 WHEN match_date >= ? THEN 1 ELSE 2 END", [$now])
+            ->orderByRaw("CASE WHEN match_date >= ? THEN match_date END ASC", [$now])
+            ->orderByRaw("CASE WHEN match_date < ? THEN match_date END DESC", [$now])
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('matches.index', compact('matches', 'view'));
     }
 
     public function create()

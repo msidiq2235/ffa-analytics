@@ -15,23 +15,23 @@
             <!-- Kolom Kiri -->
             <div class="space-y-6">
                 <div>
-                    <label for="title" class="block text-[12px] font-bold text-slate-700 mb-2">Nama Tim</label>
-                    <div class="relative">
-                        <select id="title" name="title" required 
-                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
-                            <option value="" disabled selected class="text-slate-300">Pilih Nama Tim</option>
-                            @foreach($clubs as $club)
-                                <option value="{{ $club->name }}" {{ old('title') == $club->name ? 'selected' : '' }}>
-                                    {{ $club->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-300">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
+                    <label for="title_search" class="block text-[12px] font-bold text-slate-700 mb-2">Nama Tim</label>
+                    <!-- Combobox dengan fitur pencarian: ketik untuk mencari, lalu pilih dari daftar -->
+                    <div class="relative" id="team-combobox">
+                        <input type="hidden" id="title" name="title" value="{{ old('title') }}">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
+                        <input type="text" id="title_search" autocomplete="off" placeholder="Cari / ketik nama tim..." value="{{ old('title') }}" required
+                               role="combobox" aria-expanded="false" aria-controls="team-options"
+                               class="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <ul id="team-options" role="listbox" class="hidden absolute z-30 left-0 right-0 mt-2 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg py-1"></ul>
                     </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5">Ketik untuk mencari, lalu pilih tim dari daftar.</p>
+                    @error('title')<p class="text-[11px] text-rose-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 
                 <div>
@@ -91,4 +91,86 @@
     </form>
 </div>
 
+<script>
+(function () {
+    const clubs = @json($clubs->pluck('name')->values());
+    const input = document.getElementById('title_search');
+    const hidden = document.getElementById('title');
+    const list = document.getElementById('team-options');
+    let active = -1;
+    let visible = [];
+
+    function setValidity() {
+        input.setCustomValidity(hidden.value ? '' : 'Pilih nama tim dari daftar.');
+    }
+
+    function render() {
+        const q = input.value.trim().toLowerCase();
+        visible = clubs.filter(n => n.toLowerCase().includes(q));
+        active = -1;
+        list.innerHTML = '';
+        if (visible.length === 0) {
+            const li = document.createElement('li');
+            li.className = 'px-4 py-3 text-[12px] text-slate-400';
+            li.textContent = 'Tim tidak ditemukan';
+            list.appendChild(li);
+            return;
+        }
+        visible.forEach((name, i) => {
+            const li = document.createElement('li');
+            li.setAttribute('role', 'option');
+            li.dataset.index = i;
+            li.className = 'px-4 py-2.5 text-[13px] text-slate-700 cursor-pointer hover:bg-blue-50 hover:text-[#4062D6]';
+            li.textContent = name;
+            li.addEventListener('mousedown', e => { e.preventDefault(); choose(name); });
+            list.appendChild(li);
+        });
+    }
+
+    function highlight() {
+        Array.from(list.children).forEach((li, i) => {
+            li.classList.toggle('bg-blue-50', i === active);
+            li.classList.toggle('text-[#4062D6]', i === active);
+            if (i === active) li.scrollIntoView({ block: 'nearest' });
+        });
+    }
+
+    function open() { render(); list.classList.remove('hidden'); input.setAttribute('aria-expanded', 'true'); }
+    function close() { list.classList.add('hidden'); input.setAttribute('aria-expanded', 'false'); }
+
+    function choose(name) {
+        input.value = name;
+        hidden.value = name;
+        setValidity();
+        close();
+    }
+
+    input.addEventListener('focus', open);
+    input.addEventListener('input', () => {
+        // Jika teks persis sama dengan salah satu tim, anggap terpilih; selain itu kosongkan pilihan
+        const exact = clubs.find(n => n.toLowerCase() === input.value.trim().toLowerCase());
+        hidden.value = exact || '';
+        setValidity();
+        open();
+    });
+    input.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); if (list.classList.contains('hidden')) open(); active = Math.min(active + 1, visible.length - 1); highlight(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); highlight(); }
+        else if (e.key === 'Enter') { if (!list.classList.contains('hidden') && active >= 0) { e.preventDefault(); choose(visible[active]); } }
+        else if (e.key === 'Escape') { close(); }
+    });
+    input.addEventListener('blur', () => {
+        setTimeout(() => {
+            close();
+            // Rapikan teks agar sama dengan pilihan yang sah
+            if (hidden.value) input.value = hidden.value;
+        }, 100);
+    });
+    document.addEventListener('click', e => { if (!document.getElementById('team-combobox').contains(e.target)) close(); });
+
+    // Nilai awal (mis. kembali dari validasi gagal)
+    if (hidden.value && !clubs.includes(hidden.value)) { hidden.value = ''; input.value = ''; }
+    setValidity();
+})();
+</script>
 @endsection
