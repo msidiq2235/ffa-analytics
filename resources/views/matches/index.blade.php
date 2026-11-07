@@ -4,14 +4,21 @@
 @section('subheader', 'Kelola jadwal pertandingan akademi')
 @section('content')
 
+@php
+    $realRole = auth()->user()->role ?? 'Super Admin';
+    $activeRole = session('active_role', $realRole);
+@endphp
+
 <div class="space-y-6">
-    <!-- Action Top Bar -->
+    <!-- Action Top Bar (Hanya tampil untuk Super Admin/Admin/Pelatih, Analis fokus pada analisis) -->
+    @if($activeRole !== 'Analis')
     <div class="flex justify-end">
         <a href="{{ route('matches.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm active:scale-95">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Tambah Jadwal
         </a>
     </div>
+    @endif
 
     <!-- Match Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -23,7 +30,7 @@
                     {{ \Carbon\Carbon::parse($match->match_date)->format('d M Y') }}
                 </span>
                 
-                <!-- BADGE STATUS DINAMIS (Mendukung Live, Selesai, dan Upcoming) -->
+                <!-- BADGE STATUS DINAMIS -->
                 @if($match->status == 'Live')
                     <span class="px-3 py-1 bg-rose-50 border border-rose-200 text-rose-500 rounded text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> Live
@@ -40,7 +47,6 @@
             </div>
             
             <div class="mb-5 flex-1">
-                <!-- Diperbarui dari $match->team_name menjadi $match->title -->
                 <h3 class="text-xl font-bold text-[#1e293b] mb-1">{{ $match->title ?? 'Nama Tim' }}</h3>
                 <p class="text-[13px] text-slate-500 font-medium">vs {{ $match->opponent }}</p>
             </div>
@@ -48,7 +54,6 @@
             <div class="space-y-3 mb-6">
                 <div class="flex items-center gap-2 text-slate-400">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <!-- Diperbarui dari $match->location menjadi $match->venue -->
                     <span class="text-[13px] font-medium">{{ $match->venue ?? 'Belum ditentukan' }}</span>
                 </div>
                 <div class="flex items-center gap-2 text-slate-400">
@@ -57,20 +62,42 @@
                 </div>
             </div>
             
+            <!-- TOMBOL AKSI BERDASARKAN ROLE -->
             <div class="space-y-3 mt-auto shrink-0">
-                <div class="grid grid-cols-2 gap-3">
-                    <a href="{{ route('matches.lineup', $match->id) }}" class="flex items-center justify-center px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                        Line-Up
+                @if($activeRole === 'Analis')
+                    <!-- Tampilan Tombol Khusus Role Analis (Sesuai Referensi Gambar) -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{{ route('matches.vector', $match->id) }}" class="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white hover:bg-slate-50 border border-indigo-200 text-indigo-600 text-[12px] font-bold rounded-xl transition-colors shadow-sm">
+                            Vektor
+                        </a>
+                        <a href="{{ route('matches.live', $match->id) }}" class="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white hover:bg-slate-50 border border-amber-200 text-amber-600 text-[12px] font-bold rounded-xl transition-colors shadow-sm">
+                            Live Analytics
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{{ route('reports.match.show', $match->id) }}" class="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[11px] font-bold rounded-xl transition-colors shadow-sm text-center">
+                            Lihat Report Pertandingan
+                        </a>
+                        <a href="{{ route('matches.lineup', $match->id) }}" class="flex items-center justify-center px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-[#1e293b] text-[12px] font-bold rounded-xl transition-colors shadow-sm">
+                            Line-Up
+                        </a>
+                    </div>
+                @else
+                    <!-- Tampilan Tombol Standar untuk Admin / Super Admin -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{{ route('matches.lineup', $match->id) }}" class="flex items-center justify-center px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[12px] font-bold rounded-xl transition-colors shadow-sm">
+                            Line-Up
+                        </a>
+                        <a href="{{ route('matches.edit', $match->id) }}" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[12px] font-bold rounded-xl transition-colors shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            Edit Pertandingan
+                        </a>
+                    </div>
+                    <a href="{{ route('reports.match.show', $match->id) }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Lihat Report Pertandingan
                     </a>
-                    <a href="{{ route('matches.edit', $match->id) }}" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        Edit Pertandingan
-                    </a>
-                </div>
-                <a href="{{ route('reports.match.show', $match->id) }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Lihat Report Pertandingan
-                </a>
+                @endif
             </div>
         </div>
         @empty
