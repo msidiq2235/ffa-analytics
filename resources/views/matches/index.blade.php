@@ -23,7 +23,12 @@
                     {{ \Carbon\Carbon::parse($match->match_date)->format('d M Y') }}
                 </span>
                 
-                @if($match->status == 'Selesai')
+                <!-- BADGE STATUS DINAMIS (Mendukung Live, Selesai, dan Upcoming) -->
+                @if($match->status == 'Live')
+                    <span class="px-3 py-1 bg-rose-50 border border-rose-200 text-rose-500 rounded text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> Live
+                    </span>
+                @elseif($match->status == 'Selesai')
                     <span class="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-500 rounded text-[10px] font-black tracking-widest uppercase">
                         Selesai
                     </span>

@@ -291,176 +291,97 @@ $activeRole = session('active_role', auth()->user()->role ?? 'Super Admin');
 </div>
 
 @elseif($activeRole === 'Analis')
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-    <div class="lg:col-span-8 space-y-6">
+<div class="space-y-6">
+    <!-- Panel Pertandingan Berlangsung (LIVE) atau Pesan Kosong -->
+    @php
+        // Mengambil pertandingan yang statusnya sedang 'Live'
+        $liveMatch = \App\Models\MatchSession::where('status', 'Live')->first();
+        // Mengambil pertandingan yang masih 'Upcoming' (mendatang)
+        $upcomingMatchesList = \App\Models\MatchSession::where('status', 'Upcoming')->orderBy('match_date', 'asc')->take(3)->get();
+    @endphp
+
+    @if($liveMatch)
+        <!-- Jika ada pertandingan yang LIVE -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] overflow-hidden">
             <div class="bg-[#4062D6] px-6 py-3 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></div>
-                    <span class="text-[11px] font-black tracking-widest uppercase">Live <span class="font-normal opacity-70 ml-1 tracking-normal capitalize">Liga1 — Pekan 7</span></span>
+                    <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+                    <span class="text-[11px] font-black tracking-widest uppercase">LIVE <span class="font-normal opacity-70 ml-1 tracking-normal capitalize">— {{ $liveMatch->title }}</span></span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[11px] font-bold">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Menit 64'
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Sedang Berlangsung
                 </div>
             </div>
             <div class="p-8">
-                <div class="flex items-center justify-center gap-8 md:gap-16 mb-10">
+                <div class="flex items-center justify-center gap-8 md:gap-16 mb-6">
                     <div class="flex flex-col items-center gap-3">
                         <div class="w-16 h-16 md:w-20 md:h-20 bg-slate-100 rounded-full flex items-center justify-center">
-                            <img src="{{ asset('images/logo-ffa.png') }}" alt="Home" class="w-10 h-10 md:w-14 md:h-14 object-contain">
+                            <span class="font-black text-xl text-[#1e293b]">{{ substr($liveMatch->title, 0, 3) }}</span>
                         </div>
                         <div class="text-center">
-                            <h3 class="text-[14px] md:text-[16px] font-bold text-[#1e293b]">GhostClub</h3>
-                            <p class="text-[11px] text-slate-400">4-4-2</p>
+                            <h3 class="text-[14px] md:text-[16px] font-bold text-[#1e293b]">{{ $liveMatch->title }}</h3>
+                            <p class="text-[11px] text-slate-400">{{ $liveMatch->formation ?? '4-4-2' }}</p>
                         </div>
                     </div>
                     <div class="flex flex-col items-center">
-                        <div class="text-3xl md:text-5xl font-black text-[#1e293b] tracking-wider mb-2">2 - 1</div>
-                        <span class="px-3 py-1 bg-rose-50 text-rose-500 border border-rose-100 rounded text-[9px] font-black tracking-widest uppercase">Berlangsung</span>
+                        <div class="text-3xl md:text-5xl font-black text-[#1e293b] tracking-wider mb-2">VS</div>
+                        <span class="px-3 py-1 bg-rose-50 text-rose-500 border border-rose-100 rounded text-[9px] font-black tracking-widest uppercase">BERLANGSUNG</span>
                     </div>
                     <div class="flex flex-col items-center gap-3">
-                        <div class="w-16 h-16 md:w-20 md:h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-2xl">K</div>
+                        <div class="w-16 h-16 md:w-20 md:h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-2xl">
+                            {{ substr($liveMatch->opponent ?? 'L', 0, 1) }}
+                        </div>
                         <div class="text-center">
-                            <h3 class="text-[14px] md:text-[16px] font-bold text-[#1e293b]">SSB Kretek</h3>
-                            <p class="text-[11px] text-slate-400">4-3-3</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="border-t border-slate-100 pt-6">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Timeline Kejadian</p>
-                    <div class="space-y-3 pl-2">
-                        <div class="flex items-center gap-4">
-                            <span class="text-[12px] font-bold text-slate-500 w-6 text-right">12'</span>
-                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <p class="text-[12px] font-medium text-slate-700">Yazid A. <span class="text-slate-400 text-[11px] ml-1">(GhostClub)</span></p>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <span class="text-[12px] font-bold text-slate-500 w-6 text-right">38'</span>
-                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <p class="text-[12px] font-medium text-slate-700">Bagas K. <span class="text-slate-400 text-[11px] ml-1">(SSB Kretek)</span></p>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <span class="text-[12px] font-bold text-slate-500 w-6 text-right">57'</span>
-                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <p class="text-[12px] font-medium text-slate-700">Arif P. <span class="text-slate-400 text-[11px] ml-1">(GhostClub)</span></p>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <span class="text-[12px] font-bold text-slate-500 w-6 text-right">59'</span>
-                            <div class="w-3 h-4 bg-yellow-400 rounded-sm ml-0.5"></div>
-                            <p class="text-[12px] font-medium text-slate-700 ml-0.5">Hendra S. <span class="text-slate-400 text-[11px] ml-1">(SSB Kretek)</span></p>
+                            <h3 class="text-[14px] md:text-[16px] font-bold text-[#1e293b]">{{ $liveMatch->opponent ?? 'Tim Lawan' }}</h3>
+                            <p class="text-[11px] text-slate-400">Lawan</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-[#4062D6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <h3 class="font-bold text-[#1e293b]">Pertandingan Mendatang</h3>
-                </div>
-                <a href="{{ route('matches.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Lihat semua &gt;</a>
+    @else
+        <!-- Jika TIDAK ADA pertandingan yang LIVE -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6 text-center">
+            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
-            <div class="space-y-3">
-                <div class="flex items-center justify-between py-3 border-b border-slate-100">
-                    <div class="flex gap-4">
-                        <div class="text-center shrink-0">
-                            <p class="text-[13px] font-bold text-[#4062D6]">5 Jul</p>
-                            <p class="text-[10px] font-bold text-slate-400">15.00 WIB</p>
+            <h4 class="text-[14px] font-bold text-slate-700">Tidak ada pertandingan yang sedang berlangsung</h4>
+            <p class="text-[12px] text-slate-400 mt-1">Panel live analytics akan aktif otomatis saat jadwal pertandingan dimulai.</p>
+        </div>
+    @endif
+
+    <!-- Panel Pertandingan Mendatang (Upcoming) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#4062D6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <h3 class="font-bold text-[#1e293b]">Pertandingan Mendatang</h3>
+            </div>
+            <a href="{{ route('matches.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Lihat semua &gt;</a>
+        </div>
+        <div class="space-y-3">
+            @forelse($upcomingMatchesList as $match)
+                <div class="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
+                    <div class="flex gap-4 items-center">
+                        <div class="text-center shrink-0 w-12 bg-slate-50 border border-slate-100 rounded-xl p-2">
+                            <p class="text-[12px] font-bold text-[#4062D6]">{{ \Carbon\Carbon::parse($match->match_date)->format('d M') }}</p>
+                            <p class="text-[9px] font-bold text-slate-400">{{ \Carbon\Carbon::parse($match->match_date)->format('H:i') }}</p>
                         </div>
                         <div>
-                            <h4 class="text-[13px] font-bold text-[#1e293b]">vs SSB Bantul</h4>
-                            <p class="text-[11px] text-slate-500 font-medium mt-0.5">Liga1 — P8</p>
+                            <h4 class="text-[13px] font-bold text-[#1e293b]">vs {{ $match->opponent ?? 'Tim Lawan' }}</h4>
+                            <p class="text-[11px] text-slate-500 font-medium mt-0.5">{{ $match->title }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-1.5 text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        <span class="text-[10px] font-medium">Stadion Mandala Krida</span>
+                        <span class="text-[10px] font-medium">{{ $match->venue ?? 'Stadion Utama' }}</span>
                     </div>
                 </div>
-                <div class="flex items-center justify-between py-3">
-                    <div class="flex gap-4">
-                        <div class="text-center shrink-0">
-                            <p class="text-[13px] font-bold text-[#4062D6]">12 Jul</p>
-                            <p class="text-[10px] font-bold text-slate-400">09.00 WIB</p>
-                        </div>
-                        <div>
-                            <h4 class="text-[13px] font-bold text-[#1e293b]">vs SSB Piyungan</h4>
-                            <p class="text-[11px] text-slate-500 font-medium mt-0.5">Liga1 — P9</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        <span class="text-[10px] font-medium">Lapangan Piyungan</span>
-                    </div>
+            @empty
+                <div class="p-6 text-center text-slate-400 text-[13px]">
+                    Tidak ada jadwal pertandingan mendatang saat ini.
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="lg:col-span-4 space-y-6">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-[#4062D6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                    <h3 class="font-bold text-[#1e293b]">Tugas Mendatang</h3>
-                </div>
-                <span class="text-[10px] font-bold text-orange-500">4 Aktif</span>
-            </div>
-            <div class="space-y-4">
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" class="mt-0.5 w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                    <div>
-                        <p class="text-[12px] font-bold text-slate-700 group-hover:text-[#4062D6] transition-colors">Analisis Pertandingan vs SSB Bantul</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">Besok, 15:00</p>
-                    </div>
-                </label>
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" class="mt-0.5 w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                    <div>
-                        <p class="text-[12px] font-bold text-slate-700 group-hover:text-[#4062D6] transition-colors">Evaluasi video pertandingan vs SSB Gamping</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">2 Jul 2026</p>
-                    </div>
-                </label>
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" checked class="mt-0.5 w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                    <div>
-                        <p class="text-[12px] font-bold text-slate-400 line-through">Input data statistik vs SSB Imogiri</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">3 Jul 2026</p>
-                    </div>
-                </label>
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" class="mt-0.5 w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                    <div>
-                        <p class="text-[12px] font-bold text-slate-700 group-hover:text-[#4062D6] transition-colors">Live Mapping pertandingan vs SSB Imogiri</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">3 Jul 2026</p>
-                    </div>
-                </label>
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" class="mt-0.5 w-4 h-4 text-[#4062D6] border-slate-300 rounded focus:ring-[#4062D6]">
-                    <div>
-                        <p class="text-[12px] font-bold text-slate-700 group-hover:text-[#4062D6] transition-colors">Kirim laporan ke manajemen klub</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">7 Jul 2026</p>
-                    </div>
-                </label>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
-            <div class="flex items-center gap-2 mb-6">
-                <svg class="w-5 h-5 text-[#4062D6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                <h3 class="font-bold text-[#1e293b]">Aktivitas Terkini</h3>
-            </div>
-            <div class="relative border-l border-slate-200 ml-2 pl-4 space-y-5">
-                <div class="relative">
-                    <div class="absolute -left-5 mt-1 w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-white"></div>
-                    <p class="text-[12px] font-bold text-slate-700">Match vs SSB Kretek selesai — menang 2-1</p>
-                    <p class="text-[10px] text-slate-400 mt-0.5">1 jam lalu</p>
-                </div>
-                <div class="relative">
-                    <div class="absolute -left-5 mt-1 w-2 h-2 rounded-full bg-orange-500 ring-4 ring-white"></div>
-                    <p class="text-[12px] font-bold text-slate-700">Laporan performa Pekan 6 diunggah</p>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Kemarin, 16:25</p>
-                </div>
-            </div>
+            @endforelse
         </div>
     </div>
 </div>
