@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Player;
 use App\Models\Club;
+use App\Models\MatchSession;
 use Illuminate\Http\Request;
 
 class PlayerController extends Controller
@@ -33,13 +34,61 @@ class PlayerController extends Controller
         $players = $query->get();
         $clubs = Club::orderBy('name', 'asc')->get();
 
-        return view('players.index', compact('players', 'clubs'));
+        // Squad yang sedang difilter (dipakai untuk shortcut "Tambah Pemain ke Squad")
+        $selectedClub = $request->filled('club')
+            ? $clubs->firstWhere('name', $request->club)
+            : null;
+
+        // Informasi line-up: pertandingan apa saja yang memuat pemain ini
+        $lineups = $this->buildLineups($players->pluck('id')->all());
+
+        return view('players.index', compact('players', 'clubs', 'selectedClub', 'lineups'));
     }
 
-    public function create()
+    /**
+     * Susun data line-up per pemain: [player_id => [ {match, date, venue, role, position, is_starter}, ... ]]
+     */
+    private function buildLineups(array $playerIds): array
+    {
+        if (empty($playerIds)) {
+            return [];
+        }
+
+        $lineups = [];
+
+        MatchSession::whereHas('players', function ($q) use ($playerIds) {
+                $q->whereIn('players.id', $playerIds);
+            })
+            ->with(['players' => function ($q) use ($playerIds) {
+                $q->withPivot('position')->whereIn('players.id', $playerIds);
+            }])
+            ->orderBy('match_date', 'desc')
+            ->get()
+            ->each(function ($match) use (&$lineups) {
+                foreach ($match->players as $p) {
+                    $pos = $p->pivot->position ?? null;
+                    $isStarter = $pos && $pos !== 'Cadangan';
+                    $lineups[$p->id][] = [
+                        'match'      => ($match->title ?? '-') . ' vs ' . ($match->opponent ?? '-'),
+                        'date'       => $match->match_date ? \Carbon\Carbon::parse($match->match_date)->format('d M Y, H:i') : '-',
+                        'venue'      => $match->venue ?? null,
+                        'status'     => $match->status ?? null,
+                        'position'   => $pos,
+                        'is_starter' => $isStarter,
+                        'role'       => $isStarter ? 'Starter' : 'Cadangan',
+                    ];
+                }
+            });
+
+        return $lineups;
+    }
+
+    public function create(Request $request)
     {
         $clubs = Club::orderBy('name', 'asc')->get();
-        return view('players.create', compact('clubs'));
+        // Shortcut dari daftar squad: /players/create?club_id=3 -> klub terpilih otomatis
+        $selectedClubId = $request->query('club_id');
+        return view('players.create', compact('clubs', 'selectedClubId'));
     }
 
     public function store(Request $request)
@@ -50,10 +99,21 @@ class PlayerController extends Controller
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
             'second_club' => 'nullable|string|max:255',
-            'status' => 'nullable|string',
         ]);
 
-        Player::create($request->all());
+        Player::create([
+            'name' => $request->name,
+            'position' => $request->position,
+            'jersey_number' => $request->jersey_number,
+            'club_id' => $request->club_id,
+            'second_club' => $request->second_club,
+            'status' => 'Aktif', // status default otomatis untuk pemain baru
+        ]);
+
+        // Tambah cepat dari daftar squad: tetap di halaman yang sama (filter ikut terbawa)
+        if ($request->boolean('_quick')) {
+            return redirect()->back()->with('success', 'Pemain berhasil ditambahkan ke squad!');
+        }
 
         return redirect()->route('players.index')->with('success', 'Data pemain berhasil ditambahkan!');
     }
