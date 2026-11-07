@@ -61,17 +61,21 @@
                         <td class="py-4 px-4 text-[12px] font-bold text-[#1e293b]">
                             #{{ $player->jersey_number ?? '-' }}
                         </td>
-                        <!-- Dropdown Posisi: Menggunakan format players[ID][position] sesuai controller -->
+                        <!-- Dropdown Posisi: Ditambahkan opsi AM, DM, RB, LB -->
                         <td class="py-4 px-4">
                             <div class="relative w-full max-w-[220px]">
                                 <select name="players[{{ $player->id }}][position]" 
                                         class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
                                     <option value="" disabled>Pilih Posisi</option>
                                     <option value="ST" {{ $pivotPos == 'ST' ? 'selected' : '' }}>ST</option>
-                                    <option value="LW" {{ $pivotPos == 'LW' ? 'selected' : '' }}>LW</option>
+                                    <option value="AM" {{ $pivotPos == 'AM' ? 'selected' : '' }}>AM</option>
                                     <option value="RW" {{ $pivotPos == 'RW' ? 'selected' : '' }}>RW</option>
+                                    <option value="LW" {{ $pivotPos == 'LW' ? 'selected' : '' }}>LW</option>
                                     <option value="CM" {{ $pivotPos == 'CM' ? 'selected' : '' }}>CM</option>
+                                    <option value="DM" {{ $pivotPos == 'DM' ? 'selected' : '' }}>DM</option>
+                                    <option value="RB" {{ $pivotPos == 'RB' ? 'selected' : '' }}>RB</option>
                                     <option value="CB" {{ $pivotPos == 'CB' ? 'selected' : '' }}>CB</option>
+                                    <option value="LB" {{ $pivotPos == 'LB' ? 'selected' : '' }}>LB</option>
                                     <option value="GK" {{ $pivotPos == 'GK' ? 'selected' : '' }}>GK</option>
                                     <option value="Cadangan" {{ $pivotPos == 'Cadangan' ? 'selected' : '' }}>Cadangan</option>
                                 </select>

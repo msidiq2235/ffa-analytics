@@ -23,11 +23,15 @@
                                 class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
                             <option value="" disabled selected class="text-slate-400">Pilih Posisi</option>
                             <option value="ST" {{ old('position') == 'ST' ? 'selected' : '' }}>ST (Striker)</option>
-                            <option value="GK" {{ old('position') == 'GK' ? 'selected' : '' }}>GK (Goalkeeper)</option>
-                            <option value="CM" {{ old('position') == 'CM' ? 'selected' : '' }}>CM (Central Midfielder)</option>
-                            <option value="CB" {{ old('position') == 'CB' ? 'selected' : '' }}>CB (Centre-Back)</option>
-                            <option value="LW" {{ old('position') == 'LW' ? 'selected' : '' }}>LW (Left Winger)</option>
+                            <option value="AM" {{ old('position') == 'AM' ? 'selected' : '' }}>AM (Attacking Midfielder)</option>
                             <option value="RW" {{ old('position') == 'RW' ? 'selected' : '' }}>RW (Right Winger)</option>
+                            <option value="LW" {{ old('position') == 'LW' ? 'selected' : '' }}>LW (Left Winger)</option>
+                            <option value="CM" {{ old('position') == 'CM' ? 'selected' : '' }}>CM (Central Midfielder)</option>
+                            <option value="DM" {{ old('position') == 'DM' ? 'selected' : '' }}>DM (Defensive Midfielder)</option>
+                            <option value="RB" {{ old('position') == 'RB' ? 'selected' : '' }}>RB (Right Back)</option>
+                            <option value="CB" {{ old('position') == 'CB' ? 'selected' : '' }}>CB (Centre-Back)</option>
+                            <option value="LB" {{ old('position') == 'LB' ? 'selected' : '' }}>LB (Left Back)</option>
+                            <option value="GK" {{ old('position') == 'GK' ? 'selected' : '' }}>GK (Goalkeeper)</option>
                         </select>
                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -60,7 +64,6 @@
                     </div>
                 </div>
 
-                <!-- Klub Kedua Berbentuk Dropdown -->
                 <div>
                     <label for="second_club" class="block text-[13px] font-bold text-slate-700 mb-2">Klub Kedua (Opsional)</label>
                     <div class="relative">

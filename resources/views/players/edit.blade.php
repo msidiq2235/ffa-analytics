@@ -25,11 +25,15 @@
                                 class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
                             <option value="" disabled>Pilih Posisi</option>
                             <option value="ST" {{ (old('position', $player->position) == 'ST') ? 'selected' : '' }}>ST</option>
-                            <option value="GK" {{ (old('position', $player->position) == 'GK') ? 'selected' : '' }}>GK</option>
-                            <option value="CM" {{ (old('position', $player->position) == 'CM') ? 'selected' : '' }}>CM</option>
-                            <option value="CB" {{ (old('position', $player->position) == 'CB') ? 'selected' : '' }}>CB</option>
-                            <option value="LW" {{ (old('position', $player->position) == 'LW') ? 'selected' : '' }}>LW</option>
+                            <option value="AM" {{ (old('position', $player->position) == 'AM') ? 'selected' : '' }}>AM</option>
                             <option value="RW" {{ (old('position', $player->position) == 'RW') ? 'selected' : '' }}>RW</option>
+                            <option value="LW" {{ (old('position', $player->position) == 'LW') ? 'selected' : '' }}>LW</option>
+                            <option value="CM" {{ (old('position', $player->position) == 'CM') ? 'selected' : '' }}>CM</option>
+                            <option value="DM" {{ (old('position', $player->position) == 'DM') ? 'selected' : '' }}>DM</option>
+                            <option value="RB" {{ (old('position', $player->position) == 'RB') ? 'selected' : '' }}>RB</option>
+                            <option value="CB" {{ (old('position', $player->position) == 'CB') ? 'selected' : '' }}>CB</option>
+                            <option value="LB" {{ (old('position', $player->position) == 'LB') ? 'selected' : '' }}>LB</option>
+                            <option value="GK" {{ (old('position', $player->position) == 'GK') ? 'selected' : '' }}>GK</option>
                         </select>
                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -64,7 +68,6 @@
                     </div>
                 </div>
 
-                <!-- Klub Kedua Berbentuk Dropdown -->
                 <div>
                     <label for="second_club" class="block text-[13px] font-bold text-slate-700 mb-2">Klub Kedua (Opsional)</label>
                     <div class="relative">

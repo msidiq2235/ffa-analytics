@@ -46,7 +46,7 @@ class PlayerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'position' => 'required|string|max:50',
+            'position' => 'required|in:ST,GK,CM,CB,LW,RW,RB,LB,DM,AM', // Diperbarui
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
             'second_club' => 'nullable|string|max:255',
@@ -74,7 +74,7 @@ class PlayerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'position' => 'required|string|max:50',
+            'position' => 'required|in:ST,GK,CM,CB,LW,RW,RB,LB,DM,AM', // Diperbarui
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
             'second_club' => 'nullable|string|max:255',

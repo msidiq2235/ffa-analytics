@@ -26,11 +26,15 @@
                                 class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
                             <option value="">Semua Posisi</option>
                             <option value="ST" {{ request('position') == 'ST' ? 'selected' : '' }}>ST</option>
-                            <option value="GK" {{ request('position') == 'GK' ? 'selected' : '' }}>GK</option>
-                            <option value="CM" {{ request('position') == 'CM' ? 'selected' : '' }}>CM</option>
-                            <option value="CB" {{ request('position') == 'CB' ? 'selected' : '' }}>CB</option>
-                            <option value="LW" {{ request('position') == 'LW' ? 'selected' : '' }}>LW</option>
+                            <option value="AM" {{ request('position') == 'AM' ? 'selected' : '' }}>AM</option>
                             <option value="RW" {{ request('position') == 'RW' ? 'selected' : '' }}>RW</option>
+                            <option value="LW" {{ request('position') == 'LW' ? 'selected' : '' }}>LW</option>
+                            <option value="CM" {{ request('position') == 'CM' ? 'selected' : '' }}>CM</option>
+                            <option value="DM" {{ request('position') == 'DM' ? 'selected' : '' }}>DM</option>
+                            <option value="RB" {{ request('position') == 'RB' ? 'selected' : '' }}>RB</option>
+                            <option value="CB" {{ request('position') == 'CB' ? 'selected' : '' }}>CB</option>
+                            <option value="LB" {{ request('position') == 'LB' ? 'selected' : '' }}>LB</option>
+                            <option value="GK" {{ request('position') == 'GK' ? 'selected' : '' }}>GK</option>
                         </select>
                         <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
