@@ -51,20 +51,14 @@
                 </div>
 
                 <div>
-                    <label for="status" class="block text-[13px] font-bold text-slate-700 mb-2">Status Akun</label>
-                    <div class="relative">
-                        <select id="status" name="status" required 
-                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm cursor-pointer">
-                            <option value="" disabled selected class="text-slate-400">Status Akun</option>
-                            <option value="Aktif">Aktif</option>
-                            <option value="Nonaktif">Nonaktif</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
+                    <label class="block text-[13px] font-bold text-slate-700 mb-2">Status Akun</label>
+                    <div class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 shadow-sm flex items-center justify-between">
+                        <span class="flex items-center gap-2 font-bold text-emerald-600">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif
+                        </span>
+                        <span class="text-[11px] text-slate-400">Diatur otomatis</span>
                     </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5">Akun baru otomatis berstatus Aktif. Status dapat diubah nanti lewat menu Edit.</p>
                 </div>
             </div>
         </div>

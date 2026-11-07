@@ -38,6 +38,7 @@
                         <select id="role" name="role" required 
                                 class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm cursor-pointer">
                             <option value="" disabled class="text-slate-400">Role</option>
+                            <option value="Super Admin" {{ (old('role', $user->role) == 'Super Admin') ? 'selected' : '' }}>Super Admin</option>
                             <option value="Admin" {{ (old('role', $user->role) == 'Admin') ? 'selected' : '' }}>Admin</option>
                             <option value="Pelatih" {{ (old('role', $user->role) == 'Pelatih') ? 'selected' : '' }}>Pelatih</option>
                             <option value="Analis" {{ (old('role', $user->role) == 'Analis') ? 'selected' : '' }}>Analis</option>

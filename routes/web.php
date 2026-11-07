@@ -71,6 +71,10 @@ Route::middleware('auth')->group(function () {
     })->name('performa.show');
 
     // Modul CRUD Master & Transaksi
+    // Rute kustom untuk bulk-destroy harus diletakkan SEBELUM resource route 'users' 
+    // agar Laravel tidak menganggap kata 'bulk-destroy' sebagai parameter ID ({user}).
+    Route::post('users/bulk-destroy', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
+    
     Route::resource('users', UserController::class);
     Route::resource('players', PlayerController::class);
     Route::resource('clubs', ClubController::class);
