@@ -4,17 +4,24 @@
 @section('subheader', 'Pilih pemain atau pertandingan untuk melihat dan mengunduh laporan')
 
 @section('content')
+
+<style>
+    [data-lucide] { flex-shrink: 0; }
+</style>
+
 <div class="space-y-6">
 
     <!-- Tab -->
     <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] overflow-hidden">
         <div class="flex border-b border-slate-100 bg-slate-50">
             <a href="{{ route('reports.index', ['tab' => 'player']) }}"
-               class="px-6 py-4 font-bold text-sm border-b-2 transition-colors {{ $tab === 'player' ? 'text-[#4062D6] border-[#4062D6] bg-white' : 'text-slate-500 border-transparent hover:text-slate-700' }}">
+               class="inline-flex items-center gap-2 px-6 py-4 font-bold text-sm border-b-2 transition-colors {{ $tab === 'player' ? 'text-[#4062D6] border-[#4062D6] bg-white' : 'text-slate-500 border-transparent hover:text-slate-700' }}">
+                <i data-lucide="user" class="w-4 h-4"></i>
                 Per Pemain
             </a>
             <a href="{{ route('reports.index', ['tab' => 'match']) }}"
-               class="px-6 py-4 font-bold text-sm border-b-2 transition-colors {{ $tab === 'match' ? 'text-[#4062D6] border-[#4062D6] bg-white' : 'text-slate-500 border-transparent hover:text-slate-700' }}">
+               class="inline-flex items-center gap-2 px-6 py-4 font-bold text-sm border-b-2 transition-colors {{ $tab === 'match' ? 'text-[#4062D6] border-[#4062D6] bg-white' : 'text-slate-500 border-transparent hover:text-slate-700' }}">
+                <i data-lucide="trophy" class="w-4 h-4"></i>
                 Per Pertandingan
             </a>
         </div>
@@ -23,13 +30,20 @@
             <!-- Cari pemain -->
             <form method="GET" action="{{ route('reports.index') }}" class="p-6 flex flex-wrap items-center gap-3 border-b border-slate-100">
                 <input type="hidden" name="tab" value="player">
-                <input type="text" name="name" value="{{ request('name') }}" placeholder="Cari nama pemain..."
-                       class="flex-1 min-w-[240px] px-4 py-2.5 bg-white border border-[#e2e8f0] rounded-xl text-[13px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
-                <button type="submit" class="px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm">
+                <div class="flex-1 min-w-[240px] relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input type="text" name="name" value="{{ request('name') }}" placeholder="Cari nama pemain..."
+                           class="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e2e8f0] rounded-xl text-[13px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
+                </div>
+                <button type="submit" class="px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] active:scale-95 text-white text-[13px] font-bold rounded-xl transition shadow-sm inline-flex items-center gap-2">
+                    <i data-lucide="search" class="w-4 h-4"></i>
                     Cari
                 </button>
                 @if(request('name'))
-                    <a href="{{ route('reports.index', ['tab' => 'player']) }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-bold rounded-xl transition-colors">Reset</a>
+                    <a href="{{ route('reports.index', ['tab' => 'player']) }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-bold rounded-xl transition-colors inline-flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        Reset
+                    </a>
                 @endif
             </form>
 
@@ -58,15 +72,20 @@
                                 <td class="py-4 px-6 text-[13px] font-medium text-slate-600">{{ $player->club->name ?? 'Tanpa Tim' }}</td>
                                 <td class="py-4 px-6 text-right">
                                     <a href="{{ route('reports.player.show', $player->id) }}"
-                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
-                                       title="Lihat Laporan Pemain">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-[#4062D6] hover:border-[#4062D6] hover:text-white transition-colors"
+                                       title="Lihat Laporan Pemain" aria-label="Lihat laporan {{ $player->name }}">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-8 text-center text-slate-400 text-[13px]">Pemain tidak ditemukan.</td>
+                                <td colspan="5" class="py-10 text-center text-slate-400 text-[13px]">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <i data-lucide="user-x" class="w-8 h-8 text-slate-300"></i>
+                                        Pemain tidak ditemukan.
+                                    </div>
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -90,16 +109,21 @@
                             <tr class="hover:bg-slate-50/50 transition-colors">
                                 <td class="py-4 px-6 text-[13px] font-bold text-[#1e293b]">{{ $match->title ?? 'Pertandingan' }}</td>
                                 <td class="py-4 px-6 text-[13px] font-medium text-slate-600">
-                                    {{ \Carbon\Carbon::parse($match->match_date)->translatedFormat('d F Y') }}
+                                    <span class="inline-flex items-center gap-2">
+                                        <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                                        {{ \Carbon\Carbon::parse($match->match_date)->translatedFormat('d F Y') }}
+                                    </span>
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <a href="{{ route('reports.match.show', $match->id) }}"
-                                           class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-colors">
+                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-colors">
+                                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                             Lihat
                                         </a>
                                         <a href="{{ route('reports.match.pdf', $match->id) }}" target="_blank" rel="noopener"
-                                            class="px-3 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-lg transition-colors">
+                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-lg transition-colors">
+                                            <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
                                             PDF
                                         </a>
                                     </div>
@@ -107,7 +131,12 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="py-8 text-center text-slate-400 text-[13px]">Belum ada data pertandingan.</td>
+                                <td colspan="3" class="py-10 text-center text-slate-400 text-[13px]">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <i data-lucide="calendar-x" class="w-8 h-8 text-slate-300"></i>
+                                        Belum ada data pertandingan.
+                                    </div>
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -117,4 +146,12 @@
         @endif
     </div>
 </div>
+
+<!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+    });
+</script>
 @endsection

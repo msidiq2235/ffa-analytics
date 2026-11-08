@@ -4,6 +4,9 @@
 @section('subheader', $match->title . ' vs ' . $match->opponent . ' - ' . \Carbon\Carbon::parse($match->match_date)->format('M d, Y'))
 @section('content')
 
+<!-- Tambahkan CDN Lucide Icons jika belum ada di layouts/app.blade.php -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
 @php
     // ===== Helper tampilan (tidak mengubah logika / ID / fungsi JS) =====
     $jersey = fn($p, $d = '00') => $p->jersey_number ?? $p->no_punggung ?? $p->number ?? $d;
@@ -53,7 +56,10 @@
     <!-- KOLOM KIRI: Cadangan + Roster + Kembali -->
     <div class="w-full lg:w-[280px] xl:w-[300px] flex flex-col gap-5 shrink-0 min-h-0">
         <div class="bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden min-h-[300px] flex-1">
-            <div class="bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6] text-white text-center py-5 font-medium text-[22px] shrink-0">Cadangan</div>
+            <div class="bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6] text-white text-center py-5 font-medium text-[22px] shrink-0 flex items-center justify-center gap-2">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span>Cadangan</span>
+            </div>
             <div class="flex-1 overflow-y-auto bg-[#eef0f4]" id="bench-container" ondragover="allowDrop(event)" ondrop="drop(event)">
                 @foreach($bench as $player)
                 <div class="bg-white border-b-[3px] border-[#eef0f4] px-5 py-3 flex items-center gap-4 cursor-grab hover:bg-slate-50 transition-colors bench-player" draggable="true" ondragstart="drag(event)" id="player-{{ $player->id }}" data-id="{{ $player->id }}" data-name="{{ $player->name }}" data-number="{{ $jersey($player) }}">
@@ -69,10 +75,16 @@
                 <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
                 <span class="text-[12px] font-medium text-emerald-300">Roster Loaded</span>
             </div>
-            <div class="text-[14px] font-medium text-white">Formation: {{ $match->formation ?? '4-3-3' }}</div>
+            <div class="text-[14px] font-medium text-white flex items-center gap-2">
+                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                <span>Formation: {{ $match->formation ?? '4-3-3' }}</span>
+            </div>
         </div>
 
-        <a href="{{ route('matches.index') }}" class="mt-auto shrink-0 bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6] hover:brightness-110 text-white text-center py-4 rounded-2xl text-[26px] font-medium shadow-lg transition">Kembali</a>
+        <a href="{{ route('matches.index') }}" class="mt-auto shrink-0 bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6] hover:brightness-110 text-white text-center py-4 rounded-2xl text-[22px] font-medium shadow-lg transition flex items-center justify-center gap-2">
+            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            <span>Kembali</span>
+        </a>
     </div>
 
     <!-- KOLOM TENGAH: Lapangan, toggle & Histori Input -->
@@ -106,13 +118,16 @@
                     <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                     <span class="text-[10px] font-medium text-emerald-400">Formasi Aktif</span>
                 </div>
-                <div class="text-[12px] text-white">Formation: {{ $match->formation ?? '4-3-3' }}</div>
+                <div class="text-[12px] text-white flex items-center gap-1.5">
+                    <i data-lucide="grid" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span>Formation: {{ $match->formation ?? '4-3-3' }}</span>
+                </div>
             </div>
         </div>
 
         <!-- Toggle mode input -->
         <div class="flex items-center justify-between px-1 shrink-0">
-            <span class="text-[17px] text-slate-500">Tekan [Spasi] Untuk Masuk Ke Mode Input data</span>
+            <span class="text-[17px] text-slate-500 font-medium">Tekan [Spasi] Untuk Masuk Ke Mode Input data</span>
             <div class="w-14 h-8 bg-slate-400 rounded-full relative cursor-pointer shrink-0 transition-colors" id="input-toggle" onclick="toggleInputMode()">
                 <div class="w-6 h-6 bg-white rounded-full absolute left-1 top-1 shadow-sm transition-transform" id="input-toggle-dot"></div>
             </div>
@@ -120,22 +135,34 @@
 
         <!-- Histori Input -->
         <div class="flex-1 min-h-[150px] bg-[#ededed] rounded-2xl border border-slate-300 flex flex-col shadow-lg overflow-hidden">
-            <div class="bg-[#dcdcdc] text-center py-1.5 text-[16px] font-medium text-black shrink-0">HISTORI INPUT</div>
+            <div class="bg-[#dcdcdc] text-center py-1.5 text-[16px] font-bold text-black shrink-0 flex items-center justify-center gap-2">
+                <i data-lucide="history" class="w-4 h-4"></i>
+                <span>HISTORI INPUT</span>
+            </div>
             <div class="flex-1 overflow-y-auto p-3 bg-[#ededed] text-[12px] text-slate-600 font-mono" id="history-log"></div>
-            <div class="bg-[#dcdcdc] text-center py-1.5 text-[12px] font-medium text-red-600 shrink-0">!!! Tekan Backspace untuk Undo Input !!!</div>
+            <div class="bg-[#dcdcdc] text-center py-1.5 text-[12px] font-bold text-red-600 shrink-0 flex items-center justify-center gap-1">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                <span>!!! Tekan Backspace untuk Undo Input !!!</span>
+            </div>
         </div>
     </div>
 
     <!-- KOLOM KANAN: Panel Statistik -->
     <div class="w-full lg:w-[42%] flex flex-col gap-5 shrink-0 min-h-0">
-        <div class="bg-gradient-to-r from-[#2563eb] to-[#1e40af] text-white px-8 font-medium text-[32px] h-[92px] rounded-2xl shadow-lg flex items-center shrink-0" id="active-player-name"></div>
+        <div class="bg-gradient-to-r from-[#2563eb] to-[#1e40af] text-white px-8 font-bold text-[28px] h-[92px] rounded-2xl shadow-lg flex items-center gap-3 shrink-0" id="active-player-name">
+            <i data-lucide="user-check" class="w-7 h-7 text-blue-200"></i>
+            <span class="truncate">Pilih Pemain di Lapangan</span>
+        </div>
 
         <div class="relative flex-1 min-h-0">
             <!-- Panel Isi Statistik -->
             <div class="h-full overflow-y-auto flex flex-col gap-4 hidden" id="stats-panel">
                 <!-- Shooting -->
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col flex-[2] min-h-[190px]">
-                    <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-medium text-[22px] shrink-0">Shooting</div>
+                    <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-semibold text-[18px] shrink-0 flex items-center gap-2">
+                        <i data-lucide="target" class="w-5 h-5"></i>
+                        <span>Shooting</span>
+                    </div>
                     <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-x-6 gap-y-3 p-4">
                         {!! $statRow('1', 'Shots on target') !!}
                         {!! $statRow('3', 'Goal') !!}
@@ -146,7 +173,10 @@
 
                 <!-- Passing -->
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col flex-[2] min-h-[190px]">
-                    <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-medium text-[22px] shrink-0">Passing</div>
+                    <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-semibold text-[18px] shrink-0 flex items-center gap-2">
+                        <i data-lucide="git-commit" class="w-5 h-5"></i>
+                        <span>Passing</span>
+                    </div>
                     <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-x-6 gap-y-3 p-4">
                         {!! $statRow('5', 'Successful Passes') !!}
                         {!! $statRow('7', 'Assist') !!}
@@ -158,7 +188,10 @@
                 <!-- Possession & Defending -->
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-[4] min-h-[380px]">
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
-                        <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-medium text-[22px] shrink-0">Possession</div>
+                        <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-semibold text-[18px] shrink-0 flex items-center gap-2">
+                            <i data-lucide="activity" class="w-5 h-5"></i>
+                            <span>Possession</span>
+                        </div>
                         <div class="flex-1 grid grid-rows-4 gap-3 p-4">
                             {!! $statRow('Q', 'Dribble') !!}
                             {!! $statRow('W', 'Successfull Dribble') !!}
@@ -166,7 +199,10 @@
                         </div>
                     </div>
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
-                        <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-medium text-[22px] shrink-0">Defending</div>
+                        <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-semibold text-[18px] shrink-0 flex items-center gap-2">
+                            <i data-lucide="shield" class="w-5 h-5"></i>
+                            <span>Defending</span>
+                        </div>
                         <div class="flex-1 grid grid-rows-4 gap-3 p-4">
                             {!! $statRow('Z', 'Tackles') !!}
                             {!! $statRow('X', 'Fouls Committed') !!}
@@ -178,29 +214,30 @@
             </div>
 
             <!-- Placeholder sebelum player dipilih -->
-            <div id="stats-placeholder" class="absolute inset-0 flex items-center justify-center text-[20px] text-slate-400 bg-white rounded-2xl shadow-lg text-center px-4">
-                Pilih Player Untuk Memunculkan Data
+            <div id="stats-placeholder" class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-[18px] text-slate-400 bg-white rounded-2xl shadow-lg text-center px-4 font-medium">
+                <i data-lucide="mouse-pointer-click" class="w-10 h-10 text-slate-300 animate-bounce"></i>
+                <span>Pilih Player Untuk Memunculkan Data</span>
             </div>
         </div>
 
         <!-- Tombol Aksi Bawah -->
         <div class="flex gap-4 shrink-0">
-            <button class="flex-1 h-[68px] bg-gradient-to-br from-[#00c060] to-[#008a45] hover:brightness-110 text-white rounded-2xl border-2 border-emerald-400/60 font-medium text-[26px] flex items-center justify-center gap-3 shadow-lg transition">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 21h14a2 2 0 002-2V8.5L15.5 3H5a2 2 0 00-2 2v14a2 2 0 002 2zM7 3v5h8V3M7 21v-7h10v7"></path></svg>
-                SAVE
+            <button class="flex-1 h-[68px] bg-gradient-to-br from-[#00c060] to-[#008a45] hover:brightness-110 text-white rounded-2xl border-2 border-emerald-400/60 font-bold text-[20px] flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
+                <i data-lucide="save" class="w-6 h-6"></i>
+                <span>SAVE</span>
             </button>
             @if(auth()->user()->role === 'Analis')
             <form action="{{ route('matches.lock', $match->id) }}" method="POST" class="m-0 flex-1" onsubmit="return confirm('Yakin ingin mengunci data? Data yang dikunci tidak bisa diubah lagi.');">
                 @csrf
-                <button type="submit" class="w-full h-[68px] bg-gradient-to-br from-[#c00000] to-[#7a0000] hover:brightness-110 text-white rounded-2xl font-medium text-[26px] flex items-center justify-center gap-3 shadow-lg transition">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    LOCK
+                <button type="submit" class="w-full h-[68px] bg-gradient-to-br from-[#c00000] to-[#7a0000] hover:brightness-110 text-white rounded-2xl font-bold text-[20px] flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                    <span>LOCK</span>
                 </button>
             </form>
             @endif
-            <a href="#" class="flex-1 h-[68px] bg-gradient-to-br from-[#3b82f6] to-[#1e3a8a] hover:brightness-110 text-white rounded-2xl border-2 border-blue-300/60 font-medium text-[26px] flex items-center justify-center gap-3 shadow-lg transition text-center">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                EXPORT
+            <a href="#" class="flex-1 h-[68px] bg-gradient-to-br from-[#3b82f6] to-[#1e3a8a] hover:brightness-110 text-white rounded-2xl border-2 border-blue-300/60 font-bold text-[20px] flex items-center justify-center gap-2 shadow-lg transition text-center active:scale-95">
+                <i data-lucide="download" class="w-6 h-6"></i>
+                <span>EXPORT</span>
             </a>
         </div>
     </div>
@@ -231,7 +268,9 @@ function toggleInputMode() {
 
 function selectPlayer(playerId, playerName) {
     activePlayerId = playerId;
-    document.getElementById('active-player-name').innerText = playerName;
+    document.getElementById('active-player-name').innerHTML = `<i data-lucide="user-check" class="w-7 h-7 text-blue-200"></i><span class="truncate">${playerName}</span>`;
+    lucide.createIcons(); // Render ulang ikon Lucide pada nama pemain aktif
+    
     document.getElementById('stats-placeholder').classList.add('hidden');
     document.getElementById('stats-panel').classList.remove('hidden');
 
@@ -362,5 +401,10 @@ function dropToPitch(e) {
         draggedItem = null;
     }
 }
+
+// Inisialisasi Lucide Icons
+document.addEventListener("DOMContentLoaded", function() {
+    lucide.createIcons();
+});
 </script>
 @endsection

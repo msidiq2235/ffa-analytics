@@ -34,20 +34,15 @@ class PlayerController extends Controller
         $players = $query->get();
         $clubs = Club::orderBy('name', 'asc')->get();
 
-        // Squad yang sedang difilter (dipakai untuk shortcut "Tambah Pemain ke Squad")
         $selectedClub = $request->filled('club')
             ? $clubs->firstWhere('name', $request->club)
             : null;
 
-        // Informasi line-up: pertandingan apa saja yang memuat pemain ini
         $lineups = $this->buildLineups($players->pluck('id')->all());
 
         return view('players.index', compact('players', 'clubs', 'selectedClub', 'lineups'));
     }
 
-    /**
-     * Susun data line-up per pemain: [player_id => [ {match, date, venue, role, position, is_starter}, ... ]]
-     */
     private function buildLineups(array $playerIds): array
     {
         if (empty($playerIds)) {
@@ -86,7 +81,6 @@ class PlayerController extends Controller
     public function create(Request $request)
     {
         $clubs = Club::orderBy('name', 'asc')->get();
-        // Shortcut dari daftar squad: /players/create?club_id=3 -> klub terpilih otomatis
         $selectedClubId = $request->query('club_id');
         return view('players.create', compact('clubs', 'selectedClubId'));
     }
@@ -95,22 +89,47 @@ class PlayerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'position' => 'required|in:ST,GK,CM,CB,LW,RW,RB,LB,DM,AM', // Diperbarui
+            'popular_name' => 'nullable|string|max:255',
+            'position' => 'required|in:ST,GK,CM,CB,LW,RW,RB,LB,DM,AM',
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
             'second_club' => 'nullable|string|max:255',
+            'birth_place_date' => 'nullable|string|max:255',
+            'nik' => 'nullable|string|max:50',
+            'age_group' => 'nullable|integer',
+            'gender' => 'nullable|string|max:15',
+            'country' => 'nullable|string|max:255',
+            'dominant_foot' => 'nullable|string|max:50',
+            'height_cm' => 'nullable|numeric',
+            'weight_kg' => 'nullable|numeric',
+            'address' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
         ]);
 
         Player::create([
             'name' => $request->name,
+            'popular_name' => $request->popular_name,
             'position' => $request->position,
             'jersey_number' => $request->jersey_number,
             'club_id' => $request->club_id,
             'second_club' => $request->second_club,
-            'status' => 'Aktif', // status default otomatis untuk pemain baru
+            'birth_place_date' => $request->birth_place_date,
+            'nik' => $request->nik,
+            'age_group' => $request->age_group,
+            'gender' => $request->gender,
+            'country' => $request->country ?? 'Indonesia',
+            'dominant_foot' => $request->dominant_foot,
+            'height_cm' => $request->height_cm,
+            'weight_kg' => $request->weight_kg,
+            'address' => $request->address,
+            'province' => $request->province,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'status' => 'Aktif',
         ]);
 
-        // Tambah cepat dari daftar squad: tetap di halaman yang sama (filter ikut terbawa)
         if ($request->boolean('_quick')) {
             return redirect()->back()->with('success', 'Pemain berhasil ditambahkan ke squad!');
         }
@@ -134,19 +153,45 @@ class PlayerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'position' => 'required|in:ST,GK,CM,CB,LW,RW,RB,LB,DM,AM', // Diperbarui
+            'popular_name' => 'nullable|string|max:255',
+            'position' => 'required|in:ST,GK,CM,CB,LW,RW,RB,LB,DM,AM',
             'jersey_number' => 'nullable|integer',
             'club_id' => 'required|exists:clubs,id',
             'second_club' => 'nullable|string|max:255',
+            'birth_place_date' => 'nullable|string|max:255',
+            'nik' => 'nullable|string|max:50',
+            'age_group' => 'nullable|integer',
+            'gender' => 'nullable|string|max:15',
+            'country' => 'nullable|string|max:255',
+            'dominant_foot' => 'nullable|string|max:50',
+            'height_cm' => 'nullable|numeric',
+            'weight_kg' => 'nullable|numeric',
+            'address' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
             'status' => 'required|string|in:Aktif,Tidak Aktif,Cedera,Nonaktif',
         ]);
 
         $player->update([
             'name' => $request->name,
+            'popular_name' => $request->popular_name,
             'position' => $request->position,
             'jersey_number' => $request->jersey_number,
             'club_id' => $request->club_id,
             'second_club' => $request->second_club,
+            'birth_place_date' => $request->birth_place_date,
+            'nik' => $request->nik,
+            'age_group' => $request->age_group,
+            'gender' => $request->gender,
+            'country' => $request->country,
+            'dominant_foot' => $request->dominant_foot,
+            'height_cm' => $request->height_cm,
+            'weight_kg' => $request->weight_kg,
+            'address' => $request->address,
+            'province' => $request->province,
+            'phone' => $request->phone,
+            'email' => $request->email,
             'status' => $request->status,
         ]);
 
@@ -185,7 +230,7 @@ class PlayerController extends Controller
         }
 
         $players = $query->get();
-        $clubs = Club::orderBy('name', 'asc')->get();
+        $clubs = Club::orderBy('name', 'asc',)->get();
 
         return view('performa.index', compact('players', 'clubs'));
     }
@@ -194,5 +239,13 @@ class PlayerController extends Controller
     {
         $player = Player::with(['club'])->findOrFail($id);
         return view('performa.show', compact('player'));
+    }
+
+    public function exportPdf($id)
+    {
+        $player = Player::with(['club'])->findOrFail($id);
+        
+        // Menggunakan view khusus cetak PDF, atau bisa langsung stream/download
+        return view('players.pdf', compact('player'));
     }
 }

@@ -4,6 +4,10 @@
 @section('subheader', 'Manajemen akun Football')
 @section('content')
 
+<style>
+    [data-lucide] { flex-shrink: 0; }
+</style>
+
 <div class="space-y-6">
     <!-- Top Metric Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -14,7 +18,7 @@
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Akun Aktif</p>
             </div>
             <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <i data-lucide="user-check" class="w-5 h-5"></i>
             </div>
         </div>
 
@@ -25,7 +29,7 @@
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Akun Nonaktif</p>
             </div>
             <div class="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <i data-lucide="user-x" class="w-5 h-5"></i>
             </div>
         </div>
 
@@ -36,7 +40,7 @@
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Online Sekarang</p>
             </div>
             <div class="w-10 h-10 rounded-full bg-blue-50 text-[#4062D6] flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <i data-lucide="wifi" class="w-5 h-5"></i>
             </div>
         </div>
     </div>
@@ -45,7 +49,7 @@
     <div class="flex flex-col space-y-4">
         <div class="flex justify-end">
             <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
                 Tambah User
             </a>
         </div>
@@ -71,27 +75,33 @@
                                 </div>
                                 <div>
                                     <h4 class="text-[13px] font-bold text-[#1e293b]">pemain1</h4>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">Belum pernah aktif</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3 h-3"></i> Belum pernah aktif
+                                    </p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">pemain1@email.com</td>
+                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">
+                            <span class="inline-flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>pemain1@email.com</span>
+                        </td>
                         <td class="py-4 px-6">
-                            <span class="inline-block px-3 py-1 bg-emerald-100/50 text-emerald-600 rounded-full text-[11px] font-bold">Pemain</span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100/50 text-emerald-600 rounded-full text-[11px] font-bold">
+                                <i data-lucide="user" class="w-3 h-3"></i> Pemain
+                            </span>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-1.5">
-                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-500"></i>
                                 <span class="text-[12px] font-bold text-emerald-500">Aktif</span>
                             </div>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-2">
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                <button type="button" title="Edit" aria-label="Edit pemain1" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
+                                    <i data-lucide="square-pen" class="w-4 h-4"></i>
                                 </button>
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <button type="button" title="Hapus" aria-label="Hapus pemain1" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </td>
@@ -106,27 +116,33 @@
                                 </div>
                                 <div>
                                     <h4 class="text-[13px] font-bold text-[#1e293b]">Analis1</h4>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">Belum pernah aktif</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3 h-3"></i> Belum pernah aktif
+                                    </p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">analis1@email.com</td>
+                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">
+                            <span class="inline-flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>analis1@email.com</span>
+                        </td>
                         <td class="py-4 px-6">
-                            <span class="inline-block px-3 py-1 bg-orange-100/50 text-orange-600 rounded-full text-[11px] font-bold">Analis</span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-100/50 text-orange-600 rounded-full text-[11px] font-bold">
+                                <i data-lucide="chart-column" class="w-3 h-3"></i> Analis
+                            </span>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-1.5">
-                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-500"></i>
                                 <span class="text-[12px] font-bold text-emerald-500">Aktif</span>
                             </div>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-2">
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                <button type="button" title="Edit" aria-label="Edit Analis1" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
+                                    <i data-lucide="square-pen" class="w-4 h-4"></i>
                                 </button>
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <button type="button" title="Hapus" aria-label="Hapus Analis1" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </td>
@@ -141,27 +157,33 @@
                                 </div>
                                 <div>
                                     <h4 class="text-[13px] font-bold text-[#1e293b]">Pelatih1</h4>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">Aktif 1 hour ago</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3 h-3"></i> Aktif 1 hour ago
+                                    </p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">pelatih1@email.com</td>
+                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">
+                            <span class="inline-flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>pelatih1@email.com</span>
+                        </td>
                         <td class="py-4 px-6">
-                            <span class="inline-block px-3 py-1 bg-blue-100/50 text-[#4062D6] rounded-full text-[11px] font-bold">Pelatih</span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100/50 text-[#4062D6] rounded-full text-[11px] font-bold">
+                                <i data-lucide="clipboard-list" class="w-3 h-3"></i> Pelatih
+                            </span>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-1.5">
-                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-500"></i>
                                 <span class="text-[12px] font-bold text-emerald-500">Aktif</span>
                             </div>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-2">
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                <button type="button" title="Edit" aria-label="Edit Pelatih1" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
+                                    <i data-lucide="square-pen" class="w-4 h-4"></i>
                                 </button>
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <button type="button" title="Hapus" aria-label="Hapus Pelatih1" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </td>
@@ -178,29 +200,37 @@
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <h4 class="text-[13px] font-bold text-[#1e293b]">Admin FFA</h4>
-                                        <span class="px-1.5 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded text-[9px] font-black uppercase tracking-wider">Online</span>
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded text-[9px] font-black uppercase tracking-wider">
+                                            <i data-lucide="wifi" class="w-2.5 h-2.5"></i> Online
+                                        </span>
                                     </div>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">Aktif 21 seconds ago</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3 h-3"></i> Aktif 21 seconds ago
+                                    </p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">admin@ffa.com</td>
+                        <td class="py-4 px-6 text-[13px] text-slate-500 font-medium">
+                            <span class="inline-flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>admin@ffa.com</span>
+                        </td>
                         <td class="py-4 px-6">
-                            <span class="inline-block px-3 py-1 bg-rose-100/50 text-rose-600 rounded-full text-[11px] font-bold">Admin</span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100/50 text-rose-600 rounded-full text-[11px] font-bold">
+                                <i data-lucide="shield-check" class="w-3 h-3"></i> Admin
+                            </span>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-1.5">
-                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5 text-emerald-500"></i>
                                 <span class="text-[12px] font-bold text-emerald-500">Aktif</span>
                             </div>
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-2">
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                <button type="button" title="Edit" aria-label="Edit Admin FFA" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#4062D6] transition-colors">
+                                    <i data-lucide="square-pen" class="w-4 h-4"></i>
                                 </button>
-                                <button class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <button type="button" title="Hapus" aria-label="Hapus Admin FFA" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </td>
@@ -210,5 +240,13 @@
         </div>
     </div>
 </div>
+
+<!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+    });
+</script>
 
 @endsection

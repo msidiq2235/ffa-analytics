@@ -4,24 +4,35 @@
 @section('subheader', 'Informasi performa pemain')
 
 @section('content')
+
+<style>
+    [data-lucide] { flex-shrink: 0; }
+</style>
+
 <div class="space-y-6">
     <!-- Form Filter Section -->
     <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
-        <h3 class="text-[13px] font-bold text-[#334155] mb-4">Pilih Pemain</h3>
+        <h3 class="text-[13px] font-bold text-[#334155] mb-4 flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+            Pilih Pemain
+        </h3>
         <form method="GET" action="{{ route('performa.index') }}" class="space-y-4">
             <div class="flex flex-wrap items-center gap-3">
-                <div class="flex-1 min-w-[240px]">
-                    <input type="text" name="name" value="{{ request('name') }}" placeholder="Cari nama pemain..." class="w-full px-4 py-2.5 bg-white border border-[#e2e8f0] rounded-xl text-[13px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
+                <div class="flex-1 min-w-[240px] relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input type="text" name="name" value="{{ request('name') }}" placeholder="Cari nama pemain..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e2e8f0] rounded-xl text-[13px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
                 </div>
-                <button type="button" class="px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2">
+                <button type="button" class="px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] active:scale-95 text-white text-[13px] font-bold rounded-xl transition shadow-sm flex items-center gap-2">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
                     Filter
                 </button>
-                <button type="submit" class="px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <button type="submit" class="px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] active:scale-95 text-white text-[13px] font-bold rounded-xl transition shadow-sm flex items-center gap-2">
+                    <i data-lucide="search" class="w-4 h-4"></i>
                     Cari
                 </button>
                 @if(request()->hasAny(['name', 'position', 'number', 'club_id']))
-                    <a href="{{ route('performa.index') }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-bold rounded-xl transition-colors">
+                    <a href="{{ route('performa.index') }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-bold rounded-xl transition-colors flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                         Reset
                     </a>
                 @endif
@@ -29,12 +40,16 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nama Pemain</label>
+                    <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i> Nama Pemain
+                    </label>
                     <input type="text" name="name" value="{{ request('name') }}" placeholder="Nama pemain" class="w-full px-3 py-2 bg-slate-50 border border-[#e2e8f0] rounded-lg text-[12px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Posisi</label>
+                    <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Posisi
+                    </label>
                     <select name="position" class="w-full px-3 py-2 bg-slate-50 border border-[#e2e8f0] rounded-lg text-[12px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
                         <option value="">Semua Posisi</option>
                         <option value="GK" {{ request('position') == 'GK' ? 'selected' : '' }}>GK (Kiper)</option>
@@ -51,12 +66,16 @@
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nomor Punggung</label>
+                    <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="hash" class="w-3.5 h-3.5"></i> Nomor Punggung
+                    </label>
                     <input type="number" name="number" value="{{ request('number') }}" placeholder="Contoh: 10" class="w-full px-3 py-2 bg-slate-50 border border-[#e2e8f0] rounded-lg text-[12px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tim / Klub</label>
+                    <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="shield" class="w-3.5 h-3.5"></i> Tim / Klub
+                    </label>
                     <select name="club_id" class="w-full px-3 py-2 bg-slate-50 border border-[#e2e8f0] rounded-lg text-[12px] text-[#334155] focus:outline-none focus:border-[#4062D6]">
                         <option value="">Semua Tim</option>
                         @foreach($clubs as $club)
@@ -94,17 +113,17 @@
                             <td class="py-4 px-6 text-[13px] font-medium text-slate-600">{{ $player->position ?? '-' }}</td>
                             <td class="py-4 px-6 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <!-- Tombol Ikon Mata (Menuju Detail Performa Pemain) -->
-                                    <a href="{{ route('performa.show', $player->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors" title="Lihat Detail Performa">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    <!-- Tombol Lihat Detail Performa -->
+                                    <a href="{{ route('performa.show', $player->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-[#4062D6] hover:border-[#4062D6] hover:text-white transition-colors" title="Lihat Detail Performa">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
                                     </a>
 
-                                    <!-- Tombol Ikon Hapus (Tong Sampah) -->
+                                    <!-- Tombol Hapus -->
                                     <form action="{{ route('players.destroy', $player->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pemain ini?');" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors" title="Hapus Pemain">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-rose-500 hover:border-rose-500 hover:text-white transition-colors" title="Hapus Pemain">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -112,7 +131,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-8 text-center text-slate-400 text-[13px]">Pemain tidak ditemukan atau belum ada data di database.</td>
+                            <td colspan="4" class="py-10 text-center text-slate-400 text-[13px]">
+                                <div class="flex flex-col items-center gap-2">
+                                    <i data-lucide="user-x" class="w-8 h-8 text-slate-300"></i>
+                                    Pemain tidak ditemukan atau belum ada data di database.
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -120,4 +144,12 @@
         </div>
     </div>
 </div>
+
+<!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+    });
+</script>
 @endsection
