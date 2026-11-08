@@ -4,8 +4,12 @@
 @section('subheader', 'Kelola jadwal dan susunan pemain pertandingan akademi')
 @section('content')
 
+<!-- Tambahkan CDN Lucide Icons jika belum ada di layouts/app.blade.php -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] overflow-hidden">
-    <div class="px-8 py-5 border-b border-slate-100 bg-white">
+    <div class="px-8 py-5 border-b border-slate-100 bg-white flex items-center gap-2">
+        <i data-lucide="users" class="w-4 h-4 text-[#4062D6]"></i>
         <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SET LINE-UP TIM</h3>
     </div>
     
@@ -21,9 +25,17 @@
             
             <!-- Pilihan Formasi Tim -->
             <div class="w-full md:w-auto max-w-[250px]">
-                <label for="formation" class="block text-[11px] font-bold text-slate-400 mb-1">Formasi Tim</label>
-                <input type="text" id="formation" name="formation" value="{{ old('formation', $match->formation) }}" placeholder="Contoh: 4-3-3" 
-                       class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                <label for="formation" class="block text-[11px] font-bold text-slate-400 mb-1 flex items-center gap-1">
+                    <i data-lucide="layout-grid" class="w-3 h-3 text-[#4062D6]"></i>
+                    <span>Formasi Tim</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="grid" class="w-4 h-4"></i>
+                    </div>
+                    <input type="text" id="formation" name="formation" value="{{ old('formation', $match->formation) }}" placeholder="Contoh: 4-3-3" 
+                           class="w-full pl-10 pr-3.5 py-2 bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                </div>
             </div>
         </div>
 
@@ -50,7 +62,7 @@
                         <td class="py-4 px-4">
                             <label class="flex items-center cursor-pointer">
                                 <input type="checkbox" name="players[{{ $player->id }}][selected]" value="1" {{ $isSel ? 'checked' : '' }}
-                                       class="w-5 h-5 text-[#4062D6] border-slate-200 rounded focus:ring-[#4062D6]">
+                                       class="w-5 h-5 text-[#4062D6] border-slate-200 rounded focus:ring-[#4062D6] cursor-pointer">
                             </label>
                         </td>
                         <!-- Nama Pemain -->
@@ -80,9 +92,7 @@
                                     <option value="Cadangan" {{ $pivotPos == 'Cadangan' ? 'selected' : '' }}>Cadangan</option>
                                 </select>
                                 <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
+                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
                                 </div>
                             </div>
                         </td>
@@ -101,15 +111,22 @@
         <!-- Tombol Aksi -->
         <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
             <a href="{{ route('matches.index') }}" 
-               class="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[13px] font-bold rounded-xl transition-colors shadow-sm text-center">
-                Batal
+               class="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[13px] font-bold rounded-xl transition-colors shadow-sm text-center inline-flex items-center gap-2">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>Batal</span>
             </a>
             <button type="submit" 
-                    class="px-6 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm active:scale-95">
-                Simpan Line-Up
+                    class="px-6 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm active:scale-95 inline-flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Simpan Line-Up</span>
             </button>
         </div>
     </form>
 </div>
+
+<!-- Inisialisasi Lucide Icons -->
+<script>
+    lucide.createIcons();
+</script>
 
 @endsection
