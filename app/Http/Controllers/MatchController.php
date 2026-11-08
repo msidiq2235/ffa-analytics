@@ -47,15 +47,21 @@ class MatchController extends Controller
         ]);
 
         // Menggunakan toDateTimeString() agar jam dan menit ikut tersimpan secara utuh
-        $matchDate = Carbon::parse($request->match_date)->toDateTimeString();
+        $matchDate = Carbon::parse($request->match_date);
+        $formattedDate = $matchDate->toDateTimeString();
+
+        // 🌟 OTOMATISASI STATUS: 
+        // Jika tanggal/waktu yang dipilih sudah lewat -> otomatis 'Selesai'
+        // Jika tanggal/waktu masih di masa depan -> otomatis 'Upcoming'
+        $status = $matchDate->isPast() ? 'Selesai' : 'Upcoming';
 
         MatchSession::create([
             'title' => $request->title,
-            'match_date' => $matchDate,
+            'match_date' => $formattedDate,
             'venue' => $request->venue,
             'opponent' => $request->opponent,
             'formation' => $request->formation,
-            'status' => 'Upcoming',
+            'status' => $status, // Terisi otomatis!
             'created_by' => Auth::id(),
         ]);
 
@@ -202,20 +208,29 @@ class MatchController extends Controller
             'opponent'   => 'nullable|string|max:255',
             'venue'      => 'nullable|string|max:255',
             'match_date' => 'required|date',
-            'status'     => 'required|in:Upcoming,Live,Selesai',
             'formation'  => 'nullable|string|max:50',
         ]);
 
         // Menggunakan toDateTimeString() agar jam dan menit ikut tersimpan saat update
-        $matchDate = Carbon::parse($request->match_date)->toDateTimeString();
+        $matchDate = Carbon::parse($request->match_date);
+        $formattedDate = $matchDate->toDateTimeString();
 
         $match = MatchSession::findOrFail($id);
+
+        // 🌟 OTOMATISASI STATUS SAAT UPDATE:
+        // Jika status saat ini 'Live', biarkan tetap 'Live'. 
+        // Jika tidak, biarkan sistem yang mengecek tanggalnya secara otomatis.
+        $status = $match->status;
+        if ($status !== 'Live') {
+            $status = $matchDate->isPast() ? 'Selesai' : 'Upcoming';
+        }
+
         $match->update([
             'title'      => $request->title,
             'opponent'   => $request->opponent,
             'venue'      => $request->venue,
-            'match_date' => $matchDate,
-            'status'     => $request->status,
+            'match_date' => $formattedDate,
+            'status'     => $status, // Otomatis menyesuaikan tanggal baru
             'formation'  => $request->formation,
         ]);
 

@@ -4,8 +4,12 @@
 @section('subheader', 'Kelola jadwal pertandingan akademi')
 @section('content')
 
+<!-- Tambahkan CDN Lucide Icons jika belum ada di layouts/app.blade.php -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
 <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] overflow-hidden">
-    <div class="px-8 py-5 border-b border-slate-100 bg-white">
+    <div class="px-8 py-5 border-b border-slate-100 bg-white flex items-center gap-2">
+        <i data-lucide="calendar-plus" class="w-4 h-4 text-[#4062D6]"></i>
         <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Informasi Pertandingan</h3>
     </div>
     
@@ -15,18 +19,21 @@
             <!-- Kolom Kiri -->
             <div class="space-y-6">
                 <div>
-                    <label for="title_search" class="block text-[12px] font-bold text-slate-700 mb-2">Nama Tim</label>
+                    <label for="title_search" class="block text-[12px] font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <i data-lucide="shield" class="w-3.5 h-3.5 text-[#4062D6]"></i>
+                        <span>Nama Tim</span>
+                    </label>
                     <!-- Combobox dengan fitur pencarian: ketik untuk mencari, lalu pilih dari daftar -->
                     <div class="relative" id="team-combobox">
                         <input type="hidden" id="title" name="title" value="{{ old('title') }}">
-                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-300">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="search" class="w-4 h-4"></i>
                         </div>
                         <input type="text" id="title_search" autocomplete="off" placeholder="Cari / ketik nama tim..." value="{{ old('title') }}" required
                                role="combobox" aria-expanded="false" aria-controls="team-options"
                                class="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-300">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </div>
                         <ul id="team-options" role="listbox" class="hidden absolute z-30 left-0 right-0 mt-2 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg py-1"></ul>
                     </div>
@@ -35,16 +42,30 @@
                 </div>
                 
                 <div>
-                    <label for="opponent" class="block text-[12px] font-bold text-slate-700 mb-2">Tim Lawan</label>
-                    <input type="text" id="opponent" name="opponent" placeholder="Nama Tim Lawan" required 
-                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    <label for="opponent" class="block text-[12px] font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-500"></i>
+                        <span>Tim Lawan</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="user-x" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="opponent" name="opponent" placeholder="Nama Tim Lawan" required 
+                               class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    </div>
                 </div>
 
                 <div>
-                    <label for="formation" class="block text-[12px] font-bold text-slate-700 mb-2">Formasi</label>
+                    <label for="formation" class="block text-[12px] font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-[#4062D6]"></i>
+                        <span>Formasi</span>
+                    </label>
                     <div class="relative">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="grid" class="w-4 h-4"></i>
+                        </div>
                         <select id="formation" name="formation" required 
-                                class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
+                                class="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 appearance-none focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm cursor-pointer">
                             <option value="" disabled selected class="text-slate-300">Pilih Formasi</option>
                             <option value="4-3-3" {{ old('formation') == '4-3-3' ? 'selected' : '' }}>4-3-3</option>
                             <option value="4-4-2" {{ old('formation') == '4-4-2' ? 'selected' : '' }}>4-4-2</option>
@@ -52,10 +73,8 @@
                             <option value="4-2-3-1" {{ old('formation') == '4-2-3-1' ? 'selected' : '' }}>4-2-3-1</option>
                             <option value="3-4-3" {{ old('formation') == '3-4-3' ? 'selected' : '' }}>3-4-3</option>
                         </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-300">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </div>
                     </div>
                 </div>
@@ -64,15 +83,31 @@
             <!-- Kolom Kanan -->
             <div class="space-y-6">
                 <div>
-                    <label for="match_date" class="block text-[12px] font-bold text-slate-700 mb-2">Tanggal Pertandingan</label>
-                    <input type="datetime-local" id="match_date" name="match_date" required 
-                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    <label for="match_date" class="block text-[12px] font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-[#4062D6]"></i>
+                        <span>Tanggal Pertandingan</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                        </div>
+                        <input type="datetime-local" id="match_date" name="match_date" required 
+                               class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    </div>
                 </div>
 
                 <div>
-                    <label for="venue" class="block text-[12px] font-bold text-slate-700 mb-2">Tempat Pertandingan</label>
-                    <input type="text" id="venue" name="venue" required 
-                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    <label for="venue" class="block text-[12px] font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#4062D6]"></i>
+                        <span>Tempat Pertandingan</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="navigation" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="venue" name="venue" required placeholder="Contoh: Stadion Mandala Krida"
+                               class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-300 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    </div>
                 </div>
             </div>
         </div>
@@ -80,12 +115,14 @@
         <!-- Tombol Aksi -->
         <div class="mt-12 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
             <a href="{{ route('matches.index') }}" 
-               class="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[13px] font-bold rounded-xl transition-colors shadow-sm text-center">
-                Batal
+               class="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[13px] font-bold rounded-xl transition-colors shadow-sm text-center flex items-center gap-2">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>Batal</span>
             </a>
             <button type="submit" 
-                    class="px-6 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm active:scale-95">
-                Simpan Pertandingan
+                    class="px-6 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[13px] font-bold rounded-xl transition-colors shadow-sm active:scale-95 flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Simpan Pertandingan</span>
             </button>
         </div>
     </form>
@@ -147,30 +184,43 @@
 
     input.addEventListener('focus', open);
     input.addEventListener('input', () => {
-        // Jika teks persis sama dengan salah satu tim, anggap terpilih; selain itu kosongkan pilihan
         const exact = clubs.find(n => n.toLowerCase() === input.value.trim().toLowerCase());
         hidden.value = exact || '';
         setValidity();
         open();
     });
     input.addEventListener('keydown', e => {
-        if (e.key === 'ArrowDown') { e.preventDefault(); if (list.classList.contains('hidden')) open(); active = Math.min(active + 1, visible.length - 1); highlight(); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); highlight(); }
-        else if (e.key === 'Enter') { if (!list.classList.contains('hidden') && active >= 0) { e.preventDefault(); choose(visible[active]); } }
-        else if (e.key === 'Escape') { close(); }
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (list.classList.contains('hidden')) open();
+            active = Math.min(active + 1, visible.length - 1);
+            highlight();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            active = Math.max(active - 1, 0);
+            highlight();
+        } else if (e.key === 'Enter') {
+            if (!list.classList.contains('hidden') && active >= 0 && visible[active]) {
+                e.preventDefault();
+                choose(visible[active]);
+            }
+        } else if (e.key === 'Escape') {
+            close();
+        }
     });
     input.addEventListener('blur', () => {
         setTimeout(() => {
             close();
-            // Rapikan teks agar sama dengan pilihan yang sah
             if (hidden.value) input.value = hidden.value;
         }, 100);
     });
     document.addEventListener('click', e => { if (!document.getElementById('team-combobox').contains(e.target)) close(); });
 
-    // Nilai awal (mis. kembali dari validasi gagal)
     if (hidden.value && !clubs.includes(hidden.value)) { hidden.value = ''; input.value = ''; }
     setValidity();
+
+    // Inisialisasi Lucide Icons
+    lucide.createIcons();
 })();
 </script>
 @endsection

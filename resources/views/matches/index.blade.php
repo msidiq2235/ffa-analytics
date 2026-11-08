@@ -4,6 +4,9 @@
 @section('subheader', 'Kelola jadwal pertandingan akademi. Tambahkan, edit, atau hapus jadwal pertandingan sesuai kebutuhan.')
 @section('content')
 
+<!-- Tambahkan CDN Lucide Icons jika belum ada di layouts/app.blade.php -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
 @php
     $realRole = auth()->user()->role ?? 'Super Admin';
     $activeRole = session('active_role', $realRole);
@@ -14,20 +17,20 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="inline-flex p-1 bg-white border border-slate-200 rounded-xl shadow-sm">
             <a href="{{ route('matches.index', ['view' => 'table']) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold transition-colors {{ $view === 'table' ? 'bg-[#4062D6] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M3 6h18M3 18h18"></path></svg>
-                Tabel
+                <i data-lucide="list" class="w-4 h-4"></i>
+                <span>Tabel</span>
             </a>
             <a href="{{ route('matches.index', ['view' => 'card']) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold transition-colors {{ $view === 'card' ? 'bg-[#4062D6] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                Card
+                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                <span>Card</span>
             </a>
         </div>
 
         <!-- Tombol tambah (tidak untuk Analis) -->
         @if($activeRole !== 'Analis')
         <a href="{{ route('matches.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm active:scale-95">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Tambah Jadwal
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Tambah Jadwal</span>
         </a>
         @endif
     </div>
@@ -66,7 +69,7 @@
                         </td>
                         <td class="py-4 px-4">
                             <div class="flex items-center gap-1.5 text-slate-500">
-                                <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <i data-lucide="map-pin" class="w-4 h-4 shrink-0 text-slate-400"></i>
                                 <span class="text-[12px] font-medium">{{ $match->venue ?? 'Belum ditentukan' }}</span>
                             </div>
                         </td>
@@ -94,8 +97,8 @@
                                 @else
                                     <a href="{{ route('matches.lineup', $match->id) }}" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[11px] font-bold rounded-lg transition-colors">Line-Up</a>
                                     <a href="{{ route('matches.edit', $match->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[11px] font-bold rounded-lg transition-colors">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                        Edit
+                                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                        <span>Edit</span>
                                     </a>
                                     <a href="{{ route('reports.match.show', $match->id) }}" class="px-3 py-1.5 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[11px] font-bold rounded-lg transition-colors">Report</a>
                                 @endif
@@ -145,11 +148,11 @@
             
             <div class="space-y-3 mb-6">
                 <div class="flex items-center gap-2 text-slate-400">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <i data-lucide="map-pin" class="w-4 h-4 shrink-0"></i>
                     <span class="text-[13px] font-medium">{{ $match->venue ?? 'Belum ditentukan' }}</span>
                 </div>
                 <div class="flex items-center gap-2 text-slate-400">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <i data-lucide="grid" class="w-4 h-4 shrink-0"></i>
                     <span class="text-[13px] font-medium">Formasi: <span class="font-bold text-[#1e293b]">{{ $match->formation ?? '4-3-3' }}</span></span>
                 </div>
             </div>
@@ -157,7 +160,6 @@
             <!-- TOMBOL AKSI BERDASARKAN ROLE -->
             <div class="space-y-3 mt-auto shrink-0">
                 @if($activeRole === 'Analis')
-                    <!-- Tampilan Tombol Khusus Role Analis (Sesuai Referensi Gambar) -->
                     <div class="grid grid-cols-2 gap-3">
                         <a href="{{ route('matches.vector', $match->id) }}" class="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white hover:bg-slate-50 border border-indigo-200 text-indigo-600 text-[12px] font-bold rounded-xl transition-colors shadow-sm">
                             Vektor
@@ -175,19 +177,18 @@
                         </a>
                     </div>
                 @else
-                    <!-- Tampilan Tombol Standar untuk Admin / Super Admin -->
                     <div class="grid grid-cols-2 gap-3">
                         <a href="{{ route('matches.lineup', $match->id) }}" class="flex items-center justify-center px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[12px] font-bold rounded-xl transition-colors shadow-sm">
                             Line-Up
                         </a>
                         <a href="{{ route('matches.edit', $match->id) }}" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#1e293b] text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            Edit Pertandingan
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                            <span>Edit Pertandingan</span>
                         </a>
                     </div>
                     <a href="{{ route('reports.match.show', $match->id) }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#4062D6] hover:bg-[#3251b5] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Lihat Report Pertandingan
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>Lihat Report Pertandingan</span>
                     </a>
                 @endif
             </div>
@@ -252,5 +253,10 @@
     </div>
     @endif
 </div>
+
+<!-- Inisialisasi Lucide Icons -->
+<script>
+    lucide.createIcons();
+</script>
 
 @endsection
