@@ -52,12 +52,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/matches/{match}/vector', [MatchController::class, 'vector'])->name('matches.vector');
     Route::get('/matches/{match}/player-stats/{player}', [MatchController::class, 'getPlayerStats'])->name('matches.getPlayerStats');
 
-    // Modul Export Laporan
+   // Modul Export Laporan
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index'); 
     Route::get('/reports/matches/{match}', [ReportController::class, 'showMatchReport'])->name('reports.match.show');
     Route::get('/reports/matches/{match}/pdf', [ReportController::class, 'exportMatchPdf'])->name('reports.match.pdf');
 
     Route::get('/reports/players/{player}', [ReportController::class, 'showPlayerReport'])->name('reports.player.show');
+    
+    // Rute PDF Profil Umum Pemain (Ditambahkan di sini agar tidak error)
+    Route::get('/reports/players/{player}/pdf', [ReportController::class, 'exportPlayerProfilePdf'])->name('reports.player.pdf');
+    
     Route::get('/reports/players/{player}/matches/{matchId}/pdf', [ReportController::class, 'exportPlayerMatchPdf'])->name('reports.player.match.pdf');
     Route::get('/reports/players/{player}/seasons/{season}/pdf', [ReportController::class, 'exportPlayerSeasonPdf'])
         ->where('season', '[0-9]{4}')

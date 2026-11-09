@@ -24,15 +24,21 @@ class ReportController extends Controller
 
         $players = Player::with('club')
             ->when($request->query('name'), fn ($q, $name) => $q->where('name', 'like', '%' . $name . '%'))
+            ->when($request->query('position'), fn ($q, $pos) => $q->where('position', $pos))
+            ->when($request->query('jersey'), fn ($q, $jersey) => $q->where('jersey_number', $jersey))
+            ->when($request->query('club'), fn ($q, $clubName) => $q->whereHas('club', fn ($c) => $c->where('name', $clubName)))
             ->orderBy('name')
             ->paginate(10, ['*'], 'players_page')
             ->withQueryString();
 
         $matches = MatchSession::orderByDesc('match_date')
+            ->when($request->query('search'), fn ($q, $search) => $q->where('title', 'like', '%' . $search . '%')->orWhere('opponent', 'like', '%' . $search . '%'))
             ->paginate(10, ['*'], 'matches_page')
             ->withQueryString();
 
-        return view('reports.index', compact('tab', 'players', 'matches'));
+        $clubs = \App\Models\Club::orderBy('name')->get();
+
+        return view('reports.index', compact('tab', 'players', 'matches', 'clubs'));
     }
 
     /* ===================== LAPORAN PERTANDINGAN ===================== */
@@ -155,13 +161,12 @@ class ReportController extends Controller
 
         // Radar 0-100 dari rata-rata per pertandingan
         $played = max($matches->count(), 1);
-        $norm   = fn ($value, $target) => (int) min(100, round(($value / $played) / $target * 100));
+        $norm   = fn ($value, $target) => (int) min(100, round((($value / $played) / $target) * 100));
 
         $radar = [
             'Serangan'  => $norm($perMatch->sum('total_goals') + $perMatch->sum('total_shots_target'), 3),
             'Bertahan'  => $norm($perMatch->sum('total_tackles'), 6),
             'Operan'    => $norm($perMatch->sum('total_passes'), 40),
-            // Belum ada datanya di sistem, isi nanti jika ada metriknya
             'Dribbling' => 0,
             'Fisik'     => 0,
             'Mental'    => 0,
@@ -232,5 +237,30 @@ class ReportController extends Controller
         return Pdf::loadView('reports.player_season_pdf', compact(
             'player', 'matches', 'perMatch', 'totals', 'seasonLabel', 'opponentOf'
         ))->stream('Laporan_' . Str::slug($player->name) . '_Musim_' . $season . '.pdf');
+    }
+
+    /**
+     * PDF Profil Umum Pemain.
+     */
+    public function exportPlayerProfilePdf($player)
+    {
+        $player = Player::with(['club'])->findOrFail($player);
+        
+        $perMatch = $this->playerStatsPerMatch($player->id);
+        $matches  = $this->playerMatches($player->id);
+
+        $totals = (object) [
+            'goals'        => (int) $perMatch->sum('total_goals'),
+            'assists'      => (int) $perMatch->sum('total_assists'),
+            'matches'      => $matches->count(),
+            'shots_target' => (int) $perMatch->sum('total_shots_target'),
+            'passes'       => (int) $perMatch->sum('total_passes'),
+            'tackles'      => (int) $perMatch->sum('total_tackles'),
+        ];
+
+        $opponentOf = fn ($m) => $this->opponentOf($m);
+
+        return Pdf::loadView('reports.player_pdf', compact('player', 'matches', 'perMatch', 'totals', 'opponentOf'))
+            ->stream('Laporan_Lengkap_' . Str::slug($player->name) . '.pdf');
     }
 }

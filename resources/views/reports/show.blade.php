@@ -128,7 +128,6 @@
     </div>
 </div>
 
-<!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <script>
@@ -137,7 +136,6 @@ let activeFilters = ['SHOT', 'PASS', 'CROSS'];
 const canvas = document.getElementById('summaryCanvas');
 const ctx = canvas.getContext('2d');
 
-// Render semua ikon Lucide
 function renderIcons() {
     if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
 }
@@ -155,41 +153,49 @@ function switchTab(tab) {
     document.getElementById('tab-' + tab).classList.add('text-blue-600', 'border-blue-600', 'bg-white');
     if (tab === 'vector') { setTimeout(resizeCanvas, 50); }
 }
+
 function toggleAction(action) {
     const index = activeFilters.indexOf(action);
     if (index > -1) { activeFilters.splice(index, 1); } else { activeFilters.push(action); }
     renderVectors();
 }
+
 function getActionColor(action) {
     if (action === 'SHOT') return 'rgba(239, 68, 68, 0.8)';
     if (action === 'PASS') return 'rgba(34, 197, 94, 0.8)';
     if (action === 'CROSS') return 'rgba(168, 85, 247, 0.8)';
     return 'rgba(255, 255, 255, 0.8)';
 }
+
 function drawArrow(fromX, fromY, toX, toY, color, playerName, number) {
     const headlen = 10;
     const dx = toX - fromX;
     const dy = toY - fromY;
     const angle = Math.atan2(dy, dx);
+    
     ctx.beginPath();
     ctx.moveTo(fromX, fromY);
     ctx.lineTo(toX, toY);
     ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
     ctx.moveTo(toX, toY);
     ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+    
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
     ctx.stroke();
+    
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(fromX, fromY, 8, 0, 2 * Math.PI);
     ctx.fill();
+    
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 9px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(number || '-', fromX, fromY);
 }
+
 function renderVectors() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     rawVectors.forEach(v => {
@@ -202,11 +208,13 @@ function renderVectors() {
         }
     });
 }
+
 function resizeCanvas() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     renderVectors();
 }
+
 window.addEventListener('resize', resizeCanvas);
 </script>
 @endsection
