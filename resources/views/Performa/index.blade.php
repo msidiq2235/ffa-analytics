@@ -7,6 +7,13 @@
 
 <style>
     [data-lucide] { flex-shrink: 0; }
+
+    /* Animasi modal hapus */
+    #deleteModal .modal-backdrop { transition: opacity .2s ease; }
+    #deleteModal .modal-card { transition: opacity .2s ease, transform .2s ease; }
+    #deleteModal.is-hidden { pointer-events: none; }
+    #deleteModal.is-hidden .modal-backdrop { opacity: 0; }
+    #deleteModal.is-hidden .modal-card { opacity: 0; transform: scale(.95) translateY(8px); }
 </style>
 
 <div class="space-y-6">
@@ -118,14 +125,14 @@
                                         <i data-lucide="eye" class="w-4 h-4"></i>
                                     </a>
 
-                                    <!-- Tombol Hapus -->
-                                    <form action="{{ route('players.destroy', $player->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pemain ini?');" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-rose-500 hover:border-rose-500 hover:text-white transition-colors" title="Hapus Pemain">
-                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                        </button>
-                                    </form>
+                                    <!-- Tombol Hapus (membuka modal custom, bukan confirm bawaan browser) -->
+                                    <button type="button"
+                                            class="btn-delete inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-rose-500 hover:border-rose-500 hover:text-white transition-colors"
+                                            title="Hapus Pemain"
+                                            data-action="{{ route('players.destroy', $player->id) }}"
+                                            data-name="{{ $player->name }}">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -145,11 +152,88 @@
     </div>
 </div>
 
+<!-- Modal Konfirmasi Hapus -->
+<div id="deleteModal" class="is-hidden fixed inset-0 z-[100] flex items-center justify-center p-4 invisible" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-backdrop absolute inset-0 bg-slate-900/50 backdrop-blur-sm" data-close-modal></div>
+
+    <div class="modal-card relative w-full max-w-[400px] bg-white rounded-[20px] border border-slate-200 shadow-[0_20px_50px_rgb(0,0,0,0.15)] p-6">
+        <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mb-4">
+                <i data-lucide="trash-2" class="w-6 h-6 text-rose-500"></i>
+            </div>
+            <h3 id="deleteModalTitle" class="text-[16px] font-bold text-[#1e293b] mb-1.5">Hapus Pemain?</h3>
+            <p class="text-[13px] text-slate-500 leading-relaxed">
+                Anda yakin ingin menghapus
+                <span id="deleteModalName" class="font-bold text-[#1e293b]">pemain ini</span>?
+                Data yang sudah dihapus tidak dapat dikembalikan.
+            </p>
+        </div>
+
+        <form id="deleteForm" method="POST" action="" class="mt-6 flex items-center gap-3">
+            @csrf
+            @method('DELETE')
+            <button type="button" data-close-modal class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 text-[13px] font-bold rounded-xl transition">
+                Batal
+            </button>
+            <button type="submit" id="deleteSubmitBtn" class="flex-1 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 active:scale-95 text-white text-[13px] font-bold rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                Ya, Hapus
+            </button>
+        </form>
+    </div>
+</div>
+
 <!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+
+        const modal      = document.getElementById('deleteModal');
+        const form       = document.getElementById('deleteForm');
+        const nameEl     = document.getElementById('deleteModalName');
+        const submitBtn  = document.getElementById('deleteSubmitBtn');
+
+        function openModal(action, name) {
+            form.setAttribute('action', action);
+            nameEl.textContent = name ? '"' + name + '"' : 'pemain ini';
+            modal.classList.remove('invisible');
+            // paksa reflow agar transisi berjalan
+            void modal.offsetWidth;
+            modal.classList.remove('is-hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('is-hidden');
+            document.body.style.overflow = '';
+            setTimeout(function () {
+                if (modal.classList.contains('is-hidden')) modal.classList.add('invisible');
+            }, 200);
+        }
+
+        // Buka modal saat tombol hapus diklik
+        document.querySelectorAll('.btn-delete').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                openModal(btn.dataset.action, btn.dataset.name);
+            });
+        });
+
+        // Tutup modal (tombol Batal & klik backdrop)
+        modal.querySelectorAll('[data-close-modal]').forEach(function (el) {
+            el.addEventListener('click', closeModal);
+        });
+
+        // Tutup dengan tombol ESC
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.classList.contains('is-hidden')) closeModal();
+        });
+
+        // Cegah double submit
+        form.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+        });
     });
 </script>
 @endsection

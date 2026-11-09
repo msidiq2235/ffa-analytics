@@ -32,7 +32,10 @@ class ReportController extends Controller
             ->withQueryString();
 
         $matches = MatchSession::orderByDesc('match_date')
-            ->when($request->query('search'), fn ($q, $search) => $q->where('title', 'like', '%' . $search . '%')->orWhere('opponent', 'like', '%' . $search . '%'))
+            ->when($request->query('search'), fn ($q, $search) => $q->where(function ($w) use ($search) {
+                $w->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('opponent', 'like', '%' . $search . '%');
+            }))
             ->paginate(10, ['*'], 'matches_page')
             ->withQueryString();
 
@@ -43,19 +46,28 @@ class ReportController extends Controller
 
     /* ===================== LAPORAN PERTANDINGAN ===================== */
 
-    public function showMatchReport(MatchSession $match)
+    /**
+     * Data bersama untuk halaman match & PDF match.
+     */
+    private function matchReportData(MatchSession $match): array
     {
         $match->load(['players' => function ($q) { $q->withPivot('position'); }]);
 
         $stats = Statistic::where('match_id', $match->id)
-            ->selectRaw('player_id, SUM(goal) as total_goals, SUM(assist) as total_assists, SUM(shooting_on_target) as total_shots_target, SUM(shooting_off_target) as total_shots_off, SUM(successful_passes) as total_passes, SUM(tackles) as total_tackles')
+            ->selectRaw('player_id,
+                COALESCE(SUM(goal),0) as total_goals,
+                COALESCE(SUM(assist),0) as total_assists,
+                COALESCE(SUM(shooting_on_target),0) as total_shots_target,
+                COALESCE(SUM(shooting_off_target),0) as total_shots_off,
+                COALESCE(SUM(successful_passes),0) as total_passes,
+                COALESCE(SUM(tackles),0) as total_tackles')
             ->groupBy('player_id')->get()->keyBy('player_id');
 
         $teamStats = [
-            'goals'   => $stats->sum('total_goals'),
-            'shots'   => $stats->sum('total_shots_target') + $stats->sum('total_shots_off'),
-            'passes'  => $stats->sum('total_passes'),
-            'tackles' => $stats->sum('total_tackles'),
+            'goals'   => (int) $stats->sum('total_goals'),
+            'shots'   => (int) ($stats->sum('total_shots_target') + $stats->sum('total_shots_off')),
+            'passes'  => (int) $stats->sum('total_passes'),
+            'tackles' => (int) $stats->sum('total_tackles'),
         ];
 
         $vectors = VectorDirection::where('match_id', $match->id)
@@ -63,20 +75,20 @@ class ReportController extends Controller
             ->select('vector_directions.*', 'players.name as player_name', 'players.jersey_number')
             ->get();
 
-        return view('reports.show', compact('match', 'stats', 'teamStats', 'vectors'));
+        return compact('match', 'stats', 'teamStats', 'vectors');
+    }
+
+    public function showMatchReport(MatchSession $match)
+    {
+        return view('reports.show', $this->matchReportData($match));
     }
 
     public function exportMatchPdf(MatchSession $match)
     {
-        $match->load(['players' => function ($q) { $q->withPivot('position'); }]);
+        $data = $this->matchReportData($match);
 
-        $stats = Statistic::where('match_id', $match->id)
-            ->selectRaw('player_id, SUM(goal) as total_goals, SUM(assist) as total_assists, SUM(shooting_on_target) as total_shots_target, SUM(successful_passes) as total_passes')
-            ->groupBy('player_id')->get()->keyBy('player_id');
-
-        $pdf = Pdf::loadView('reports.match-pdf', compact('match', 'stats'));
-
-        return $pdf->stream('Match_Report_' . Str::slug($match->title ?? 'match') . '_' . $match->id . '.pdf');
+        return Pdf::loadView('reports.match-pdf', $data)
+            ->stream('Match_Report_' . Str::slug($match->title ?? 'match') . '_' . $match->id . '.pdf');
     }
 
     /* ===================== LAPORAN PEMAIN ===================== */
@@ -133,6 +145,25 @@ class ReportController extends Controller
     }
 
     /**
+     * Radar 0-100 dari rata-rata per pertandingan.
+     * Dipakai bersama oleh halaman show dan semua PDF.
+     */
+    private function buildRadar($perMatch, int $matchCount): array
+    {
+        $played = max($matchCount, 1);
+        $norm   = fn ($value, $target) => (int) min(100, round((($value / $played) / $target) * 100));
+
+        return [
+            'Serangan'  => $norm($perMatch->sum('total_goals') + $perMatch->sum('total_shots_target'), 3),
+            'Bertahan'  => $norm($perMatch->sum('total_tackles'), 6),
+            'Operan'    => $norm($perMatch->sum('total_passes'), 40),
+            'Dribbling' => 0,
+            'Fisik'     => 0,
+            'Mental'    => 0,
+        ];
+    }
+
+    /**
      * Halaman Laporan Performa Pemain (tujuan ikon mata).
      */
     public function showPlayerReport(Player $player)
@@ -159,18 +190,7 @@ class ReportController extends Controller
                 ->sum(fn ($m) => ($perMatch[$m->id]->total_goals ?? 0) + ($perMatch[$m->id]->total_assists ?? 0));
         }
 
-        // Radar 0-100 dari rata-rata per pertandingan
-        $played = max($matches->count(), 1);
-        $norm   = fn ($value, $target) => (int) min(100, round((($value / $played) / $target) * 100));
-
-        $radar = [
-            'Serangan'  => $norm($perMatch->sum('total_goals') + $perMatch->sum('total_shots_target'), 3),
-            'Bertahan'  => $norm($perMatch->sum('total_tackles'), 6),
-            'Operan'    => $norm($perMatch->sum('total_passes'), 40),
-            'Dribbling' => 0,
-            'Fisik'     => 0,
-            'Mental'    => 0,
-        ];
+        $radar = $this->buildRadar($perMatch, $matches->count());
 
         // Riwayat musim (diturunkan dari tanggal pertandingan)
         $seasons = $matches
@@ -193,6 +213,8 @@ class ReportController extends Controller
 
     /**
      * PDF satu pemain pada satu pertandingan.
+     * Memakai template yang sama dengan PDF musim (berisi 1 pertandingan),
+     * sehingga tidak bentrok dengan reports.player_pdf (profil lengkap).
      */
     public function exportPlayerMatchPdf(Player $player, $matchId)
     {
@@ -202,11 +224,26 @@ class ReportController extends Controller
         abort_if(!$joined, 404);
 
         $player->load('club');
-        $stat     = $this->playerStatsPerMatch($player->id)->get($match->id);
-        $opponent = $this->opponentOf($match);
 
-        return Pdf::loadView('reports.player_pdf', compact('player', 'match', 'stat', 'opponent'))
-            ->stream('Laporan_' . Str::slug($player->name) . '_Match_' . $match->id . '.pdf');
+        $perMatch = $this->playerStatsPerMatch($player->id)->only([$match->id]);
+        $matches  = collect([$match]);
+
+        $totals = (object) [
+            'goals'        => (int) ($perMatch[$match->id]->total_goals ?? 0),
+            'assists'      => (int) ($perMatch[$match->id]->total_assists ?? 0),
+            'shots_target' => (int) ($perMatch[$match->id]->total_shots_target ?? 0),
+            'passes'       => (int) ($perMatch[$match->id]->total_passes ?? 0),
+            'tackles'      => (int) ($perMatch[$match->id]->total_tackles ?? 0),
+        ];
+
+        $seasonLabel = $this->seasonLabel($this->seasonStartYear($match->match_date));
+        $reportTitle = 'MATCH REPORT - ' . ($match->title ?? 'Pertandingan');
+        $radar       = $this->buildRadar($perMatch, 1);
+        $opponentOf  = fn ($m) => $this->opponentOf($m);
+
+        return Pdf::loadView('reports.player_season_pdf', compact(
+            'player', 'matches', 'perMatch', 'totals', 'seasonLabel', 'reportTitle', 'radar', 'opponentOf'
+        ))->stream('Laporan_' . Str::slug($player->name) . '_Match_' . $match->id . '.pdf');
     }
 
     /**
@@ -232,10 +269,14 @@ class ReportController extends Controller
         ];
 
         $seasonLabel = $this->seasonLabel($season);
-        $opponentOf  = fn ($m) => $this->opponentOf($m);
+
+        // Radar hanya dari pertandingan di musim ini
+        $radar = $this->buildRadar($perMatch->only($matches->pluck('id')->all()), $matches->count());
+
+        $opponentOf = fn ($m) => $this->opponentOf($m);
 
         return Pdf::loadView('reports.player_season_pdf', compact(
-            'player', 'matches', 'perMatch', 'totals', 'seasonLabel', 'opponentOf'
+            'player', 'matches', 'perMatch', 'totals', 'seasonLabel', 'radar', 'opponentOf'
         ))->stream('Laporan_' . Str::slug($player->name) . '_Musim_' . $season . '.pdf');
     }
 
@@ -245,7 +286,7 @@ class ReportController extends Controller
     public function exportPlayerProfilePdf($player)
     {
         $player = Player::with(['club'])->findOrFail($player);
-        
+
         $perMatch = $this->playerStatsPerMatch($player->id);
         $matches  = $this->playerMatches($player->id);
 
@@ -258,9 +299,10 @@ class ReportController extends Controller
             'tackles'      => (int) $perMatch->sum('total_tackles'),
         ];
 
+        $radar      = $this->buildRadar($perMatch, $matches->count());
         $opponentOf = fn ($m) => $this->opponentOf($m);
 
-        return Pdf::loadView('reports.player_pdf', compact('player', 'matches', 'perMatch', 'totals', 'opponentOf'))
+        return Pdf::loadView('reports.player_pdf', compact('player', 'matches', 'perMatch', 'totals', 'radar', 'opponentOf'))
             ->stream('Laporan_Lengkap_' . Str::slug($player->name) . '.pdf');
     }
 }

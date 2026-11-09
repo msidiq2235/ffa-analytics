@@ -1,19 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Match Report - FFA Analytics')
-@section('header', 'Match Report Dashboard')
-@section('subheader', $match->title . ' - ' . \Carbon\Carbon::parse($match->match_date)->format('d M Y'))
-@section('header_action')
-<div class="flex gap-2">
-    <a href="{{ route('matches.index') }}" class="px-4 py-2 bg-slate-100 text-slate-600 font-semibold rounded-lg border border-slate-200 hover:bg-slate-200 transition-colors flex items-center gap-2">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        Kembali
-    </a>
-    <a href="{{ route('reports.match.pdf', $match->id) }}" class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 flex items-center gap-2 shadow-sm transition-colors">
-        <i data-lucide="file-down" class="w-4 h-4"></i>
-        Export PDF
-    </a>
-</div>
-@endsection
+@section('title', 'Laporan Performa Pemain - FFA Analytics')
+@section('header', 'Laporan Performa Pemain')
+@section('subheader', 'Informasi performa pemain')
+
 @section('content')
 
 <style>
@@ -21,200 +10,226 @@
 </style>
 
 <div class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-6 flex flex-col items-center justify-center">
-            <span class="text-slate-400 text-xs font-bold tracking-wider mb-2 flex items-center gap-1.5">
-                <i data-lucide="trophy" class="w-3.5 h-3.5"></i> TOTAL GOALS
+
+    <!-- Header Profil -->
+    <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <span class="px-3.5 py-1.5 bg-[#1e293b] text-white rounded-xl text-sm font-bold shadow-sm">
+                #{{ $player->jersey_number ?? $player->number ?? '-' }}
             </span>
-            <span class="text-4xl font-black text-slate-800">{{ $teamStats['goals'] }}</span>
+            <div>
+                <h2 class="text-lg font-bold text-[#1e293b]">{{ $player->name }}</h2>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5 flex items-center gap-1.5">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-slate-400"></i>
+                    Tim: <span class="text-[#4062D6]">{{ $player->club->name ?? 'Tanpa Tim' }}</span>
+                </p>
+            </div>
         </div>
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-6 flex flex-col items-center justify-center">
-            <span class="text-slate-400 text-xs font-bold tracking-wider mb-2 flex items-center gap-1.5">
-                <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> TOTAL SHOTS
-            </span>
-            <span class="text-4xl font-black text-slate-800">{{ $teamStats['shots'] }}</span>
-        </div>
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-6 flex flex-col items-center justify-center">
-            <span class="text-slate-400 text-xs font-bold tracking-wider mb-2 flex items-center gap-1.5">
-                <i data-lucide="move-up-right" class="w-3.5 h-3.5"></i> SUCC. PASSES
-            </span>
-            <span class="text-4xl font-black text-slate-800">{{ $teamStats['passes'] }}</span>
-        </div>
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-6 flex flex-col items-center justify-center">
-            <span class="text-slate-400 text-xs font-bold tracking-wider mb-2 flex items-center gap-1.5">
-                <i data-lucide="shield" class="w-3.5 h-3.5"></i> TACKLES
-            </span>
-            <span class="text-4xl font-black text-slate-800">{{ $teamStats['tackles'] }}</span>
+
+        <div class="flex items-center gap-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-500 uppercase tracking-wider">
+                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>
+                {{ $player->position ?? '-' }}
+            </div>
+
+            <!-- Tombol Download PDF Laporan Lengkap -->
+            <a href="{{ route('reports.player.pdf', $player->id) }}" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-[#4062D6] hover:bg-[#3251b5] active:scale-95 text-white text-[13px] font-bold rounded-xl transition shadow-sm">
+                <i data-lucide="file-down" class="w-4 h-4"></i>
+                Download PDF
+            </a>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="flex border-b border-slate-100 bg-slate-50">
-            <button onclick="switchTab('stats')" id="tab-stats" class="px-6 py-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 bg-white transition-colors inline-flex items-center gap-2">
-                <i data-lucide="table-2" class="w-4 h-4"></i> Data Statistik
-            </button>
-            <button onclick="switchTab('vector')" id="tab-vector" class="px-6 py-4 font-bold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-colors inline-flex items-center gap-2">
-                <i data-lucide="route" class="w-4 h-4"></i> Vector Summary
-            </button>
+    <!-- 3 Kartu Metrik -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="bg-white rounded-[20px] border border-slate-200 p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-500">
+                <i data-lucide="trophy" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-extrabold text-[#1e293b]">{{ $totals->goals }}</h3>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Gol</span>
+            </div>
         </div>
-
-        <div id="content-stats" class="block overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
-                    <tr>
-                        <th class="px-6 py-4">Player</th>
-                        <th class="px-6 py-4 text-center">Pos</th>
-                        <th class="px-6 py-4 text-center">Goals</th>
-                        <th class="px-6 py-4 text-center">Assists</th>
-                        <th class="px-6 py-4 text-center">Shots (On/Off)</th>
-                        <th class="px-6 py-4 text-center">Passes</th>
-                        <th class="px-6 py-4 text-center">Tackles</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @foreach($match->players as $player)
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-slate-800">{{ $player->jersey_number ? $player->jersey_number . ' - ' : '' }}{{ $player->name }}</td>
-                        <td class="px-6 py-4 text-center"><span class="px-2 py-1 text-xs rounded bg-slate-100 text-slate-600 font-medium">{{ $player->pivot->position }}</span></td>
-                        <td class="px-6 py-4 text-center font-bold text-blue-600">{{ $stats[$player->id]->total_goals ?? 0 }}</td>
-                        <td class="px-6 py-4 text-center">{{ $stats[$player->id]->total_assists ?? 0 }}</td>
-                        <td class="px-6 py-4 text-center">{{ $stats[$player->id]->total_shots_target ?? 0 }} / {{ $stats[$player->id]->total_shots_off ?? 0 }}</td>
-                        <td class="px-6 py-4 text-center">{{ $stats[$player->id]->total_passes ?? 0 }}</td>
-                        <td class="px-6 py-4 text-center">{{ $stats[$player->id]->total_tackles ?? 0 }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <div class="bg-white rounded-[20px] border border-slate-200 p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500">
+                <i data-lucide="target" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-extrabold text-[#1e293b]">{{ $totals->assists }}</h3>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Assist</span>
+            </div>
         </div>
-
-        <div id="content-vector" class="hidden p-6 bg-slate-50">
-            <div class="flex gap-4">
-                <div class="w-1/4 bg-white rounded-lg border border-slate-200 p-4 shadow-sm h-[500px] flex flex-col">
-                    <h3 class="font-bold text-slate-800 mb-4 text-sm flex items-center gap-2">
-                        <i data-lucide="sliders-horizontal" class="w-4 h-4 text-slate-400"></i>
-                        Filter Tampilan
-                    </h3>
-                    <div class="space-y-3 flex-1 overflow-y-auto">
-                        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer p-2 hover:bg-slate-50 rounded">
-                            <input type="checkbox" checked onchange="toggleAction('SHOT')" class="rounded border-slate-300 text-red-500 focus:ring-red-500">
-                            <i data-lucide="crosshair" class="w-4 h-4 text-red-500"></i> SHOT
-                            <span class="w-3 h-3 rounded-full bg-red-500 ml-auto"></span>
-                        </label>
-                        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer p-2 hover:bg-slate-50 rounded">
-                            <input type="checkbox" checked onchange="toggleAction('PASS')" class="rounded border-slate-300 text-green-500 focus:ring-green-500">
-                            <i data-lucide="move-up-right" class="w-4 h-4 text-green-500"></i> PASS
-                            <span class="w-3 h-3 rounded-full bg-green-500 ml-auto"></span>
-                        </label>
-                        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer p-2 hover:bg-slate-50 rounded">
-                            <input type="checkbox" checked onchange="toggleAction('CROSS')" class="rounded border-slate-300 text-purple-500 focus:ring-purple-500">
-                            <i data-lucide="corner-up-right" class="w-4 h-4 text-purple-500"></i> CROSS
-                            <span class="w-3 h-3 rounded-full bg-purple-500 ml-auto"></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="w-3/4 relative bg-[#2C6E36] rounded-lg border-4 border-white shadow-lg overflow-hidden h-[500px]" id="pitch-container">
-                    <div class="absolute inset-0 border-2 border-white/40 m-6 pointer-events-none"></div>
-                    <div class="absolute left-1/2 top-6 bottom-6 w-0 border-l-2 border-white/40 pointer-events-none"></div>
-                    <div class="absolute top-1/2 left-1/2 w-32 h-32 -mt-16 -ml-16 border-2 border-white/40 rounded-full pointer-events-none"></div>
-                    <div class="absolute top-1/2 left-1/2 w-2 h-2 -mt-1 -ml-1 bg-white/40 rounded-full pointer-events-none"></div>
-                    <div class="absolute top-1/2 left-6 w-32 h-64 -mt-32 border-2 border-white/40 border-l-0 pointer-events-none"></div>
-                    <div class="absolute top-1/2 left-6 w-12 h-24 -mt-12 border-2 border-white/40 border-l-0 pointer-events-none"></div>
-                    <div class="absolute top-1/2 right-6 w-32 h-64 -mt-32 border-2 border-white/40 border-r-0 pointer-events-none"></div>
-                    <div class="absolute top-1/2 right-6 w-12 h-24 -mt-12 border-2 border-white/40 border-r-0 pointer-events-none"></div>
-                    <canvas id="summaryCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
-                </div>
+        <div class="bg-white rounded-[20px] border border-slate-200 p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500">
+                <i data-lucide="timer" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-extrabold text-[#1e293b]">{{ $totals->matches }}</h3>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Bermain</span>
             </div>
         </div>
     </div>
+
+    <!-- Grafik & Radar -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div class="lg:col-span-3 bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+            <h3 class="text-[13px] font-bold text-[#1e293b] mb-4 flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-4 h-4 text-slate-400"></i>
+                Statistik Performa Pemain (6 Bulan)
+            </h3>
+            @if($totals->matches > 0)
+                <div class="relative h-[280px]"><canvas id="lineChart"></canvas></div>
+            @else
+                <div class="py-16 text-center text-slate-400 text-[13px] flex flex-col items-center gap-2">
+                    <i data-lucide="chart-line" class="w-8 h-8 text-slate-300"></i>
+                    Belum ada data statistik.
+                </div>
+            @endif
+        </div>
+        <div class="lg:col-span-2 bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+            <h3 class="text-[13px] font-bold text-[#1e293b] mb-4 flex items-center gap-2">
+                <i data-lucide="radar" class="w-4 h-4 text-slate-400"></i>
+                Radar Atribut Pemain
+            </h3>
+            @if($totals->matches > 0)
+                <div class="relative h-[280px]"><canvas id="radarChart"></canvas></div>
+            @else
+                <div class="py-16 text-center text-slate-400 text-[13px] flex flex-col items-center gap-2">
+                    <i data-lucide="radar" class="w-8 h-8 text-slate-300"></i>
+                    Belum ada data atribut.
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Riwayat Pertandingan -->
+    <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+        <h3 class="text-[13px] font-bold text-[#1e293b] mb-4 flex items-center gap-2">
+            <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
+            Riwayat Pertandingan
+        </h3>
+        <div class="divide-y divide-slate-100">
+            @forelse($matches as $match)
+                <div class="flex items-center justify-between py-3">
+                    <div>
+                        <h4 class="text-[13px] font-bold text-[#1e293b]">{{ $match->title ?? 'Pertandingan' }}</h4>
+                        <p class="text-[11px] font-medium text-slate-400 flex items-center gap-1.5 mt-0.5">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                            {{ \Carbon\Carbon::parse($match->match_date)->translatedFormat('d F Y') }} - vs {{ $opponentOf($match) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('reports.match.show', $match->id) }}"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-colors">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                            Lihat Match
+                        </a>
+                        <a href="{{ route('reports.player.match.pdf', [$player->id, $match->id]) }}"
+                           target="_blank" rel="noopener"
+                           class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-full transition-colors shadow-sm">
+                            <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+                            PDF
+                        </a>
+                    </div>
+                </div>
+            @empty
+                <div class="py-8 text-center text-slate-400 text-[13px] bg-slate-50/50 rounded-xl border border-dashed border-slate-200 flex flex-col items-center gap-2">
+                    <i data-lucide="calendar-x" class="w-8 h-8 text-slate-300"></i>
+                    Belum ada riwayat pertandingan untuk pemain ini.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- Riwayat Musim -->
+    <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+        <h3 class="text-[13px] font-bold text-[#1e293b] mb-4 flex items-center gap-2">
+            <i data-lucide="calendar-range" class="w-4 h-4 text-slate-400"></i>
+            Riwayat Musim
+        </h3>
+        <div class="divide-y divide-slate-100">
+            @forelse($seasons as $season)
+                <div class="flex items-center justify-between py-3">
+                    <div>
+                        <h4 class="text-[13px] font-bold text-[#1e293b]">Musim {{ $season->label }}</h4>
+                        <p class="text-[11px] font-medium text-slate-400">{{ $season->matches }} pertandingan</p>
+                    </div>
+                    <a href="{{ route('reports.player.season.pdf', [$player->id, $season->start]) }}"
+                       target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#4062D6] hover:bg-blue-50 text-[#4062D6] text-[11px] font-bold rounded-full transition-colors shadow-sm">
+                        <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+                        PDF
+                    </a>
+                </div>
+            @empty
+                <div class="py-8 text-center text-slate-400 text-[13px] bg-slate-50/50 rounded-xl border border-dashed border-slate-200 flex flex-col items-center gap-2">
+                    <i data-lucide="calendar-x" class="w-8 h-8 text-slate-300"></i>
+                    Belum ada riwayat musim.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- Kembali -->
+    <div class="pt-2">
+        <a href="{{ route('performa.index') }}"
+           class="inline-flex items-center gap-2 px-6 py-2.5 bg-[#4062D6] hover:bg-[#3251b5] active:scale-95 text-white text-[13px] font-bold rounded-xl transition shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Kembali
+        </a>
+    </div>
 </div>
 
+<!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
 <script src="https://unpkg.com/lucide@latest"></script>
-
 <script>
-const rawVectors = @json($vectors);
-let activeFilters = ['SHOT', 'PASS', 'CROSS'];
-const canvas = document.getElementById('summaryCanvas');
-const ctx = canvas.getContext('2d');
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+    });
+</script>
 
-function renderIcons() {
-    if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
-}
-document.addEventListener('DOMContentLoaded', renderIcons);
-
-function switchTab(tab) {
-    document.getElementById('content-stats').classList.add('hidden');
-    document.getElementById('content-vector').classList.add('hidden');
-    document.getElementById('tab-stats').classList.remove('text-blue-600', 'border-blue-600', 'bg-white');
-    document.getElementById('tab-stats').classList.add('text-slate-500', 'border-transparent');
-    document.getElementById('tab-vector').classList.remove('text-blue-600', 'border-blue-600', 'bg-white');
-    document.getElementById('tab-vector').classList.add('text-slate-500', 'border-transparent');
-    document.getElementById('content-' + tab).classList.remove('hidden');
-    document.getElementById('tab-' + tab).classList.remove('text-slate-500', 'border-transparent');
-    document.getElementById('tab-' + tab).classList.add('text-blue-600', 'border-blue-600', 'bg-white');
-    if (tab === 'vector') { setTimeout(resizeCanvas, 50); }
-}
-
-function toggleAction(action) {
-    const index = activeFilters.indexOf(action);
-    if (index > -1) { activeFilters.splice(index, 1); } else { activeFilters.push(action); }
-    renderVectors();
-}
-
-function getActionColor(action) {
-    if (action === 'SHOT') return 'rgba(239, 68, 68, 0.8)';
-    if (action === 'PASS') return 'rgba(34, 197, 94, 0.8)';
-    if (action === 'CROSS') return 'rgba(168, 85, 247, 0.8)';
-    return 'rgba(255, 255, 255, 0.8)';
-}
-
-function drawArrow(fromX, fromY, toX, toY, color, playerName, number) {
-    const headlen = 10;
-    const dx = toX - fromX;
-    const dy = toY - fromY;
-    const angle = Math.atan2(dy, dx);
-    
-    ctx.beginPath();
-    ctx.moveTo(fromX, fromY);
-    ctx.lineTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
-    
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(fromX, fromY, 8, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 9px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(number || '-', fromX, fromY);
-}
-
-function renderVectors() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    rawVectors.forEach(v => {
-        if (activeFilters.includes(v.action_type)) {
-            const startX = (v.start_x / 100) * canvas.width;
-            const startY = (v.start_y / 100) * canvas.height;
-            const endX = (v.end_x / 100) * canvas.width;
-            const endY = (v.end_y / 100) * canvas.height;
-            drawArrow(startX, startY, endX, endY, getActionColor(v.action_type), v.player_name, v.jersey_number);
+@if($totals->matches > 0)
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: @json($chartLabels),
+            datasets: [{
+                data: @json($chartValues),
+                borderColor: '#34c38f',
+                backgroundColor: 'rgba(52,195,143,0.1)',
+                pointBackgroundColor: '#34c38f',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
     });
-}
 
-function resizeCanvas() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    renderVectors();
-}
-
-window.addEventListener('resize', resizeCanvas);
+    new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
+        data: {
+            labels: @json(array_keys($radar)),
+            datasets: [{
+                data: @json(array_values($radar)),
+                backgroundColor: 'rgba(249,115,22,0.3)',
+                borderColor: '#f97316',
+                pointBackgroundColor: '#f97316'
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { r: { min: 0, max: 100, ticks: { display: false } } }
+        }
+    });
 </script>
+@endif
 @endsection

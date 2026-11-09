@@ -12,7 +12,7 @@
 <div class="space-y-6">
 
     <!-- Header Profil -->
-    <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6 flex items-center justify-between">
+    <div class="bg-white rounded-[20px] border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-4">
             <span class="px-3.5 py-1.5 bg-[#1e293b] text-white rounded-xl text-sm font-bold shadow-sm">
                 #{{ $player->jersey_number ?? $player->number ?? '-' }}
@@ -25,9 +25,19 @@
                 </p>
             </div>
         </div>
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-500 uppercase tracking-wider">
-            <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>
-            {{ $player->position ?? '-' }}
+
+        <div class="flex items-center gap-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-500 uppercase tracking-wider">
+                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>
+                {{ $player->position ?? '-' }}
+            </div>
+
+            <!-- Tombol Download PDF Laporan Lengkap -->
+            <a href="{{ route('reports.player.pdf', $player->id) }}" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-[#4062D6] hover:bg-[#3251b5] active:scale-95 text-white text-[13px] font-bold rounded-xl transition shadow-sm">
+                <i data-lucide="file-down" class="w-4 h-4"></i>
+                Download PDF
+            </a>
         </div>
     </div>
 
