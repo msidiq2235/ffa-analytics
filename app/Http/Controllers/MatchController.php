@@ -163,7 +163,8 @@ class MatchController extends Controller
     {
         $request->validate([
             'player_id' => 'required|exists:players,id',
-            'action_type' => 'required|string',
+            'action_type' => 'required|in:SHOT,PASS,CROSS',
+            'subtype' => 'nullable|required_if:action_type,SHOT|in:ON_TARGET,OFF_TARGET,BLOCKED,GOAL',
             'start_x' => 'required|numeric',
             'start_y' => 'required|numeric',
             'end_x' => 'required|numeric',
@@ -177,6 +178,7 @@ class MatchController extends Controller
             'player_id' => $request->player_id,
             'analyst_id' => auth()->id(),
             'action_type' => $request->action_type,
+            'subtype' => $request->subtype,
             'start_x' => $request->start_x,
             'start_y' => $request->start_y,
             'end_x' => $request->end_x,
@@ -194,8 +196,26 @@ class MatchController extends Controller
         }]);
 
         $startingEleven = $match->players->where('pivot.position', '!=', 'Cadangan');
+        $vectors = \App\Models\VectorDirection::query()
+            ->join('players', 'vector_directions.player_id', '=', 'players.id')
+            ->where('vector_directions.match_id', $match->id)
+            ->select(
+                'vector_directions.id',
+                'vector_directions.player_id',
+                'players.name as player_name',
+                'vector_directions.action_type',
+                'vector_directions.subtype',
+                'vector_directions.start_x',
+                'vector_directions.start_y',
+                'vector_directions.end_x',
+                'vector_directions.end_y',
+                'vector_directions.input_time',
+                'vector_directions.match_minute'
+            )
+            ->orderBy('vector_directions.created_at')
+            ->get();
 
-        return view('matches.vector', compact('match', 'startingEleven'));
+        return view('matches.vector', compact('match', 'startingEleven', 'vectors'));
     }
 
     public function edit($id)

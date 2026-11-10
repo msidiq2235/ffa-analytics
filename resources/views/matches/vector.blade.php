@@ -24,91 +24,130 @@
     [data-lucide] { flex-shrink: 0; }
 </style>
 
-<div class="flex flex-col gap-4 h-[calc(100vh-140px)] min-h-0">
-
-    <!-- Bar pilihan Player & Event -->
-    <div class="flex flex-wrap items-center justify-between bg-white rounded-xl shadow-sm p-3 border border-slate-200 shrink-0">
-        <div class="flex items-center gap-2 overflow-x-auto pr-4">
-            <span class="text-xs font-bold text-slate-400 tracking-wider mr-2 shrink-0 flex items-center gap-1.5">
-                <i data-lucide="users" class="w-4 h-4"></i> PLAYER
-            </span>
-            @foreach($startingEleven as $player)
-            <button id="btn-player-{{ $player->id }}" onclick="setPlayer({{ $player->id }}, '{{ $player->jersey_number }}', '{{ $player->name }}')" class="player-btn shrink-0 w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 font-bold text-sm hover:bg-blue-50 hover:border-blue-200 transition-colors">
-                {{ $player->jersey_number ?? '-' }}
-            </button>
-            @endforeach
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2 border-l border-slate-200 pl-4">
-            <button type="button" id="live-mode-toggle" onclick="toggleLiveMode()" aria-pressed="false" title="LIVE ON mencatat waktu dari jam perangkat" class="px-4 py-2 rounded-full border border-slate-200 bg-slate-100 text-slate-600 font-bold text-sm transition-colors inline-flex items-center gap-2 shrink-0">
-                <span class="w-2 h-2 rounded-full bg-slate-400" id="live-mode-indicator"></span>
-                <span id="live-mode-label">LIVE OFF</span>
-            </button>
-            <span class="text-xs font-bold text-slate-400 tracking-wider mr-2 flex items-center gap-1.5">
-                <i data-lucide="mouse-pointer-click" class="w-4 h-4"></i> EVENT
-            </span>
-            <button id="btn-action-SHOT" onclick="setAction('SHOT')" class="action-btn px-5 py-2 rounded-full border border-slate-200 bg-slate-50 text-slate-600 font-bold text-sm hover:bg-red-50 hover:text-red-600 transition-colors inline-flex items-center gap-2">
-                <i data-lucide="crosshair" class="w-4 h-4"></i> SHOT
-            </button>
-            <button id="btn-action-PASS" onclick="setAction('PASS')" class="action-btn px-5 py-2 rounded-full border border-slate-200 bg-slate-50 text-slate-600 font-bold text-sm hover:bg-green-50 hover:text-green-600 transition-colors inline-flex items-center gap-2">
-                <i data-lucide="move-up-right" class="w-4 h-4"></i> PASS
-            </button>
-            <button id="btn-action-CROSS" onclick="setAction('CROSS')" class="action-btn px-5 py-2 rounded-full border border-slate-200 bg-slate-50 text-slate-600 font-bold text-sm hover:bg-purple-50 hover:text-purple-600 transition-colors inline-flex items-center gap-2">
-                <i data-lucide="corner-up-right" class="w-4 h-4"></i> CROSS
-            </button>
-        </div>
-    </div>
-
-    <div class="flex gap-6 flex-1 min-h-0">
-        <!-- Lapangan + canvas -->
-        <div class="flex-1 relative flex flex-col">
-            <div class="flex-1 relative bg-[#2C6E36] rounded-xl border-4 border-white shadow-lg overflow-hidden min-h-[400px]" id="pitch-container">
-                <div class="absolute inset-0 border-2 border-white/40 m-6 pointer-events-none"></div>
-                <div class="absolute left-1/2 top-6 bottom-6 w-0 border-l-2 border-white/40 pointer-events-none"></div>
-                <div class="absolute top-1/2 left-1/2 w-32 h-32 -mt-16 -ml-16 border-2 border-white/40 rounded-full pointer-events-none"></div>
-                <div class="absolute top-1/2 left-1/2 w-2 h-2 -mt-1 -ml-1 bg-white/40 rounded-full pointer-events-none"></div>
-                <div class="absolute top-1/2 left-6 w-32 h-64 -mt-32 border-2 border-white/40 border-l-0 pointer-events-none"></div>
-                <div class="absolute top-1/2 left-6 w-12 h-24 -mt-12 border-2 border-white/40 border-l-0 pointer-events-none"></div>
-                <div class="absolute top-1/2 right-6 w-32 h-64 -mt-32 border-2 border-white/40 border-r-0 pointer-events-none"></div>
-                <div class="absolute top-1/2 right-6 w-12 h-24 -mt-12 border-2 border-white/40 border-r-0 pointer-events-none"></div>
-                <canvas id="vectorCanvas" class="absolute inset-0 w-full h-full cursor-crosshair z-10"></canvas>
-            </div>
-            <div class="absolute -bottom-4 -left-4 bg-slate-900 text-green-400 text-xs font-mono font-bold px-4 py-3 rounded-lg shadow-lg border border-slate-700 z-20 flex items-center gap-2">
-                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
-                <span>48-POINT GRID<br><span class="text-white/70">Drag dari awal ke akhir · Double klik awal, klik akhir</span></span>
+<div class="grid min-h-[calc(100vh-12rem)] grid-cols-1 gap-4 md:grid-cols-12">
+    <section class="flex min-w-0 flex-col gap-4 md:col-span-7">
+        <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+            <div class="flex items-center gap-3 overflow-x-auto">
+                <span class="shrink-0 text-xs font-bold tracking-wider text-slate-400">PLAYER</span>
+                <span class="shrink-0 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-500">XI</span>
+                @foreach($startingEleven as $player)
+                <button id="btn-player-{{ $player->id }}" onclick="setPlayer({{ $player->id }}, @js($player->jersey_number), @js($player->name))" class="player-btn h-9 min-w-9 shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 text-sm font-bold text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50">
+                    {{ $player->jersey_number ?? '-' }}
+                </button>
+                @endforeach
             </div>
         </div>
 
-        <!-- Panel kanan -->
-        <div class="w-80 flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden shrink-0">
-            <div class="h-14 bg-linear-to-r from-slate-800 to-red-700 bg-gradient-to-r flex items-center gap-2 px-4">
-                <i data-lucide="activity" class="w-4 h-4 text-white/80"></i>
-                <span class="text-white font-bold text-sm" id="active-indicator">-</span>
+        <div class="relative flex min-h-[400px] flex-1 flex-col">
+            <div class="relative flex-1 overflow-hidden rounded-xl border-4 border-white bg-[#164a27] shadow-lg" id="pitch-container">
+                <div class="pointer-events-none absolute inset-[5%] rounded border-2 border-white/40"></div>
+                <div class="pointer-events-none absolute bottom-[5%] left-1/2 top-[5%] border-l-2 border-white/40"></div>
+                <div class="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[18%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/40"></div>
+                <div class="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/40"></div>
+                <div class="pointer-events-none absolute bottom-[25%] left-[5%] top-[25%] w-[21%] border-2 border-l-0 border-white/40"></div>
+                <div class="pointer-events-none absolute bottom-[37%] left-[5%] top-[37%] w-[8%] border-2 border-l-0 border-white/40"></div>
+                <div class="pointer-events-none absolute bottom-[25%] right-[5%] top-[25%] w-[21%] border-2 border-r-0 border-white/40"></div>
+                <div class="pointer-events-none absolute bottom-[37%] right-[5%] top-[37%] w-[8%] border-2 border-r-0 border-white/40"></div>
+                <canvas id="vectorCanvas" class="absolute inset-0 z-10 h-full w-full touch-none cursor-crosshair"></canvas>
             </div>
-            <div class="flex border-b border-slate-100 p-2 gap-2 bg-slate-50">
-                <button class="flex-1 py-2 text-xs font-bold bg-white shadow-sm rounded text-slate-700 flex justify-center items-center gap-1.5">
-                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-                    Live Mapping
+            <div class="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-semibold text-slate-300 sm:grid-cols-4">
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-emerald-400"></i>Shot On Target</span>
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-red-400"></i>Shot Off Target</span>
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-amber-400"></i>Blocked</span>
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-blue-400"></i>Goal</span>
+                <span class="col-span-2 text-emerald-300 sm:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>
+            </div>
+        </div>
+        <a href="{{ route('matches.index') }}" class="w-fit rounded-lg bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700">
+            <i data-lucide="arrow-left" class="mr-1 inline h-4 w-4"></i>Kembali
+        </a>
+    </section>
+
+    <section class="flex min-w-0 flex-col gap-3 md:col-span-5">
+        <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" id="live-mode-toggle" onclick="toggleLiveMode()" aria-pressed="false" title="LIVE ON mencatat waktu dari jam perangkat" class="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 transition-colors">
+                    <span class="h-2 w-2 rounded-full bg-slate-400" id="live-mode-indicator"></span>
+                    <span id="live-mode-label">LIVE OFF</span>
                 </button>
-                <button class="flex-1 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 flex justify-center items-center gap-1.5 transition-colors">
-                    <i data-lucide="chart-column" class="w-3.5 h-3.5"></i>
-                    Vector Summary
+                <span class="ml-auto text-xs font-bold tracking-wider text-slate-400">EVENT</span>
+                <button id="btn-action-SHOT" onclick="setAction('SHOT')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600">SHOT</button>
+                <button id="btn-action-PASS" onclick="setAction('PASS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-green-50 hover:text-green-600">PASS</button>
+                <button id="btn-action-CROSS" onclick="setAction('CROSS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-purple-50 hover:text-purple-600">CROSS</button>
+            </div>
+            <div id="shot-subtypes" class="mt-3 border-t border-slate-100 pt-3">
+                <div class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">SHOT SUBTYPE</div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" data-subtype="ON_TARGET" onclick="setSubtype('ON_TARGET')" class="subtype-btn rounded-md bg-emerald-100 px-2.5 py-1.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-300">ON TARGET</button>
+                    <button type="button" data-subtype="OFF_TARGET" onclick="setSubtype('OFF_TARGET')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">OFF TARGET</button>
+                    <button type="button" data-subtype="BLOCKED" onclick="setSubtype('BLOCKED')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">BLOCKED</button>
+                    <button type="button" data-subtype="GOAL" onclick="setSubtype('GOAL')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">GOAL</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex min-h-[500px] flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex h-14 shrink-0 items-center gap-2 bg-gradient-to-r from-[#263a8b] to-[#4a7bf0] px-4">
+                <span class="truncate text-sm font-bold text-white" id="active-indicator">Pilih pemain untuk melihat ringkasan</span>
+            </div>
+            <div class="flex shrink-0 border-b border-slate-100 bg-slate-50 p-2">
+                <button type="button" id="tab-live-mapping" onclick="setPanel('mapping')" class="panel-tab flex-1 rounded-lg bg-white py-2 text-xs font-bold text-slate-700 shadow-sm">
+                    <i data-lucide="map-pin" class="mr-1 inline h-3.5 w-3.5"></i>Live Mapping
+                </button>
+                <button type="button" id="tab-vector-summary" onclick="setPanel('summary')" class="panel-tab flex-1 rounded-lg py-2 text-xs font-bold text-slate-400 transition-colors hover:text-blue-600">
+                    <i data-lucide="chart-column" class="mr-1 inline h-3.5 w-3.5"></i>Vector Summary
                 </button>
             </div>
-            <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-2" id="event-list">
+
+            <div id="mapping-panel" class="flex-1 overflow-y-auto p-3">
+                <div id="event-list" class="flex flex-col gap-2"></div>
+                <div id="empty-event-list" class="flex h-40 flex-col items-center justify-center gap-2 text-center text-xs text-slate-400">
+                    <i data-lucide="mouse-pointer-click" class="h-7 w-7 text-slate-300"></i>
+                    Pilih pemain dan event, lalu gambar vektor di lapangan.
+                </div>
             </div>
-            <div class="p-4 border-t border-slate-100 flex gap-2 bg-slate-50">
-                <button type="button" class="flex-1 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white text-sm font-bold py-3 rounded-lg flex justify-center items-center gap-2 transition">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    EXPORT
+
+            <div id="summary-panel" class="hidden flex-1 overflow-y-auto p-3">
+                <div class="mb-2 text-[9px] font-bold tracking-[0.18em] text-slate-500" id="summary-player-label">VECTOR MAP</div>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-[#164a27]">
+                        <canvas id="summary-canvas" class="block h-[210px] w-full"></canvas>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[5px] border-red-400 text-[10px] font-extrabold text-red-500" id="shot-percentage">0%</div>
+                            <div><div class="text-xs font-semibold text-slate-500">Shot Accuracy</div><div class="text-[11px] text-slate-400" id="shot-ratio">0/0 on target</div></div>
+                        </div>
+                        <div class="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[5px] border-blue-500 text-[10px] font-extrabold text-blue-600" id="pass-count">0</div>
+                            <div><div class="text-xs font-semibold text-slate-500">Passes</div><div class="text-[11px] text-slate-400">total recorded</div></div>
+                        </div>
+                        <div class="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[5px] border-purple-500 text-[10px] font-extrabold text-purple-600" id="cross-count">0</div>
+                            <div><div class="text-xs font-semibold text-slate-500">Crosses</div><div class="text-[11px] text-slate-400">total recorded</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="mb-2 text-[10px] font-bold tracking-[0.18em] text-slate-500">EVENT BREAKDOWN</div>
+                    <div class="space-y-2.5 text-[10px]">
+                        <div><div class="mb-1 flex justify-between text-slate-400"><span>Shots</span><span class="font-bold text-red-500" id="shot-total">0</span></div><div class="h-1.5 rounded-full bg-slate-100"><div id="shot-bar" class="h-1.5 rounded-full bg-red-400" style="width:0%"></div></div></div>
+                        <div><div class="mb-1 flex justify-between text-slate-400"><span>Passes</span><span class="font-bold text-blue-500" id="pass-total">0</span></div><div class="h-1.5 rounded-full bg-slate-100"><div id="pass-bar" class="h-1.5 rounded-full bg-blue-500" style="width:0%"></div></div></div>
+                        <div><div class="mb-1 flex justify-between text-slate-400"><span>Crosses</span><span class="font-bold text-purple-500" id="cross-total">0</span></div><div class="h-1.5 rounded-full bg-slate-100"><div id="cross-bar" class="h-1.5 rounded-full bg-purple-500" style="width:0%"></div></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex shrink-0 gap-2 border-t border-slate-100 bg-slate-50 p-3">
+                <button type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-110">
+                    <i data-lucide="download" class="h-4 w-4"></i>EXPORT
                 </button>
-                <button type="button" onclick="submitVectors()" class="flex-1 bg-green-500 hover:bg-green-600 active:scale-95 text-white text-sm font-bold py-3 rounded-lg flex justify-center items-center gap-2 transition">
-                    <i data-lucide="save" class="w-4 h-4"></i>
-                    SAVE
+                <button type="button" onclick="submitVectors()" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-700 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-110">
+                    <i data-lucide="save" class="h-4 w-4"></i>SAVE
                 </button>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <div id="manual-minute-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 p-4" role="dialog" aria-modal="true" aria-labelledby="manual-minute-title">
@@ -133,6 +172,7 @@
 let selectedPlayerId = null;
 let selectedPlayerName = '';
 let selectedAction = null;
+let selectedSubtype = 'ON_TARGET';
 let liveMode = false;
 let isDrawing = false;
 let dragStartPoint = null;
@@ -143,9 +183,12 @@ let gridPoints = [];
 let pendingVectors = [];
 let currentStartPoint = null;
 let pendingManualVector = null;
+const savedVectors = @js($vectors);
 
 const canvas = document.getElementById('vectorCanvas');
 const ctx = canvas.getContext('2d');
+const summaryCanvas = document.getElementById('summary-canvas');
+const summaryCtx = summaryCanvas.getContext('2d');
 const matchStatus = '{{ $match->status }}';
 const eventList = document.getElementById('event-list');
 const indicator = document.getElementById('active-indicator');
@@ -188,10 +231,10 @@ function drawGrid() {
 
 function redrawAll() {
     drawGrid();
-    pendingVectors.forEach(v => {
+    getSelectedPlayerVectors().forEach(v => {
         const start = getPointFromPct(v.start_x, v.start_y);
         const end = getPointFromPct(v.end_x, v.end_y);
-        drawArrow(start.x, start.y, end.x, end.y, getActionColor(v.action_type));
+        drawArrow(start.x, start.y, end.x, end.y, getActionColor(v.action_type, v.subtype));
     });
 
     if (currentStartPoint) {
@@ -210,6 +253,7 @@ function resizeCanvas() {
     canvas.height = canvas.offsetHeight;
     calculateGrid();
     redrawAll();
+    drawSummary();
 }
 
 window.addEventListener('resize', resizeCanvas);
@@ -226,6 +270,9 @@ function setPlayer(id, number, name) {
     activeBtn.classList.remove('bg-slate-50', 'text-slate-600');
     activeBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-600');
     updateIndicator();
+    updateSummary();
+    updateEventList();
+    redrawAll();
 }
 
 function setAction(action) {
@@ -239,7 +286,44 @@ function setAction(action) {
     if(action === 'SHOT') activeBtn.classList.add('bg-red-500', 'text-white');
     if(action === 'PASS') activeBtn.classList.add('bg-green-500', 'text-white');
     if(action === 'CROSS') activeBtn.classList.add('bg-purple-500', 'text-white');
+    document.getElementById('shot-subtypes').classList.toggle('hidden', action !== 'SHOT');
+    if (action === 'SHOT' && !selectedSubtype) setSubtype('ON_TARGET');
     updateIndicator();
+    redrawAll();
+}
+
+function setSubtype(subtype) {
+    selectedSubtype = subtype;
+    document.querySelectorAll('.subtype-btn').forEach(button => {
+        const selected = button.dataset.subtype === subtype;
+        button.classList.toggle('ring-1', selected);
+        button.classList.toggle('ring-emerald-300', selected && subtype === 'ON_TARGET');
+        button.classList.toggle('ring-red-300', selected && subtype === 'OFF_TARGET');
+        button.classList.toggle('ring-amber-300', selected && subtype === 'BLOCKED');
+        button.classList.toggle('ring-blue-300', selected && subtype === 'GOAL');
+        button.classList.toggle('bg-emerald-100', selected && subtype === 'ON_TARGET');
+        button.classList.toggle('text-emerald-700', selected && subtype === 'ON_TARGET');
+        button.classList.toggle('bg-red-100', selected && subtype === 'OFF_TARGET');
+        button.classList.toggle('text-red-700', selected && subtype === 'OFF_TARGET');
+        button.classList.toggle('bg-amber-100', selected && subtype === 'BLOCKED');
+        button.classList.toggle('text-amber-700', selected && subtype === 'BLOCKED');
+        button.classList.toggle('bg-blue-100', selected && subtype === 'GOAL');
+        button.classList.toggle('text-blue-700', selected && subtype === 'GOAL');
+        button.classList.toggle('bg-slate-100', !selected);
+        button.classList.toggle('text-slate-500', !selected);
+    });
+}
+
+function setPanel(panel) {
+    const showSummary = panel === 'summary';
+    document.getElementById('mapping-panel').classList.toggle('hidden', showSummary);
+    document.getElementById('summary-panel').classList.toggle('hidden', !showSummary);
+    document.getElementById('tab-live-mapping').className = `panel-tab flex-1 rounded-lg py-2 text-xs font-bold ${showSummary ? 'text-slate-400 hover:text-blue-600' : 'bg-white text-slate-700 shadow-sm'}`;
+    document.getElementById('tab-vector-summary').className = `panel-tab flex-1 rounded-lg py-2 text-xs font-bold ${showSummary ? 'bg-blue-100 text-blue-600 shadow-sm' : 'text-slate-400 hover:text-blue-600'}`;
+    if (showSummary) {
+        updateSummary();
+        requestAnimationFrame(drawSummary);
+    }
 }
 
 function toggleLiveMode() {
@@ -262,18 +346,109 @@ function toggleLiveMode() {
 }
 
 function updateIndicator() {
-    if(selectedPlayerId && selectedAction) {
-        indicator.innerHTML = `${selectedPlayerName} <span class="mx-2 text-slate-400">|</span> ${selectedAction}`;
-    } else {
-        indicator.innerText = '-';
-    }
+    indicator.textContent = selectedPlayerName || 'Pilih pemain untuk melihat ringkasan';
 }
 
-function getActionColor(action) {
-    if (action === 'SHOT') return '#ef4444';
+function getActionColor(action, subtype = null) {
+    if (action === 'SHOT') {
+        const subtypeColors = {
+            ON_TARGET: '#4ade80',
+            OFF_TARGET: '#ef4444',
+            BLOCKED: '#fbbf24',
+            GOAL: '#3b82f6'
+        };
+        return subtypeColors[subtype] || '#ef4444';
+    }
     if (action === 'PASS') return '#22c55e';
     if (action === 'CROSS') return '#a855f7';
     return '#ffffff';
+}
+
+function getAllVectors() {
+    return [...savedVectors, ...pendingVectors];
+}
+
+function getSelectedPlayerVectors() {
+    const vectors = getAllVectors();
+    return selectedPlayerId
+        ? vectors.filter(vector => String(vector.player_id) === String(selectedPlayerId))
+        : vectors;
+}
+
+function updateSummary() {
+    const vectors = getSelectedPlayerVectors();
+    const shots = vectors.filter(vector => vector.action_type === 'SHOT');
+    const classifiedShots = shots.filter(vector => vector.subtype);
+    const onTarget = classifiedShots.filter(vector => ['ON_TARGET', 'GOAL'].includes(vector.subtype)).length;
+    const passes = vectors.filter(vector => vector.action_type === 'PASS').length;
+    const crosses = vectors.filter(vector => vector.action_type === 'CROSS').length;
+    const shotPercentage = classifiedShots.length ? Math.round((onTarget / classifiedShots.length) * 100) : 0;
+    const maxTotal = Math.max(shots.length, passes, crosses, 1);
+
+    document.getElementById('summary-player-label').textContent = selectedPlayerName
+        ? `VECTOR MAP — ${selectedPlayerName.toUpperCase()}`
+        : 'VECTOR MAP — ALL PLAYERS';
+    document.getElementById('shot-percentage').textContent = `${shotPercentage}%`;
+    document.getElementById('shot-ratio').textContent = `${onTarget}/${classifiedShots.length} on target`;
+    document.getElementById('pass-count').textContent = passes;
+    document.getElementById('cross-count').textContent = crosses;
+    document.getElementById('shot-total').textContent = shots.length;
+    document.getElementById('pass-total').textContent = passes;
+    document.getElementById('cross-total').textContent = crosses;
+    document.getElementById('shot-bar').style.width = `${(shots.length / maxTotal) * 100}%`;
+    document.getElementById('pass-bar').style.width = `${(passes / maxTotal) * 100}%`;
+    document.getElementById('cross-bar').style.width = `${(crosses / maxTotal) * 100}%`;
+    drawSummary();
+}
+
+function drawSummary() {
+    if (!summaryCanvas || !summaryCanvas.offsetWidth) return;
+    summaryCanvas.width = summaryCanvas.offsetWidth;
+    summaryCanvas.height = summaryCanvas.offsetHeight;
+    const width = summaryCanvas.width;
+    const height = summaryCanvas.height;
+    summaryCtx.clearRect(0, 0, width, height);
+    summaryCtx.fillStyle = '#164a27';
+    summaryCtx.fillRect(0, 0, width, height);
+    summaryCtx.strokeStyle = 'rgba(255,255,255,0.35)';
+    summaryCtx.lineWidth = 1;
+    summaryCtx.strokeRect(width * 0.06, height * 0.06, width * 0.88, height * 0.88);
+    summaryCtx.beginPath();
+    summaryCtx.moveTo(width / 2, height * 0.06);
+    summaryCtx.lineTo(width / 2, height * 0.94);
+    summaryCtx.stroke();
+    summaryCtx.beginPath();
+    summaryCtx.arc(width / 2, height / 2, Math.min(width, height) * 0.12, 0, Math.PI * 2);
+    summaryCtx.stroke();
+    summaryCtx.strokeRect(width * 0.06, height * 0.32, width * 0.2, height * 0.36);
+    summaryCtx.strokeRect(width * 0.74, height * 0.32, width * 0.2, height * 0.36);
+    summaryCtx.fillStyle = 'rgba(255,255,255,0.3)';
+    for (let column = 1; column <= 8; column++) {
+        for (let row = 1; row <= 6; row++) {
+            summaryCtx.beginPath();
+            summaryCtx.arc((column * width) / 9, (row * height) / 7, 2, 0, Math.PI * 2);
+            summaryCtx.fill();
+        }
+    }
+
+    const vectors = getSelectedPlayerVectors();
+    vectors.forEach(vector => {
+        const fromX = (vector.start_x / 100) * width;
+        const fromY = (vector.start_y / 100) * height;
+        const toX = (vector.end_x / 100) * width;
+        const toY = (vector.end_y / 100) * height;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const head = 7;
+        summaryCtx.strokeStyle = getActionColor(vector.action_type, vector.subtype);
+        summaryCtx.lineWidth = 2;
+        summaryCtx.beginPath();
+        summaryCtx.moveTo(fromX, fromY);
+        summaryCtx.lineTo(toX, toY);
+        summaryCtx.lineTo(toX - head * Math.cos(angle - Math.PI / 6), toY - head * Math.sin(angle - Math.PI / 6));
+        summaryCtx.moveTo(toX, toY);
+        summaryCtx.lineTo(toX - head * Math.cos(angle + Math.PI / 6), toY - head * Math.sin(angle + Math.PI / 6));
+        summaryCtx.stroke();
+    });
 }
 
 function getActionIcon(action) {
@@ -323,13 +498,14 @@ function getCanvasPosition(e) {
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
-function addVector(startPoint, endPoint, playerId, playerName, action) {
+function addVector(startPoint, endPoint, playerId, playerName, action, subtype = selectedSubtype) {
     if (!startPoint || !endPoint || (startPoint.x === endPoint.x && startPoint.y === endPoint.y)) return false;
 
     const vector = {
         player_id: playerId,
         playerName: playerName,
         action_type: action,
+        subtype: action === 'SHOT' ? subtype : null,
         start_x: (startPoint.x / canvas.width) * 100,
         start_y: (startPoint.y / canvas.height) * 100,
         end_x: (endPoint.x / canvas.width) * 100,
@@ -342,6 +518,7 @@ function addVector(startPoint, endPoint, playerId, playerName, action) {
         vector.match_minute = null;
         pendingVectors.push(vector);
         updateEventList();
+        updateSummary();
         redrawAll();
         return true;
     }
@@ -365,6 +542,7 @@ function confirmManualMinute(event) {
     pendingManualVector = null;
     closeManualMinuteModal();
     updateEventList();
+    updateSummary();
     redrawAll();
 }
 
@@ -442,7 +620,7 @@ canvas.addEventListener('pointermove', (e) => {
 
     redrawAll();
     const snapPoint = getNearestPoint(position.x, position.y);
-    drawArrow(dragStartPoint.x, dragStartPoint.y, snapPoint ? snapPoint.x : position.x, snapPoint ? snapPoint.y : position.y, getActionColor(selectedAction));
+    drawArrow(dragStartPoint.x, dragStartPoint.y, snapPoint ? snapPoint.x : position.x, snapPoint ? snapPoint.y : position.y, getActionColor(selectedAction, selectedSubtype));
 });
 
 canvas.addEventListener('pointerup', (e) => {
@@ -453,7 +631,7 @@ canvas.addEventListener('pointerup', (e) => {
     const endPoint = getNearestPoint(position.x, position.y);
 
     if (wasDragging && startPoint && endPoint) {
-        addVector(startPoint, endPoint, selectedPlayerId, selectedPlayerName, selectedAction);
+        addVector(startPoint, endPoint, selectedPlayerId, selectedPlayerName, selectedAction, selectedSubtype);
         suppressNextClick = true;
         setTimeout(() => { suppressNextClick = false; }, 100);
         currentStartPoint = null;
@@ -487,7 +665,8 @@ canvas.addEventListener('click', (e) => {
             endPoint,
             currentStartPoint.player_id,
             currentStartPoint.playerName,
-            currentStartPoint.action_type
+            currentStartPoint.action_type,
+            currentStartPoint.subtype
         );
         if (added) {
             currentStartPoint = null;
@@ -512,30 +691,45 @@ canvas.addEventListener('dblclick', (e) => {
         ...startPoint,
         player_id: selectedPlayerId,
         playerName: selectedPlayerName,
-        action_type: selectedAction
+        action_type: selectedAction,
+        subtype: selectedAction === 'SHOT' ? selectedSubtype : null
     };
     redrawAll();
 });
 
 function updateEventList() {
     eventList.innerHTML = '';
-    [...pendingVectors].reverse().forEach((v, index) => {
+    const vectors = getSelectedPlayerVectors();
+    document.getElementById('empty-event-list').classList.toggle('hidden', vectors.length > 0);
+    [...vectors].reverse().forEach(v => {
         const el = document.createElement('div');
         el.className = 'bg-white border border-slate-100 rounded-lg p-2.5 text-xs flex justify-between items-center shadow-sm gap-2';
-        let colorClass = v.action_type === 'SHOT' ? 'text-red-500' : (v.action_type === 'PASS' ? 'text-green-500' : 'text-purple-500');
-        const modeLabel = v.timestamp_mode === 'live' ? 'LIVE' : 'MANUAL';
-        const modeClass = v.timestamp_mode === 'live' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600';
-        el.innerHTML = `
-            <div class="min-w-0">
-                <span class="font-bold text-slate-700">${v.playerName}</span>
-                <span class="block text-[10px] text-slate-400">${v.timestamp_mode === 'live' ? new Date(v.input_time).toLocaleString() : `Menit ${v.match_minute}`}</span>
-            </div>
-            <div class="flex shrink-0 flex-col items-end gap-1">
-                <span class="rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-wide ${modeClass}">${modeLabel}</span>
-                <span class="font-bold ${colorClass} inline-flex items-center gap-1.5">
-                    <i data-lucide="${getActionIcon(v.action_type)}" class="w-3.5 h-3.5"></i>${v.action_type}
-                </span>
-            </div>`;
+        const mode = v.timestamp_mode || (v.input_time ? 'live' : 'manual');
+        const player = document.createElement('span');
+        player.className = 'font-bold text-slate-700';
+        player.textContent = v.playerName || v.player_name || 'Pemain';
+        const time = document.createElement('span');
+        time.className = 'block text-[10px] text-slate-400';
+        time.textContent = mode === 'live' ? new Date(v.input_time).toLocaleString() : `Menit ${v.match_minute}`;
+        const details = document.createElement('div');
+        details.className = 'min-w-0';
+        details.append(player, time);
+
+        const action = document.createElement('span');
+        action.className = `inline-flex items-center gap-1.5 font-bold ${v.action_type === 'SHOT' ? 'text-red-500' : (v.action_type === 'PASS' ? 'text-green-500' : 'text-purple-500')}`;
+        if (v.action_type === 'SHOT') action.style.color = getActionColor(v.action_type, v.subtype);
+        const icon = document.createElement('i');
+        icon.setAttribute('data-lucide', getActionIcon(v.action_type));
+        icon.className = 'h-3.5 w-3.5';
+        action.append(icon, document.createTextNode(v.action_type === 'SHOT' && v.subtype ? `SHOT · ${v.subtype.replace('_', ' ')}` : v.action_type));
+
+        const modeLabel = document.createElement('span');
+        modeLabel.className = `rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-wide ${mode === 'live' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`;
+        modeLabel.textContent = mode.toUpperCase();
+        const right = document.createElement('div');
+        right.className = 'flex shrink-0 flex-col items-end gap-1';
+        right.append(modeLabel, action);
+        el.append(details, right);
         eventList.appendChild(el);
     });
     // Render ulang ikon untuk item event yang baru dibuat
@@ -549,6 +743,7 @@ function submitVectors() {
         if (pendingVectors.length === 0) {
             redrawAll();
             updateEventList();
+            updateSummary();
             showNotification('Semua vektor berhasil disimpan.', 'success');
             return;
         }
@@ -566,6 +761,11 @@ function submitVectors() {
             if (!response.ok || !data.success) {
                 throw new Error(data.message || 'Gagal menyimpan vektor.');
             }
+            savedVectors.push({
+                ...vector,
+                id: data.data.id,
+                player_name: vector.playerName
+            });
             pendingVectors.shift();
             saveNextVector();
         }).catch(error => {
@@ -575,5 +775,10 @@ function submitVectors() {
 
     saveNextVector();
 }
+
+setAction('SHOT');
+setSubtype('ON_TARGET');
+updateEventList();
+updateSummary();
 </script>
 @endsection

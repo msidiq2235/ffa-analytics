@@ -4,5 +4,5 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 class VectorDirection extends Model
 {
-protected $fillable = ['match_id', 'player_id', 'analyst_id', 'action_type', 'start_x', 'start_y', 'end_x', 'end_y', 'input_time', 'match_minute'];
+protected $fillable = ['match_id', 'player_id', 'analyst_id', 'action_type', 'subtype', 'start_x', 'start_y', 'end_x', 'end_y', 'input_time', 'match_minute'];
 }
