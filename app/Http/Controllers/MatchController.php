@@ -168,6 +168,9 @@ class MatchController extends Controller
             'start_y' => 'required|numeric',
             'end_x' => 'required|numeric',
             'end_y' => 'required|numeric',
+            'timestamp_mode' => 'required|in:live,manual',
+            'input_time' => 'required_if:timestamp_mode,live|nullable|date',
+            'match_minute' => 'required_if:timestamp_mode,manual|nullable|integer|min:0',
         ]);
         $vector = \App\Models\VectorDirection::create([
             'match_id' => $match->id,
@@ -178,6 +181,8 @@ class MatchController extends Controller
             'start_y' => $request->start_y,
             'end_x' => $request->end_x,
             'end_y' => $request->end_y,
+            'input_time' => $request->timestamp_mode === 'live' ? Carbon::parse($request->input_time) : null,
+            'match_minute' => $request->timestamp_mode === 'manual' ? $request->match_minute : null,
         ]);
         return response()->json(['success' => true, 'data' => $vector]);
     }

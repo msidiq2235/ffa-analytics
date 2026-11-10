@@ -39,7 +39,11 @@
             @endforeach
         </div>
 
-        <div class="flex items-center gap-2 border-l border-slate-200 pl-4 shrink-0">
+        <div class="flex flex-wrap items-center gap-2 border-l border-slate-200 pl-4">
+            <button type="button" id="live-mode-toggle" onclick="toggleLiveMode()" aria-pressed="false" title="LIVE ON mencatat waktu dari jam perangkat" class="px-4 py-2 rounded-full border border-slate-200 bg-slate-100 text-slate-600 font-bold text-sm transition-colors inline-flex items-center gap-2 shrink-0">
+                <span class="w-2 h-2 rounded-full bg-slate-400" id="live-mode-indicator"></span>
+                <span id="live-mode-label">LIVE OFF</span>
+            </button>
             <span class="text-xs font-bold text-slate-400 tracking-wider mr-2 flex items-center gap-1.5">
                 <i data-lucide="mouse-pointer-click" class="w-4 h-4"></i> EVENT
             </span>
@@ -107,6 +111,21 @@
     </div>
 </div>
 
+<div id="manual-minute-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 p-4" role="dialog" aria-modal="true" aria-labelledby="manual-minute-title">
+    <form class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl" onsubmit="confirmManualMinute(event)">
+        <h2 id="manual-minute-title" class="text-lg font-bold text-slate-800">Masukkan Menit Pertandingan</h2>
+        <p class="mt-1 text-sm text-slate-500">Masukkan menit saat aksi ini terjadi.</p>
+        <label for="manual-minute-input" class="mt-4 block text-sm font-semibold text-slate-700">Menit</label>
+        <input type="number" id="manual-minute-input" min="0" step="1" required autofocus class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <div class="mt-5 flex justify-end gap-2">
+            <button type="button" onclick="cancelManualMinute()" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Batal</button>
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Simpan Waktu</button>
+        </div>
+    </form>
+</div>
+
+<div id="notification-container" class="fixed right-4 top-4 z-[60] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3" aria-live="polite" aria-atomic="false"></div>
+
 <!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -114,6 +133,7 @@
 let selectedPlayerId = null;
 let selectedPlayerName = '';
 let selectedAction = null;
+let liveMode = false;
 let isDrawing = false;
 let dragStartPoint = null;
 let pointerDownPosition = null;
@@ -122,12 +142,15 @@ let clickTimer = null;
 let gridPoints = [];
 let pendingVectors = [];
 let currentStartPoint = null;
+let pendingManualVector = null;
 
 const canvas = document.getElementById('vectorCanvas');
 const ctx = canvas.getContext('2d');
 const matchStatus = '{{ $match->status }}';
 const eventList = document.getElementById('event-list');
 const indicator = document.getElementById('active-indicator');
+const manualMinuteModal = document.getElementById('manual-minute-modal');
+const manualMinuteInput = document.getElementById('manual-minute-input');
 
 // Render semua ikon Lucide
 function renderIcons() {
@@ -219,6 +242,25 @@ function setAction(action) {
     updateIndicator();
 }
 
+function toggleLiveMode() {
+    liveMode = !liveMode;
+    const toggle = document.getElementById('live-mode-toggle');
+    const indicator = document.getElementById('live-mode-indicator');
+    const label = document.getElementById('live-mode-label');
+
+    toggle.setAttribute('aria-pressed', String(liveMode));
+    toggle.classList.toggle('bg-emerald-100', liveMode);
+    toggle.classList.toggle('text-emerald-700', liveMode);
+    toggle.classList.toggle('border-emerald-300', liveMode);
+    toggle.classList.toggle('bg-slate-100', !liveMode);
+    toggle.classList.toggle('text-slate-600', !liveMode);
+    toggle.classList.toggle('border-slate-200', !liveMode);
+    indicator.classList.toggle('bg-emerald-500', liveMode);
+    indicator.classList.toggle('animate-pulse', liveMode);
+    indicator.classList.toggle('bg-slate-400', !liveMode);
+    label.textContent = liveMode ? 'LIVE ON' : 'LIVE OFF';
+}
+
 function updateIndicator() {
     if(selectedPlayerId && selectedAction) {
         indicator.innerHTML = `${selectedPlayerName} <span class="mx-2 text-slate-400">|</span> ${selectedAction}`;
@@ -284,7 +326,7 @@ function getCanvasPosition(e) {
 function addVector(startPoint, endPoint, playerId, playerName, action) {
     if (!startPoint || !endPoint || (startPoint.x === endPoint.x && startPoint.y === endPoint.y)) return false;
 
-    pendingVectors.push({
+    const vector = {
         player_id: playerId,
         playerName: playerName,
         action_type: action,
@@ -292,15 +334,96 @@ function addVector(startPoint, endPoint, playerId, playerName, action) {
         start_y: (startPoint.y / canvas.height) * 100,
         end_x: (endPoint.x / canvas.width) * 100,
         end_y: (endPoint.y / canvas.height) * 100
-    });
-    updateEventList();
-    redrawAll();
+    };
+
+    if (liveMode) {
+        vector.timestamp_mode = 'live';
+        vector.input_time = new Date().toISOString();
+        vector.match_minute = null;
+        pendingVectors.push(vector);
+        updateEventList();
+        redrawAll();
+        return true;
+    }
+
+    pendingManualVector = vector;
+    manualMinuteInput.value = '';
+    manualMinuteModal.classList.remove('hidden');
+    manualMinuteModal.classList.add('flex');
+    requestAnimationFrame(() => manualMinuteInput.focus());
     return true;
 }
 
+function confirmManualMinute(event) {
+    event.preventDefault();
+    if (!pendingManualVector || manualMinuteInput.value === '') return;
+
+    pendingManualVector.timestamp_mode = 'manual';
+    pendingManualVector.input_time = null;
+    pendingManualVector.match_minute = Number(manualMinuteInput.value);
+    pendingVectors.push(pendingManualVector);
+    pendingManualVector = null;
+    closeManualMinuteModal();
+    updateEventList();
+    redrawAll();
+}
+
+function cancelManualMinute() {
+    pendingManualVector = null;
+    closeManualMinuteModal();
+}
+
+function closeManualMinuteModal() {
+    manualMinuteModal.classList.add('hidden');
+    manualMinuteModal.classList.remove('flex');
+}
+
+function showNotification(message, type = 'info') {
+    const styles = {
+        info: { icon: 'info', accent: 'border-blue-500', iconColor: 'text-blue-600', title: 'Perlu diperhatikan' },
+        warning: { icon: 'alert-triangle', accent: 'border-amber-500', iconColor: 'text-amber-600', title: 'Periksa kembali' },
+        success: { icon: 'circle-check', accent: 'border-emerald-500', iconColor: 'text-emerald-600', title: 'Berhasil' },
+        error: { icon: 'circle-x', accent: 'border-red-500', iconColor: 'text-red-600', title: 'Gagal' }
+    };
+    const style = styles[type] || styles.info;
+    const toast = document.createElement('div');
+    toast.className = `flex items-start gap-3 rounded-xl border-l-4 ${style.accent} bg-white p-4 shadow-lg ring-1 ring-black/5 transition duration-300`;
+
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', style.icon);
+    icon.className = `mt-0.5 h-5 w-5 shrink-0 ${style.iconColor}`;
+
+    const content = document.createElement('div');
+    content.className = 'min-w-0 flex-1';
+    const title = document.createElement('p');
+    title.className = 'text-sm font-bold text-slate-800';
+    title.textContent = style.title;
+    const description = document.createElement('p');
+    description.className = 'mt-0.5 text-sm text-slate-600';
+    description.textContent = message;
+    content.append(title, description);
+
+    const dismiss = document.createElement('button');
+    dismiss.type = 'button';
+    dismiss.className = 'rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600';
+    dismiss.setAttribute('aria-label', 'Tutup notifikasi');
+    dismiss.textContent = '×';
+    dismiss.addEventListener('click', () => toast.remove());
+
+    toast.append(icon, content, dismiss);
+    document.getElementById('notification-container').appendChild(toast);
+    renderIcons();
+    window.setTimeout(() => {
+        toast.classList.add('translate-x-2', 'opacity-0');
+        window.setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
 canvas.addEventListener('pointerdown', (e) => {
-    if(matchStatus === 'Selesai') return alert('Pertandingan selesai, data dikunci.');
-    if(!selectedPlayerId || !selectedAction) return alert('Pilih PLAYER dan EVENT di atas terlebih dahulu.');
+    if(matchStatus === 'Selesai') return showNotification('Pertandingan sudah selesai, sehingga data tidak dapat diubah.', 'warning');
+    if(!selectedPlayerId && !selectedAction) return showNotification('Pilih pemain dan event terlebih dahulu sebelum menggambar vektor.', 'info');
+    if(!selectedPlayerId) return showNotification('Pilih pemain terlebih dahulu sebelum menggambar vektor.', 'info');
+    if(!selectedAction) return showNotification('Pilih event SHOT, PASS, atau CROSS terlebih dahulu.', 'info');
 
     const position = getCanvasPosition(e);
     dragStartPoint = getNearestPoint(position.x, position.y);
@@ -354,32 +477,36 @@ canvas.addEventListener('click', (e) => {
         if (!currentStartPoint) return;
         const position = getCanvasPosition(e);
         const endPoint = getNearestPoint(position.x, position.y);
-        if (!endPoint) return alert('Pilih titik grid untuk menentukan titik akhir.');
+        if (!endPoint) return showNotification('Klik salah satu titik pada grid untuk menentukan titik akhir.', 'info');
         if (endPoint.x === currentStartPoint.x && endPoint.y === currentStartPoint.y) {
-            return alert('Titik akhir harus berbeda dari titik awal.');
+            return showNotification('Titik akhir harus berbeda dari titik awal.', 'warning');
         }
 
-        addVector(
+        const added = addVector(
             currentStartPoint,
             endPoint,
             currentStartPoint.player_id,
             currentStartPoint.playerName,
             currentStartPoint.action_type
         );
-        currentStartPoint = null;
-        redrawAll();
+        if (added) {
+            currentStartPoint = null;
+            redrawAll();
+        }
     }, 250);
 });
 
 canvas.addEventListener('dblclick', (e) => {
     e.preventDefault();
     clearTimeout(clickTimer);
-    if(matchStatus === 'Selesai') return alert('Pertandingan selesai, data dikunci.');
-    if(!selectedPlayerId || !selectedAction) return alert('Pilih PLAYER dan EVENT di atas terlebih dahulu.');
+    if(matchStatus === 'Selesai') return showNotification('Pertandingan sudah selesai, sehingga data tidak dapat diubah.', 'warning');
+    if(!selectedPlayerId && !selectedAction) return showNotification('Pilih pemain dan event terlebih dahulu sebelum menggambar vektor.', 'info');
+    if(!selectedPlayerId) return showNotification('Pilih pemain terlebih dahulu sebelum menggambar vektor.', 'info');
+    if(!selectedAction) return showNotification('Pilih event SHOT, PASS, atau CROSS terlebih dahulu.', 'info');
 
     const position = getCanvasPosition(e);
     const startPoint = getNearestPoint(position.x, position.y);
-    if (!startPoint) return alert('Double klik pada titik grid untuk menentukan titik awal.');
+    if (!startPoint) return showNotification('Double klik salah satu titik pada grid untuk menentukan titik awal.', 'info');
 
     currentStartPoint = {
         ...startPoint,
@@ -394,13 +521,21 @@ function updateEventList() {
     eventList.innerHTML = '';
     [...pendingVectors].reverse().forEach((v, index) => {
         const el = document.createElement('div');
-        el.className = 'bg-white border border-slate-100 rounded p-2 text-xs flex justify-between items-center shadow-sm';
+        el.className = 'bg-white border border-slate-100 rounded-lg p-2.5 text-xs flex justify-between items-center shadow-sm gap-2';
         let colorClass = v.action_type === 'SHOT' ? 'text-red-500' : (v.action_type === 'PASS' ? 'text-green-500' : 'text-purple-500');
+        const modeLabel = v.timestamp_mode === 'live' ? 'LIVE' : 'MANUAL';
+        const modeClass = v.timestamp_mode === 'live' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600';
         el.innerHTML = `
-            <span class="font-bold text-slate-700">${v.playerName}</span>
-            <span class="font-bold ${colorClass} inline-flex items-center gap-1.5">
-                <i data-lucide="${getActionIcon(v.action_type)}" class="w-3.5 h-3.5"></i>${v.action_type}
-            </span>`;
+            <div class="min-w-0">
+                <span class="font-bold text-slate-700">${v.playerName}</span>
+                <span class="block text-[10px] text-slate-400">${v.timestamp_mode === 'live' ? new Date(v.input_time).toLocaleString() : `Menit ${v.match_minute}`}</span>
+            </div>
+            <div class="flex shrink-0 flex-col items-end gap-1">
+                <span class="rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-wide ${modeClass}">${modeLabel}</span>
+                <span class="font-bold ${colorClass} inline-flex items-center gap-1.5">
+                    <i data-lucide="${getActionIcon(v.action_type)}" class="w-3.5 h-3.5"></i>${v.action_type}
+                </span>
+            </div>`;
         eventList.appendChild(el);
     });
     // Render ulang ikon untuk item event yang baru dibuat
@@ -408,18 +543,37 @@ function updateEventList() {
 }
 
 function submitVectors() {
-    if (pendingVectors.length === 0) return alert('Tidak ada data vektor baru untuk disimpan.');
-    const lastVector = pendingVectors[pendingVectors.length - 1];
-    fetch(`{{ route('matches.storeVector', $match->id) }}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify(lastVector)
-    }).then(res => res.json()).then(data => {
-        alert('Vektor terakhir berhasil disimpan!');
-    }).catch(err => console.error(err));
+    if (pendingVectors.length === 0) return showNotification('Belum ada vektor baru untuk disimpan.', 'info');
+
+    const saveNextVector = () => {
+        if (pendingVectors.length === 0) {
+            redrawAll();
+            updateEventList();
+            showNotification('Semua vektor berhasil disimpan.', 'success');
+            return;
+        }
+
+        const vector = pendingVectors[0];
+        fetch(`{{ route('matches.storeVector', $match->id) }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(vector)
+        }).then(async response => {
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Gagal menyimpan vektor.');
+            }
+            pendingVectors.shift();
+            saveNextVector();
+        }).catch(error => {
+            showNotification(`Vektor gagal disimpan: ${error.message}`, 'error');
+        });
+    };
+
+    saveNextVector();
 }
 </script>
 @endsection
