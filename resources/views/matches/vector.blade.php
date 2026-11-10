@@ -71,7 +71,7 @@
             </div>
             <div class="absolute -bottom-4 -left-4 bg-slate-900 text-green-400 text-xs font-mono font-bold px-4 py-3 rounded-lg shadow-lg border border-slate-700 z-20 flex items-center gap-2">
                 <i data-lucide="grid-3x3" class="w-4 h-4"></i>
-                48-POINT GRID
+                <span>48-POINT GRID<br><span class="text-white/70">Drag dari awal ke akhir · Double klik awal, klik akhir</span></span>
             </div>
         </div>
 
@@ -115,6 +115,10 @@ let selectedPlayerId = null;
 let selectedPlayerName = '';
 let selectedAction = null;
 let isDrawing = false;
+let dragStartPoint = null;
+let pointerDownPosition = null;
+let suppressNextClick = false;
+let clickTimer = null;
 let gridPoints = [];
 let pendingVectors = [];
 let currentStartPoint = null;
@@ -166,6 +170,16 @@ function redrawAll() {
         const end = getPointFromPct(v.end_x, v.end_y);
         drawArrow(start.x, start.y, end.x, end.y, getActionColor(v.action_type));
     });
+
+    if (currentStartPoint) {
+        ctx.beginPath();
+        ctx.arc(currentStartPoint.x, currentStartPoint.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#facc15';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
 }
 
 function resizeCanvas() {
@@ -262,58 +276,118 @@ function drawArrow(fromX, fromY, toX, toY, color) {
     ctx.stroke();
 }
 
-canvas.addEventListener('mousedown', (e) => {
+function getCanvasPosition(e) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function addVector(startPoint, endPoint, playerId, playerName, action) {
+    if (!startPoint || !endPoint || (startPoint.x === endPoint.x && startPoint.y === endPoint.y)) return false;
+
+    pendingVectors.push({
+        player_id: playerId,
+        playerName: playerName,
+        action_type: action,
+        start_x: (startPoint.x / canvas.width) * 100,
+        start_y: (startPoint.y / canvas.height) * 100,
+        end_x: (endPoint.x / canvas.width) * 100,
+        end_y: (endPoint.y / canvas.height) * 100
+    });
+    updateEventList();
+    redrawAll();
+    return true;
+}
+
+canvas.addEventListener('pointerdown', (e) => {
     if(matchStatus === 'Selesai') return alert('Pertandingan selesai, data dikunci.');
     if(!selectedPlayerId || !selectedAction) return alert('Pilih PLAYER dan EVENT di atas terlebih dahulu.');
-    const rect = canvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-    currentStartPoint = getNearestPoint(clickX, clickY);
-    if (currentStartPoint) {
+
+    const position = getCanvasPosition(e);
+    dragStartPoint = getNearestPoint(position.x, position.y);
+    pointerDownPosition = position;
+    isDrawing = false;
+    if (dragStartPoint) canvas.setPointerCapture(e.pointerId);
+});
+
+canvas.addEventListener('pointermove', (e) => {
+    if (!pointerDownPosition || !dragStartPoint) return;
+    const position = getCanvasPosition(e);
+    if (!isDrawing && Math.hypot(position.x - pointerDownPosition.x, position.y - pointerDownPosition.y) > 4) {
         isDrawing = true;
     }
-});
+    if (!isDrawing) return;
 
-canvas.addEventListener('mousemove', (e) => {
-    if (!isDrawing || !currentStartPoint) return;
-    const rect = canvas.getBoundingClientRect();
-    const currentX = e.clientX - rect.left;
-    const currentY = e.clientY - rect.top;
     redrawAll();
-    const snapPoint = getNearestPoint(currentX, currentY);
-    const endX = snapPoint ? snapPoint.x : currentX;
-    const endY = snapPoint ? snapPoint.y : currentY;
-    drawArrow(currentStartPoint.x, currentStartPoint.y, endX, endY, getActionColor(selectedAction));
+    const snapPoint = getNearestPoint(position.x, position.y);
+    drawArrow(dragStartPoint.x, dragStartPoint.y, snapPoint ? snapPoint.x : position.x, snapPoint ? snapPoint.y : position.y, getActionColor(selectedAction));
 });
 
-canvas.addEventListener('mouseup', (e) => {
-    if (!isDrawing || !currentStartPoint) return;
-    isDrawing = false;
-    const rect = canvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-    const snapPoint = getNearestPoint(clickX, clickY);
+canvas.addEventListener('pointerup', (e) => {
+    if (!pointerDownPosition) return;
+    const wasDragging = isDrawing;
+    const startPoint = dragStartPoint;
+    const position = getCanvasPosition(e);
+    const endPoint = getNearestPoint(position.x, position.y);
 
-    if (snapPoint && (snapPoint.x !== currentStartPoint.x || snapPoint.y !== currentStartPoint.y)) {
-        const pctStartX = (currentStartPoint.x / canvas.width) * 100;
-        const pctStartY = (currentStartPoint.y / canvas.height) * 100;
-        const pctEndX = (snapPoint.x / canvas.width) * 100;
-        const pctEndY = (snapPoint.y / canvas.height) * 100;
-
-        pendingVectors.push({
-            player_id: selectedPlayerId,
-            playerName: selectedPlayerName,
-            action_type: selectedAction,
-            start_x: pctStartX,
-            start_y: pctStartY,
-            end_x: pctEndX,
-            end_y: pctEndY
-        });
-
-        updateEventList();
+    if (wasDragging && startPoint && endPoint) {
+        addVector(startPoint, endPoint, selectedPlayerId, selectedPlayerName, selectedAction);
+        suppressNextClick = true;
+        setTimeout(() => { suppressNextClick = false; }, 100);
+        currentStartPoint = null;
     }
+
+    isDrawing = false;
+    dragStartPoint = null;
+    pointerDownPosition = null;
     redrawAll();
-    currentStartPoint = null;
+});
+
+canvas.addEventListener('click', (e) => {
+    if (suppressNextClick) {
+        suppressNextClick = false;
+        return;
+    }
+    if (e.detail !== 1) return;
+
+    clearTimeout(clickTimer);
+    clickTimer = setTimeout(() => {
+        if (!currentStartPoint) return;
+        const position = getCanvasPosition(e);
+        const endPoint = getNearestPoint(position.x, position.y);
+        if (!endPoint) return alert('Pilih titik grid untuk menentukan titik akhir.');
+        if (endPoint.x === currentStartPoint.x && endPoint.y === currentStartPoint.y) {
+            return alert('Titik akhir harus berbeda dari titik awal.');
+        }
+
+        addVector(
+            currentStartPoint,
+            endPoint,
+            currentStartPoint.player_id,
+            currentStartPoint.playerName,
+            currentStartPoint.action_type
+        );
+        currentStartPoint = null;
+        redrawAll();
+    }, 250);
+});
+
+canvas.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    clearTimeout(clickTimer);
+    if(matchStatus === 'Selesai') return alert('Pertandingan selesai, data dikunci.');
+    if(!selectedPlayerId || !selectedAction) return alert('Pilih PLAYER dan EVENT di atas terlebih dahulu.');
+
+    const position = getCanvasPosition(e);
+    const startPoint = getNearestPoint(position.x, position.y);
+    if (!startPoint) return alert('Double klik pada titik grid untuk menentukan titik awal.');
+
+    currentStartPoint = {
+        ...startPoint,
+        player_id: selectedPlayerId,
+        playerName: selectedPlayerName,
+        action_type: selectedAction
+    };
+    redrawAll();
 });
 
 function updateEventList() {
