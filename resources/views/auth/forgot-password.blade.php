@@ -21,7 +21,7 @@
             <div class="relative z-10 mt-4">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white backdrop-blur-sm">
-                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                        <img src="{{ asset('images/logo-ffa.png') }}" alt="Logo Future Football Academy" class="w-7 h-7 object-contain">
                     </div>
                     <h1 class="text-[26px] font-bold text-white leading-[1.2] tracking-tight">Future Football<br>Academy</h1>
                 </div>
