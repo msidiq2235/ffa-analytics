@@ -354,4 +354,25 @@ class MatchController extends Controller
 
         return redirect()->route('matches.index')->with('success', 'Jadwal pertandingan berhasil diperbarui!');
     }
+
+    public function destroy(MatchSession $match)
+    {
+        $user = Auth::user();
+        abort_unless(in_array($user->role, ['Super Admin', 'Pelatih'], true), 403);
+
+        if ($user->role === 'Pelatih') {
+            abort_unless(
+                Club::where('coach_id', $user->id)
+                    ->where('name', $match->title)
+                    ->exists(),
+                404
+            );
+        }
+
+        $match->delete();
+
+        return redirect()
+            ->route('matches.index')
+            ->with('success', 'Jadwal pertandingan berhasil dihapus.');
+    }
 }

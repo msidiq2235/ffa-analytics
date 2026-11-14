@@ -28,6 +28,7 @@
     $byPos = fn(array $positions) => $startingEleven->filter(fn($p) => in_array($p->pivot->position ?? '', $positions))->values();
 
     $forwards = $byPos(['LW'])->concat($byPos(['ST']))->concat($byPos(['RW']));
+    $attackingMidfielders = $byPos(['AM']);
     $cms = $byPos(['CM']);
     $mids = $cms->slice(0, 1)->concat($byPos(['DM']))->concat($cms->slice(1))->values();
     $defs = $byPos(['LB'])->concat($byPos(['CB']))->concat($byPos(['RB']));
@@ -104,8 +105,13 @@
                 <div class="flex justify-around items-start px-8 sm:px-14">
                     @foreach($forwards as $fwd) {!! $pitchPlayer($fwd) !!} @endforeach
                 </div>
-                <div class="flex justify-around items-start px-8 sm:px-14">
+                <div class="relative flex justify-around items-start px-8 sm:px-14">
                     @foreach($mids as $mid) {!! $pitchPlayer($mid) !!} @endforeach
+                    @foreach($attackingMidfielders as $am)
+                        <div class="absolute left-1/2 -translate-x-1/2 -top-8 z-20">
+                            {!! $pitchPlayer($am) !!}
+                        </div>
+                    @endforeach
                 </div>
                 <div class="flex justify-around items-start px-4 sm:px-10">
                     @foreach($defs as $def) {!! $pitchPlayer($def) !!} @endforeach

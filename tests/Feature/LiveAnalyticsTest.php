@@ -51,6 +51,25 @@ class LiveAnalyticsTest extends TestCase
             ->assertJsonPath('stats.gk_successful_passes', 0);
     }
 
+    public function test_attacking_midfielder_is_rendered_above_the_central_midfield_line(): void
+    {
+        [$analyst, $match, , $outfieldPlayer] = $this->createMatchWithPlayers();
+        $outfieldPlayer->update([
+            'name' => 'Attacking Midfielder',
+            'popular_name' => 'AM Player',
+            'position' => 'AM',
+        ]);
+        $match->players()->updateExistingPivot($outfieldPlayer->id, ['position' => 'AM']);
+
+        $this->actingAs($analyst)
+            ->get(route('matches.live', $match))
+            ->assertOk()
+            ->assertSee('data-name="AM Player"', false)
+            ->assertSee('data-position="AM"', false)
+            ->assertSee('absolute left-1/2 -translate-x-1/2 -top-8 z-20', false)
+            ->assertSee('class="relative flex justify-around items-start px-8 sm:px-14"', false);
+    }
+
     public function test_goalkeeper_statistics_are_saved_and_outfield_keys_are_rejected(): void
     {
         [$analyst, $match, $goalkeeper] = $this->createMatchWithPlayers();
