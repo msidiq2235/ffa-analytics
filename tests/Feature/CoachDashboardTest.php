@@ -34,10 +34,12 @@ class CoachDashboardTest extends TestCase
             'status' => 'Aktif',
         ]);
 
-        $assignedMatch = MatchSession::create([
+        MatchSession::create([
             'title' => $club->name,
-            'match_date' => now()->addDays(2),
+            'match_date' => now()->addDays(2)->setTime(15, 30),
+            'venue' => 'Future Stadium',
             'opponent' => 'Rival Akademi',
+            'formation' => '4-3-3',
             'status' => 'Upcoming',
             'created_by' => $analyst->id,
         ]);
@@ -69,6 +71,9 @@ class CoachDashboardTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('Future FC')
+            ->assertSee('Future Stadium')
+            ->assertSee('4-3-3')
+            ->assertSee('15:30 WIB')
             ->assertSee('Pemain Future')
             ->assertSee('Rival Akademi')
             ->assertDontSee('Other Academy')

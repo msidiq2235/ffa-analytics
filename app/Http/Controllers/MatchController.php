@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\MatchSession;
 use App\Models\Club;
+use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 class MatchController extends Controller
@@ -78,20 +81,10 @@ class MatchController extends Controller
 
     public function lineup(MatchSession $match)
     {
-        $players = \App\Models\Player::where('status', 'Aktif')
-            ->where(function($query) use ($match) {
-                $query->whereHas('club', function($q) use ($match) {
-                    $q->where('name', 'like', '%' . $match->title . '%')
-                    ->orWhere('name', 'like', '%' . $match->opponent . '%');
-                })
-                ->orWhere('second_club', 'like', '%' . $match->title . '%')
-                ->orWhere('second_club', 'like', '%' . $match->opponent . '%');
-            })->get();
-
-        // Fallback: Jika setelah difilter pemainnya kosong, tampilkan seluruh pemain aktif
-        if ($players->isEmpty()) {
-            $players = \App\Models\Player::where('status', 'Aktif')->get();
-        }
+        $club = Club::where('name', $match->title)->first();
+        $players = $club
+            ? Player::where('club_id', $club->id)->where('status', 'Aktif')->orderBy('name')->get()
+            : collect();
 
         $match->load('players');
 
@@ -109,6 +102,25 @@ class MatchController extends Controller
             'formation' => 'nullable|string',
             'players' => 'array'
         ]);
+
+        $selectedPlayers = collect($request->input('players', []))
+            ->filter(fn ($player) => isset($player['selected']) && (string) $player['selected'] === '1')
+            ->keys();
+        $club = Club::where('name', $match->title)->first();
+        $playerRule = $club
+            ? Rule::exists('players', 'id')->where('club_id', $club->id)->where('status', 'Aktif')
+            : Rule::in([]);
+
+        Validator::make(
+            ['player_ids' => $selectedPlayers->all()],
+            [
+                'player_ids.*' => [
+                    'required',
+                    $playerRule,
+                ],
+            ],
+            ['player_ids.*.exists' => 'Pemain yang dipilih harus pemain aktif dari tim pertandingan ini.']
+        )->validate();
 
         $match->update([
             'formation' => $request->formation

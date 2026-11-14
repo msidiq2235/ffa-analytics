@@ -44,8 +44,8 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-        <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+        <section class="xl:col-span-2 bg-white rounded-2xl border border-slate-200 p-6">
             <div class="flex items-center justify-between gap-3 mb-5">
                 <div>
                     <h2 class="font-bold text-[#1e293b] text-sm">Jadwal Pertandingan</h2>
@@ -53,23 +53,79 @@
                 </div>
                 <a href="{{ route('matches.index') }}" class="text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Semua jadwal</a>
             </div>
-            <div class="space-y-3">
-                @forelse($upcomingMatchesList as $match)
-                    <article class="flex items-center gap-4 rounded-xl border border-slate-100 p-3">
-                        <div class="w-12 shrink-0 rounded-lg bg-blue-50 text-center py-2">
-                            <p class="text-[11px] font-black text-[#4062D6]">{{ $match->match_date->format('d M') }}</p>
-                            <p class="text-[10px] font-semibold text-slate-500">{{ $match->match_date->format('H:i') }}</p>
+            @if($upcomingMatchesList->isNotEmpty())
+                @php
+                    $nextCoachMatch = $upcomingMatchesList->first();
+                    $otherCoachMatches = $upcomingMatchesList->skip(1);
+                @endphp
+                <article class="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/70 to-white p-5">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <span class="text-[11px] font-bold text-slate-500">{{ $nextCoachMatch->title }}</span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-100 text-[#4062D6] rounded-full text-[10px] font-bold">
+                            <i data-lucide="clock" class="w-3 h-3"></i>
+                            {{ $nextCoachMatch->match_date->diffForHumans() }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-center gap-5 sm:gap-10 mb-5">
+                        <div class="flex flex-col items-center gap-2 min-w-0">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#183262] text-white flex items-center justify-center text-sm font-black">{{ strtoupper(substr($nextCoachMatch->title, 0, 3)) }}</div>
+                            <span class="text-xs font-bold text-[#1e293b] text-center">{{ $nextCoachMatch->title }}</span>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-[12px] font-bold text-[#1e293b] truncate">{{ $match->title }} <span class="font-medium text-slate-400">vs {{ $match->opponent ?: 'Lawan belum ditentukan' }}</span></p>
-                            <p class="text-[10px] text-slate-500 mt-1">{{ $match->venue ?: 'Lokasi belum ditentukan' }}</p>
+                        <span class="text-xl font-black text-slate-300">VS</span>
+                        <div class="flex flex-col items-center gap-2 min-w-0">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-100 text-[#4062D6] flex items-center justify-center text-lg font-black">{{ strtoupper(substr($nextCoachMatch->opponent ?: 'L', 0, 1)) }}</div>
+                            <span class="text-xs font-bold text-[#1e293b] text-center">{{ $nextCoachMatch->opponent ?: 'Tim lawan belum ditentukan' }}</span>
                         </div>
-                        <span class="rounded-full bg-blue-50 text-[#4062D6] px-2.5 py-1 text-[9px] font-bold">Mendatang</span>
-                    </article>
-                @empty
-                    <p class="rounded-xl bg-slate-50 p-5 text-center text-xs text-slate-500">{{ $isAssignedCoach ? 'Belum ada jadwal mendatang untuk tim Anda.' : 'Belum ada jadwal pertandingan mendatang.' }}</p>
-                @endforelse
-            </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> Tanggal</p>
+                            <p class="text-[11px] font-bold text-[#1e293b]">{{ $nextCoachMatch->match_date->format('d M Y') }}</p>
+                        </div>
+                        <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Kick-off</p>
+                            <p class="text-[11px] font-bold text-[#1e293b]">{{ $nextCoachMatch->match_date->format('H:i') }} WIB</p>
+                        </div>
+                        <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Lokasi</p>
+                            <p class="text-[11px] font-bold text-[#1e293b] truncate">{{ $nextCoachMatch->venue ?: 'Belum ditentukan' }}</p>
+                        </div>
+                        <div class="bg-white border border-slate-100 rounded-xl px-3 py-2.5">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1"><i data-lucide="layout-grid" class="w-3 h-3"></i> Formasi</p>
+                            <p class="text-[11px] font-bold text-[#1e293b]">{{ $nextCoachMatch->formation ?: 'Belum ditentukan' }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between gap-3">
+                        <span class="inline-block px-2.5 py-1 bg-amber-50 border border-amber-100 text-amber-700 rounded-full text-[9px] font-black uppercase tracking-wider">{{ $nextCoachMatch->status }}</span>
+                        <a href="{{ route('matches.lineup', $nextCoachMatch) }}" class="text-[10px] font-bold text-[#4062D6] hover:text-[#3251b5]">Atur line-up</a>
+                    </div>
+                </article>
+
+                @if($otherCoachMatches->isNotEmpty())
+                    <div class="mt-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Jadwal Berikutnya</p>
+                        <div class="space-y-2">
+                            @foreach($otherCoachMatches as $match)
+                                <article class="rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <p class="text-[12px] font-bold text-[#1e293b] truncate">{{ $match->title }} <span class="font-medium text-slate-400">vs {{ $match->opponent ?: 'Tim lawan belum ditentukan' }}</span></p>
+                                            <p class="text-[10px] text-slate-500 mt-1">{{ $match->match_date->format('d M Y') }} · {{ $match->match_date->format('H:i') }} WIB</p>
+                                        </div>
+                                        <span class="shrink-0 rounded-full bg-amber-50 text-amber-700 px-2.5 py-1 text-[9px] font-bold">{{ $match->status }}</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[10px] text-slate-500">
+                                        <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i>{{ $match->venue ?: 'Lokasi belum ditentukan' }}</span>
+                                        <span class="inline-flex items-center gap-1"><i data-lucide="layout-grid" class="w-3 h-3"></i>Formasi {{ $match->formation ?: 'belum ditentukan' }}</span>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            @else
+                <p class="rounded-xl bg-slate-50 p-5 text-center text-xs text-slate-500">{{ $isAssignedCoach ? 'Belum ada jadwal mendatang untuk tim Anda.' : 'Belum ada jadwal pertandingan mendatang.' }}</p>
+            @endif
 
             <div class="border-t border-slate-100 mt-6 pt-5">
                 <h3 class="font-bold text-[#1e293b] text-xs mb-3">Hasil Terbaru</h3>
@@ -89,7 +145,7 @@
             </div>
         </section>
 
-        <section class="bg-white rounded-2xl border border-slate-200 p-6">
+        <section class="bg-white rounded-2xl border border-slate-200 p-5">
             <div class="flex items-center justify-between gap-3 mb-5">
                 <div>
                     <h2 class="font-bold text-[#1e293b] text-sm">{{ $isAssignedCoach ? 'Tim yang Ditangani' : 'Semua Tim' }}</h2>
