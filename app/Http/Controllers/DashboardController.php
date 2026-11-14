@@ -7,6 +7,7 @@ use App\Models\MatchSession;
 use App\Models\Player;
 use App\Models\Statistic;
 use App\Models\User;
+use App\Models\VectorDirection;
 
 class DashboardController extends Controller
 {
@@ -71,8 +72,60 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('player_id');
         } elseif ($activeRole === 'Analis') {
-            $data['liveMatches'] = MatchSession::where('status', 'Live')->orderBy('match_date', 'desc')->get();
-            $data['upcomingMatchesData'] = MatchSession::where('status', 'Upcoming')->orderBy('match_date', 'asc')->take(5)->get();
+            $isOwnAnalyst = $user->role === 'Analis';
+            $analystStatistics = fn () => Statistic::query()
+                ->when($isOwnAnalyst, fn ($query) => $query->where('analyst_id', $user->id));
+
+            $matches = MatchSession::query()
+                ->orderByRaw("CASE WHEN status = 'Live' THEN 0 WHEN status = 'Upcoming' THEN 1 ELSE 2 END")
+                ->orderByRaw("CASE WHEN status = 'Upcoming' THEN match_date END ASC")
+                ->orderByRaw("CASE WHEN status != 'Upcoming' THEN match_date END DESC")
+                ->take(20)
+                ->get();
+            $matchStats = $analystStatistics()
+                ->whereIn('match_id', $matches->modelKeys())
+                ->selectRaw('match_id, COUNT(*) as entries, SUM(goal) as goals, SUM(assist) as assists, SUM(shooting_on_target + shooting_off_target) as shots, SUM(successful_passes) as passes')
+                ->groupBy('match_id')
+                ->get()
+                ->keyBy('match_id');
+
+            $topPlayers = Player::query()
+                ->join('statistics', 'players.id', '=', 'statistics.player_id')
+                ->leftJoin('clubs', 'players.club_id', '=', 'clubs.id')
+                ->when($isOwnAnalyst, fn ($query) => $query->where('statistics.analyst_id', $user->id))
+                ->selectRaw('players.id, players.name, players.jersey_number, clubs.name as club_name, SUM(statistics.goal) as goals, SUM(statistics.assist) as assists, COUNT(DISTINCT statistics.match_id) as matches')
+                ->groupBy('players.id', 'players.name', 'players.jersey_number', 'clubs.name')
+                ->orderByDesc('goals')
+                ->orderByDesc('assists')
+                ->take(5)
+                ->get();
+
+            $monthlyGoals = collect(range(5, 0))->map(function ($monthsAgo) use ($analystStatistics) {
+                $month = now()->startOfMonth()->subMonths($monthsAgo);
+                $goals = $analystStatistics()
+                    ->whereBetween('created_at', [$month->copy(), $month->copy()->endOfMonth()])
+                    ->sum('goal');
+
+                return [
+                    'label' => $month->translatedFormat('M'),
+                    'goals' => (int) $goals,
+                ];
+            });
+
+            $data['isOwnAnalyst'] = $isOwnAnalyst;
+            $data['analystMatches'] = $matches;
+            $data['analystMatchStats'] = $matchStats;
+            $data['analystTopPlayers'] = $topPlayers;
+            $data['analystMonthlyGoals'] = $monthlyGoals;
+            $data['analystLiveCount'] = MatchSession::where('status', 'Live')->count();
+            $data['analystUpcomingCount'] = MatchSession::where('status', 'Upcoming')->count();
+            $data['analystCompletedCount'] = MatchSession::where('status', 'Selesai')->count();
+            $data['analystGoals'] = $analystStatistics()->sum('goal');
+            $data['analystAssists'] = $analystStatistics()->sum('assist');
+            $data['analystEntries'] = $analystStatistics()->count();
+            $data['analystVectors'] = VectorDirection::query()
+                ->when($isOwnAnalyst, fn ($query) => $query->where('analyst_id', $user->id))
+                ->count();
         } elseif ($activeRole === 'Pemain') {
             $data['totalGoals'] = Statistic::sum('goal');
             $data['totalAssists'] = Statistic::sum('assist');
