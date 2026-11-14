@@ -16,9 +16,15 @@ class MatchController extends Controller
         $view = $request->query('view', 'table') === 'card' ? 'card' : 'table';
         $perPage = $view === 'card' ? 9 : 10; // card: 3x3, tabel: 10 baris
 
+        $matchesQuery = MatchSession::query();
+        if (auth()->user()->role === 'Pelatih') {
+            $clubNames = Club::where('coach_id', auth()->id())->pluck('name');
+            $matchesQuery->whereIn('title', $clubNames);
+        }
+
         // Urutan: (1) pertandingan Live, (2) jadwal mendatang dari yang paling dekat,
         // (3) jadwal yang sudah lewat dari yang paling baru.
-        $matches = MatchSession::query()
+        $matches = $matchesQuery
             ->orderByRaw("CASE WHEN status = 'Live' THEN 0 WHEN match_date >= ? THEN 1 ELSE 2 END", [$now])
             ->orderByRaw("CASE WHEN match_date >= ? THEN match_date END ASC", [$now])
             ->orderByRaw("CASE WHEN match_date < ? THEN match_date END DESC", [$now])

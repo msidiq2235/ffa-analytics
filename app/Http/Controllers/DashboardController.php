@@ -41,16 +41,10 @@ class DashboardController extends Controller
             $players = $playersQuery->get();
             $playerIds = $players->modelKeys();
 
-            $coachMatches = function () use ($isAssignedCoach, $clubNames, $clubIds) {
+            $coachMatches = function () use ($isAssignedCoach, $clubNames) {
                 $query = MatchSession::query();
                 if ($isAssignedCoach) {
-                    $query->where(function ($query) use ($clubNames, $clubIds) {
-                        $query->whereIn('title', $clubNames);
-
-                        if ($clubIds !== []) {
-                            $query->orWhereHas('players', fn ($playerQuery) => $playerQuery->whereIn('players.club_id', $clubIds));
-                        }
-                    });
+                    $query->whereIn('title', $clubNames);
                 }
 
                 return $query;

@@ -34,19 +34,21 @@ class CoachDashboardTest extends TestCase
             'status' => 'Aktif',
         ]);
 
-        MatchSession::create([
+        $assignedMatch = MatchSession::create([
             'title' => $club->name,
             'match_date' => now()->addDays(2),
             'opponent' => 'Rival Akademi',
             'status' => 'Upcoming',
             'created_by' => $analyst->id,
         ]);
-        MatchSession::create([
+        $otherMatch = MatchSession::create([
             'title' => $otherClub->name,
             'match_date' => now()->addDays(3),
+            'opponent' => 'Other Academy',
             'status' => 'Upcoming',
             'created_by' => $analyst->id,
         ]);
+        $otherMatch->players()->attach($player);
 
         Statistic::create([
             'match_id' => MatchSession::where('title', $club->name)->value('id'),
@@ -69,6 +71,8 @@ class CoachDashboardTest extends TestCase
             ->assertSee('Future FC')
             ->assertSee('Pemain Future')
             ->assertSee('Rival Akademi')
+            ->assertDontSee('Other Academy')
+            ->assertViewHas('upcomingMatches', 1)
             ->assertDontSee('Pemain Rival')
             ->assertDontSee('Rival FC')
             ->assertSee('Total Gol')
