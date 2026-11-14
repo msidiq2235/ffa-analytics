@@ -27,15 +27,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('password.update');
 
-    // Fitur Switch Role (Khusus Super Admin)
+    // Fitur switch role untuk Super Admin dan Admin.
     Route::post('/switch-role', function (Request $request) {
+        $user = auth()->user();
+        abort_unless(in_array($user->role, ['Super Admin', 'Admin'], true), 403);
+
+        $allowedRoles = $user->role === 'Super Admin'
+            ? ['Super Admin', 'Pelatih', 'Analis', 'Pemain']
+            : ['Admin', 'Pelatih', 'Analis', 'Pemain'];
         $request->validate([
-            'active_role' => 'required|string|in:Super Admin,Pelatih,Analis,Pemain'
+            'active_role' => 'required|string|in:' . implode(',', $allowedRoles),
         ]);
 
-        if (auth()->user()->role === 'Super Admin') {
-            session(['active_role' => $request->active_role]);
-        }
+        session(['active_role' => $request->active_role]);
 
         return back();
     })->name('switch.role');

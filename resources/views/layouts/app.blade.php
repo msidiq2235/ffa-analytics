@@ -21,7 +21,9 @@ body { font-family: 'Inter', sans-serif; }
 <body class="bg-[#F8FAFC] min-h-screen text-slate-800 antialiased">
 @php
 $realRole = auth()->user()->role ?? 'Super Admin';
-$activeRole = session('active_role', $realRole);
+$activeRole = in_array($realRole, ['Super Admin', 'Admin'], true)
+? session('active_role', $realRole)
+: $realRole;
 @endphp
 <div class="flex min-h-screen overflow-hidden">
 <aside id="sidebar" class="w-64 bg-[#183262] text-slate-300 flex flex-col shrink-0 min-h-screen z-20 transition-all duration-300 ease-in-out">
@@ -119,13 +121,17 @@ $activeRole = session('active_role', $realRole);
 <p class="text-[9px] font-bold text-yellow-400 uppercase tracking-widest mt-0.5">{{ $activeRole }}</p>
 </div>
 </div>
-@if($realRole === 'Super Admin')
+@if(in_array($realRole, ['Super Admin', 'Admin'], true))
 <div class="mb-3 sidebar-text transition-all">
 <form action="{{ route('switch.role') }}" method="POST" id="roleSwitchForm">
 @csrf
 <div class="relative">
 <select name="active_role" onchange="this.form.submit()" class="w-full bg-black/20 hover:bg-black/30 border border-white/10 text-blue-100 text-[10px] font-semibold py-2 pl-3 pr-7 rounded-lg appearance-none focus:outline-none focus:border-blue-500/50 transition-colors cursor-pointer">
+@if($realRole === 'Admin')
+<option value="Admin" class="text-slate-800" {{ $activeRole == 'Admin' ? 'selected' : '' }}>Mode: Admin</option>
+@else
 <option value="Super Admin" class="text-slate-800" {{ $activeRole == 'Super Admin' ? 'selected' : '' }}>Mode: Super Admin</option>
+@endif
 <option value="Pelatih" class="text-slate-800" {{ $activeRole == 'Pelatih' ? 'selected' : '' }}>Mode: Pelatih</option>
 <option value="Analis" class="text-slate-800" {{ $activeRole == 'Analis' ? 'selected' : '' }}>Mode: Analis</option>
 <option value="Pemain" class="text-slate-800" {{ $activeRole == 'Pemain' ? 'selected' : '' }}>Mode: Pemain</option>
