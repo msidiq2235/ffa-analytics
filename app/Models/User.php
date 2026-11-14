@@ -32,4 +32,9 @@ class User extends Authenticatable
             'last_seen' => 'datetime',
         ];
     }
+
+    public function clubs()
+    {
+        return $this->hasMany(Club::class, 'coach_id');
+    }
 }

@@ -11,6 +11,16 @@
     <form action="{{ route('clubs.update', $club->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
+
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-[12px] text-rose-600">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         
         <div class="space-y-6">
             <!-- Input Nama Klub -->
@@ -21,6 +31,25 @@
                 </label>
                 <input type="text" id="name" name="name" value="{{ old('name', $club->name) }}" required 
                        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+            </div>
+
+            <div>
+                <label for="coach_id" class="block text-[13px] font-bold text-slate-700 mb-2 flex items-center gap-2">
+                    <i data-lucide="clipboard-list" class="w-4 h-4 text-[#4062D6]"></i>
+                    <span>Penanggung Jawab (Pelatih)</span>
+                </label>
+                <select id="coach_id" name="coach_id" required
+                        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#4062D6] focus:ring-1 focus:ring-[#4062D6] transition-all shadow-sm">
+                    <option value="" disabled {{ old('coach_id', $club->coach_id) ? '' : 'selected' }}>Pilih pelatih</option>
+                    @foreach($coaches as $coach)
+                        <option value="{{ $coach->id }}" {{ old('coach_id', $club->coach_id) == $coach->id ? 'selected' : '' }}>
+                            {{ $coach->name }} ({{ $coach->email }})
+                        </option>
+                    @endforeach
+                </select>
+                @if($coaches->isEmpty())
+                    <p class="text-[11px] text-amber-600 mt-2">Belum ada user dengan role Pelatih. Tambahkan akun Pelatih terlebih dahulu.</p>
+                @endif
             </div>
             
             <!-- Input Logo Klub -->

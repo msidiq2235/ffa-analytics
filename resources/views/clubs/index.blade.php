@@ -38,7 +38,11 @@
             </div>
 
             <!-- Nama Tim -->
-            <h3 class="text-xl font-bold text-[#1e293b] mb-6">{{ $club->name }}</h3>
+            <h3 class="text-xl font-bold text-[#1e293b] mb-2">{{ $club->name }}</h3>
+            <p class="text-[12px] text-slate-500 mb-6">
+                Penanggung jawab:
+                <span class="font-semibold text-slate-700">{{ $club->coach?->name ?? 'Belum ditentukan' }}</span>
+            </p>
 
             <!-- Tombol Aksi -->
             <div class="w-full flex flex-col gap-3 mt-auto">

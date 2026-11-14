@@ -34,6 +34,7 @@
                 <div>
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Daftar Anggota Tim</h3>
                     <p class="text-[15px] font-bold text-[#1e293b] mt-1">{{ $club->name }} <span class="text-[12px] font-medium text-slate-400 ml-1">· {{ count($squad) }} pemain</span></p>
+                    <p class="text-[12px] text-slate-500 mt-1">Penanggung jawab: <span class="font-semibold text-slate-700">{{ $club->coach?->name ?? 'Belum ditentukan' }}</span></p>
                 </div>
 
                 <!-- Shortcut: tambah pemain khusus tim ini -->
