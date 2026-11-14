@@ -12,14 +12,18 @@ class ClubController extends Controller
 {
     public function index()
     {
-        // Menampilkan daftar klub beserta jumlah pemainnya
-        $clubs = Club::with(['coach'])->withCount('players')->get();
+        $clubs = $this->clubsVisibleToCurrentUser()
+            ->with(['coach'])
+            ->withCount('players')
+            ->get();
+
         return view('clubs.index', compact('clubs'));
     }
 
     public function create()
     {
         $coaches = User::where('role', 'Pelatih')->orderBy('name')->get(['id', 'name', 'email']);
+
         return view('clubs.create', compact('coaches'));
     }
 
@@ -47,17 +51,21 @@ class ClubController extends Controller
 
     public function destroy(Club $club)
     {
-        $club->delete();
+        $this->clubsVisibleToCurrentUser()->findOrFail($club->id)->delete();
+
         return redirect()->route('clubs.index')->with('success', 'Klub berhasil dihapus!');
     }
+
     public function show(Request $request, $id)
     {
-        $club = Club::with('coach')->findOrFail($id);
+        $club = $this->clubsVisibleToCurrentUser()
+            ->with('coach')
+            ->findOrFail($id);
 
         // Daftar squad klub ini (mendukung pencarian nama lewat ?search=)
         $players = $club->players()
             ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%');
             })
             ->orderBy('jersey_number')
             ->get();
@@ -67,8 +75,9 @@ class ClubController extends Controller
 
     public function edit($id)
     {
-        $club = Club::findOrFail($id);
+        $club = $this->clubsVisibleToCurrentUser()->findOrFail($id);
         $coaches = User::where('role', 'Pelatih')->orderBy('name')->get(['id', 'name', 'email']);
+
         return view('clubs.edit', compact('club', 'coaches'));
     }
 
@@ -80,8 +89,8 @@ class ClubController extends Controller
             'coach_id' => ['required', Rule::exists('users', 'id')->where('role', 'Pelatih')],
         ]);
 
-        $club = \App\Models\Club::findOrFail($id);
-        
+        $club = $this->clubsVisibleToCurrentUser()->findOrFail($id);
+
         $data = [
             'name' => $request->name,
             'coach_id' => $request->coach_id,
@@ -100,5 +109,16 @@ class ClubController extends Controller
         $club->update($data);
 
         return redirect()->route('clubs.index')->with('success', 'Informasi klub berhasil diperbarui!');
+    }
+
+    private function clubsVisibleToCurrentUser()
+    {
+        $query = Club::query();
+
+        if (auth()->user()->role === 'Pelatih') {
+            $query->where('coach_id', auth()->id());
+        }
+
+        return $query;
     }
 }
