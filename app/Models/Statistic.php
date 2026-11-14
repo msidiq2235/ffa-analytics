@@ -1,8 +1,46 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
+
 class Statistic extends Model
 {
-protected $fillable=['match_id','player_id','analyst_id','minute','input_time','shooting_on_target','goal','shots','shooting_off_target','penalty_goal','shot_on_target_alternate','assist','chance_created','successful_passes','successful_crosses','dribble','successful_dribble','unsuccessful_dribble','tackles','fouls_committed','interceptions','dribbled_past'];
+    protected $fillable = [
+        'match_id',
+        'player_id',
+        'analyst_id',
+        'minute',
+        'input_time',
+        'shooting_on_target',
+        'goal',
+        'shots',
+        'shooting_off_target',
+        'penalty_goal',
+        'shot_on_target_alternate',
+        'assist',
+        'chance_created',
+        'successful_passes',
+        'successful_crosses',
+        'dribble',
+        'successful_dribble',
+        'unsuccessful_dribble',
+        'tackles',
+        'fouls_committed',
+        'interceptions',
+        'dribbled_past',
+        'shots_faced',
+        'goals_conceded',
+        'clean_sheets',
+        'saves',
+        'penalty_saves',
+        'high_claims',
+        'punches',
+        'sweeper_actions',
+        'catches',
+        'crosses_stopped',
+        'accurate_goal_kicks',
+        'unsuccessful_passes',
+        'accurate_throws',
+    ];
 }

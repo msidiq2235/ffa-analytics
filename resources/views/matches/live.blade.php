@@ -14,11 +14,12 @@
     $offsets = ['LW' => 'mt-12', 'RW' => 'mt-12', 'DM' => 'mt-14', 'CB' => 'mt-8'];
 
     $pitchPlayer = function ($p, $default = '00') use ($jersey, $offsets) {
-        $pos = $p->pivot->position ?? '';
+        $pos = $p->pivot->position === 'Cadangan' ? ($p->position ?? 'Cadangan') : ($p->pivot->position ?? '');
+        $displayName = $p->popular_name ?: $p->name;
         $off = $offsets[$pos] ?? '';
-        $name = e($p->name);
+        $name = e($displayName);
         $num = e($jersey($p, $default));
-        return '<div class="flex flex-col items-center cursor-pointer pitch-player group ' . $off . '" data-id="' . $p->id . '" onclick="selectPlayer(' . $p->id . ', \'' . $name . '\')">'
+        return '<div class="flex flex-col items-center cursor-pointer pitch-player group ' . $off . '" role="button" tabindex="0" aria-label="Pilih ' . e($displayName) . '" data-id="' . $p->id . '" data-name="' . e($displayName) . '" data-position="' . e($pos) . '">'
             . '<span class="text-[13px] font-medium text-white mb-1.5 drop-shadow-md truncate max-w-[110px] text-center">' . $name . '</span>'
             . '<div class="pitch-circle w-11 h-11 rounded-full bg-[#111827] border-[3px] border-white text-white flex items-center justify-center text-[13px] font-bold transition-colors shadow-lg">' . $num . '</div>'
             . '</div>';
@@ -32,9 +33,10 @@
     $defs = $byPos(['LB'])->concat($byPos(['CB']))->concat($byPos(['RB']));
     $keepers = $byPos(['GK']);
 
-    $statRow = function ($key, $label) {
+    $statRow = function ($key, $label, $shortcut = null) {
+        $shortcut = $shortcut ?? $key;
         return '<div class="flex items-stretch gap-3 h-full min-h-[56px]">'
-            . '<div class="aspect-square h-full min-w-[52px] shrink-0 bg-white border border-slate-200 rounded-xl shadow-md flex items-center justify-center text-[28px] font-medium text-slate-800">' . $key . '</div>'
+            . '<div class="aspect-square h-full min-w-[52px] shrink-0 bg-white border border-slate-200 rounded-xl shadow-md flex items-center justify-center text-[22px] font-medium text-slate-800">' . $shortcut . '</div>'
             . '<div class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl shadow-md px-3 flex items-center justify-between gap-2">'
             . '<span class="text-[14px] xl:text-[15px] font-medium text-slate-800 leading-tight">' . $label . '</span>'
             . '<div class="flex items-center gap-1.5 shrink-0">'
@@ -51,7 +53,7 @@
     .pitch-player.is-selected:hover .pitch-circle { background-color: #00f58a; }
 </style>
 
-<div class="flex flex-col lg:flex-row gap-6 w-full items-stretch lg:h-[calc(100vh-150px)] lg:min-h-[900px]">
+<div class="flex flex-col lg:flex-row gap-5 w-full items-stretch lg:h-[calc(100vh-150px)] lg:min-h-[720px]">
 
     <!-- KOLOM KIRI: Cadangan + Roster + Kembali -->
     <div class="w-full lg:w-[280px] xl:w-[300px] flex flex-col gap-5 shrink-0 min-h-0">
@@ -62,9 +64,9 @@
             </div>
             <div class="flex-1 overflow-y-auto bg-[#eef0f4]" id="bench-container" ondragover="allowDrop(event)" ondrop="drop(event)">
                 @foreach($bench as $player)
-                <div class="bg-white border-b-[3px] border-[#eef0f4] px-5 py-3 flex items-center gap-4 cursor-grab hover:bg-slate-50 transition-colors bench-player" draggable="true" ondragstart="drag(event)" id="player-{{ $player->id }}" data-id="{{ $player->id }}" data-name="{{ $player->name }}" data-number="{{ $jersey($player) }}">
+                <div class="bg-white border-b-[3px] border-[#eef0f4] px-5 py-3 flex items-center gap-4 cursor-grab hover:bg-slate-50 transition-colors bench-player" draggable="true" ondragstart="drag(event)" id="player-{{ $player->id }}" data-id="{{ $player->id }}" data-name="{{ $player->popular_name ?: $player->name }}" data-number="{{ $jersey($player) }}" data-position="{{ $player->position ?? $player->pivot->position }}">
                     <div class="w-11 h-11 rounded-full bg-[#111c34] text-white flex items-center justify-center text-[14px] font-bold shrink-0">{{ $jersey($player) }}</div>
-                    <span class="text-[16px] font-medium text-slate-800 truncate">{{ $player->name }}</span>
+                    <span class="text-[16px] font-medium text-slate-800 truncate">{{ $player->popular_name ?: $player->name }}</span>
                 </div>
                 @endforeach
             </div>
@@ -157,6 +159,7 @@
         <div class="relative flex-1 min-h-0">
             <!-- Panel Isi Statistik -->
             <div class="h-full overflow-y-auto flex flex-col gap-4 hidden" id="stats-panel">
+                <div id="field-stats" class="flex flex-col gap-4">
                 <!-- Shooting -->
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col flex-[2] min-h-[190px]">
                     <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-6 py-3 font-semibold text-[18px] shrink-0 flex items-center gap-2">
@@ -178,10 +181,10 @@
                         <span>Passing</span>
                     </div>
                     <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-x-6 gap-y-3 p-4">
-                        {!! $statRow('5', 'Successful Passes') !!}
-                        {!! $statRow('7', 'Assist') !!}
-                        {!! $statRow('6', 'Successful Crosses') !!}
-                        {!! $statRow('8', 'Chance Created') !!}
+                        {!! $statRow('Q', 'Successful Passes') !!}
+                        {!! $statRow('E', 'Assist') !!}
+                        {!! $statRow('W', 'Successful Crosses') !!}
+                        {!! $statRow('R', 'Chance Created') !!}
                     </div>
                 </div>
 
@@ -193,9 +196,9 @@
                             <span>Possession</span>
                         </div>
                         <div class="flex-1 grid grid-rows-4 gap-3 p-4">
-                            {!! $statRow('Q', 'Dribble') !!}
-                            {!! $statRow('W', 'Successfull Dribble') !!}
-                            {!! $statRow('E', 'Unsuccessfull Dribble') !!}
+                            {!! $statRow('T', 'Dribble') !!}
+                            {!! $statRow('Y', 'Successful Dribble') !!}
+                            {!! $statRow('U', 'Unsuccessful Dribble') !!}
                         </div>
                     </div>
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
@@ -204,13 +207,55 @@
                             <span>Defending</span>
                         </div>
                         <div class="flex-1 grid grid-rows-4 gap-3 p-4">
-                            {!! $statRow('Z', 'Tackles') !!}
-                            {!! $statRow('X', 'Fouls Committed') !!}
-                            {!! $statRow('C', 'Dribbled Past') !!}
-                            {!! $statRow('V', 'Interceptions') !!}
+                            {!! $statRow('A', 'Tackles') !!}
+                            {!! $statRow('S', 'Fouls Committed') !!}
+                            {!! $statRow('F', 'Dribbled Past') !!}
+                            {!! $statRow('D', 'Interceptions') !!}
+                        </div>
                         </div>
                     </div>
                 </div>
+
+                        <div id="goalkeeper-stats" class="hidden flex flex-col gap-4">
+                            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-5 py-3 font-semibold text-[18px] flex items-center gap-2">
+                                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                    <span>Goalkeeping</span>
+                                </div>
+                                <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 p-4">
+                                    {!! $statRow('gk_shots_faced', 'Shots Faced', '1') !!}
+                                    {!! $statRow('gk_goals_conceded', 'Goals Conceded', '2') !!}
+                                    {!! $statRow('gk_clean_sheets', 'Clean Sheets', '3') !!}
+                                    {!! $statRow('gk_saves', 'Saves', '4') !!}
+                                    {!! $statRow('gk_penalty_saves', 'Penalty Saves', '5') !!}
+                                    {!! $statRow('gk_high_claims', 'High Claims', '6') !!}
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-5 py-3 font-semibold text-[18px] flex items-center gap-2">
+                                    <i data-lucide="hand" class="w-5 h-5"></i>
+                                    <span>Aerial &amp; Defensive</span>
+                                </div>
+                                <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 p-4">
+                                    {!! $statRow('gk_punches', 'Punches', '7') !!}
+                                    {!! $statRow('gk_sweeper_actions', 'Sweeper Actions', '8') !!}
+                                    {!! $statRow('gk_catches', 'Catches', '9') !!}
+                                    {!! $statRow('gk_crosses_stopped', 'Crosses Stopped', 'Q') !!}
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <div class="bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] text-white px-5 py-3 font-semibold text-[18px] flex items-center gap-2">
+                                    <i data-lucide="send" class="w-5 h-5"></i>
+                                    <span>Distribution</span>
+                                </div>
+                                <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 p-4">
+                                    {!! $statRow('gk_successful_passes', 'Successful Passes', 'W') !!}
+                                    {!! $statRow('gk_accurate_goal_kicks', 'Accurate Goal Kicks', 'E') !!}
+                                    {!! $statRow('gk_unsuccessful_passes', 'Unsuccessful Passes', 'R') !!}
+                                    {!! $statRow('gk_accurate_throws', 'Accurate Throws', 'T') !!}
+                                </div>
+                            </div>
+                        </div>
             </div>
 
             <!-- Placeholder sebelum player dipilih -->
@@ -246,6 +291,7 @@
 
 <script>
 let activePlayerId = null;
+let activePlayerPosition = null;
 let inputMode = false;
 let matchId = {{ $match->id }};
 let csrfToken = '{{ csrf_token() }}';
@@ -266,28 +312,43 @@ function toggleInputMode() {
     }
 }
 
-function selectPlayer(playerId, playerName) {
+function selectPlayer(playerId, playerName, position = '') {
     activePlayerId = playerId;
-    document.getElementById('active-player-name').innerHTML = `<i data-lucide="user-check" class="w-7 h-7 text-blue-200"></i><span class="truncate">${playerName}</span>`;
-    lucide.createIcons(); // Render ulang ikon Lucide pada nama pemain aktif
-    
+    activePlayerPosition = position;
+    const activeName = document.getElementById('active-player-name');
+    const icon = document.createElement('i');
+    icon.dataset.lucide = 'user-check';
+    icon.className = 'w-7 h-7 text-blue-200';
+    const name = document.createElement('span');
+    name.className = 'truncate';
+    name.textContent = playerName;
+    activeName.replaceChildren(icon, name);
     document.getElementById('stats-placeholder').classList.add('hidden');
     document.getElementById('stats-panel').classList.remove('hidden');
+    const isGoalkeeper = position === 'GK';
+    document.getElementById('field-stats').classList.toggle('hidden', isGoalkeeper);
+    document.getElementById('goalkeeper-stats').classList.toggle('hidden', !isGoalkeeper);
+    if (window.lucide) window.lucide.createIcons();
 
     document.querySelectorAll('.pitch-player').forEach(el => {
         el.classList.toggle('is-selected', String(el.dataset.id) === String(playerId));
     });
 
     fetch(`/matches/${matchId}/player-stats/${playerId}`)
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error(`Failed to load player statistics (${res.status})`);
+        return res.json();
+    })
     .then(data => {
+        if (String(activePlayerId) !== String(playerId)) return;
         if(data.success) {
             for (const [key, value] of Object.entries(data.stats)) {
                 const el = document.getElementById(`val-${key}`);
                 if (el) el.innerText = value;
             }
         }
-    });
+    })
+    .catch(error => console.error(error));
 }
 
 function executeStatUpdate(playerId, statKey, action, isUndo) {
@@ -297,7 +358,10 @@ function executeStatUpdate(playerId, statKey, action, isUndo) {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
         body: JSON.stringify({ player_id: playerId, stat_key: statKey, action: action })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error(`Failed to update statistic (${res.status})`);
+        return res.json();
+    })
     .then(data => {
         if(data.success) {
             if(playerId === activePlayerId) {
@@ -310,7 +374,8 @@ function executeStatUpdate(playerId, statKey, action, isUndo) {
                 logUndoHistory(playerId, statKey);
             }
         }
-    });
+    })
+    .catch(error => console.error(error));
 }
 
 function undoLastInput() {
@@ -356,18 +421,43 @@ document.addEventListener('keydown', (e) => {
         }
 
         if(activePlayerId) {
-            const keyMap = ['1','2','3','4','5','6','7','8','q','w','e','z','x','c','v'];
             const pressed = e.key.toLowerCase();
-            if(keyMap.includes(pressed)) {
-                executeStatUpdate(activePlayerId, pressed.toUpperCase(), 'increment', false);
-            }
+            const fieldKeys = {
+                '1': '1', '2': '2', '3': '3', '4': '4',
+                q: 'Q', w: 'W', e: 'E', r: 'R', t: 'T',
+                y: 'Y', u: 'U', a: 'A', s: 'S', d: 'D', f: 'F'
+            };
+            const goalkeeperKeys = {
+                '1': 'gk_shots_faced', '2': 'gk_goals_conceded',
+                '3': 'gk_clean_sheets', '4': 'gk_saves',
+                '5': 'gk_penalty_saves', '6': 'gk_high_claims',
+                '7': 'gk_punches', '8': 'gk_sweeper_actions',
+                '9': 'gk_catches', q: 'gk_crosses_stopped',
+                w: 'gk_successful_passes', e: 'gk_accurate_goal_kicks',
+                r: 'gk_unsuccessful_passes', t: 'gk_accurate_throws'
+            };
+            const statKey = activePlayerPosition === 'GK' ? goalkeeperKeys[pressed] : fieldKeys[pressed];
+            if (statKey) executeStatUpdate(activePlayerId, statKey, 'increment', false);
         }
     }
 });
 
 let draggedItem = null;
-function drag(e) { draggedItem = e.target; }
+function drag(e) { draggedItem = e.currentTarget; }
 function allowDrop(e) { e.preventDefault(); }
+document.getElementById('pitch-players').addEventListener('click', (e) => {
+    const player = e.target.closest('.pitch-player');
+    if (player) {
+        selectPlayer(player.dataset.id, player.dataset.name, player.dataset.position);
+    }
+});
+document.getElementById('pitch-players').addEventListener('keydown', (e) => {
+    const player = e.target.closest('.pitch-player');
+    if (player && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        selectPlayer(player.dataset.id, player.dataset.name, player.dataset.position);
+    }
+});
 function drop(e) {
     e.preventDefault();
     if(e.target.id === 'bench-container' || e.target.closest('#bench-container')) {
@@ -382,19 +472,34 @@ function dropToPitch(e) {
         cloneDragged.className = targetPlayer.className.replace('is-selected', '').trim();
         cloneDragged.removeAttribute('draggable');
         cloneDragged.removeAttribute('ondragstart');
-        cloneDragged.innerHTML = `
-            <span class="text-[13px] font-medium text-white mb-1.5 drop-shadow-md truncate max-w-[110px] text-center">${draggedItem.dataset.name}</span>
-            <div class="pitch-circle w-11 h-11 rounded-full bg-[#111827] border-[3px] border-white text-white flex items-center justify-center text-[13px] font-bold transition-colors shadow-lg">${draggedItem.dataset.number}</div>
-        `;
-        cloneDragged.setAttribute('onclick', `selectPlayer(${draggedItem.dataset.id}, '${draggedItem.dataset.name}')`);
+        const pitchName = document.createElement('span');
+        pitchName.className = 'text-[13px] font-medium text-white mb-1.5 drop-shadow-md truncate max-w-[110px] text-center';
+        pitchName.textContent = draggedItem.dataset.name;
+        const pitchNumber = document.createElement('div');
+        pitchNumber.className = 'pitch-circle w-11 h-11 rounded-full bg-[#111827] border-[3px] border-white text-white flex items-center justify-center text-[13px] font-bold transition-colors shadow-lg';
+        pitchNumber.textContent = draggedItem.dataset.number;
+        cloneDragged.replaceChildren(pitchName, pitchNumber);
+        cloneDragged.dataset.position = draggedItem.dataset.position;
+        cloneDragged.setAttribute('role', 'button');
+        cloneDragged.setAttribute('tabindex', '0');
+        cloneDragged.setAttribute('aria-label', `Pilih ${draggedItem.dataset.name}`);
 
-        const originalBenchHTML = `
-            <div class="bg-white border-b-[3px] border-[#eef0f4] px-5 py-3 flex items-center gap-4 cursor-grab hover:bg-slate-50 transition-colors bench-player" draggable="true" ondragstart="drag(event)" data-id="${targetPlayer.dataset.id}" data-name="${targetPlayer.querySelector('span').innerText}" data-number="${targetPlayer.querySelector('.pitch-circle').innerText}">
-                <div class="w-11 h-11 rounded-full bg-[#111c34] text-white flex items-center justify-center text-[14px] font-bold shrink-0">${targetPlayer.querySelector('.pitch-circle').innerText}</div>
-                <span class="text-[16px] font-medium text-slate-800 truncate">${targetPlayer.querySelector('span').innerText}</span>
-            </div>
-        `;
-        document.getElementById('bench-container').insertAdjacentHTML('beforeend', originalBenchHTML);
+        const originalBench = document.createElement('div');
+        originalBench.className = 'bg-white border-b-[3px] border-[#eef0f4] px-5 py-3 flex items-center gap-4 cursor-grab hover:bg-slate-50 transition-colors bench-player';
+        originalBench.draggable = true;
+        originalBench.ondragstart = drag;
+        originalBench.dataset.id = targetPlayer.dataset.id;
+        originalBench.dataset.name = targetPlayer.querySelector('span').textContent;
+        originalBench.dataset.number = targetPlayer.querySelector('.pitch-circle').textContent;
+        originalBench.dataset.position = targetPlayer.dataset.position;
+        const benchNumber = document.createElement('div');
+        benchNumber.className = 'w-11 h-11 rounded-full bg-[#111c34] text-white flex items-center justify-center text-[14px] font-bold shrink-0';
+        benchNumber.textContent = originalBench.dataset.number;
+        const benchName = document.createElement('span');
+        benchName.className = 'text-[16px] font-medium text-slate-800 truncate';
+        benchName.textContent = originalBench.dataset.name;
+        originalBench.replaceChildren(benchNumber, benchName);
+        document.getElementById('bench-container').appendChild(originalBench);
 
         targetPlayer.replaceWith(cloneDragged);
         draggedItem.remove();
@@ -404,7 +509,7 @@ function dropToPitch(e) {
 
 // Inisialisasi Lucide Icons
 document.addEventListener("DOMContentLoaded", function() {
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 });
 </script>
 @endsection

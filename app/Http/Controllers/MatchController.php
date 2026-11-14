@@ -154,21 +154,96 @@ class MatchController extends Controller
 
     public function getPlayerStats(MatchSession $match, $playerId)
     {
-        $stat = \App\Models\Statistic::where('match_id', $match->id)->where('player_id', $playerId)->where('analyst_id', auth()->id())->first();
-        $statsData = ['1'=>0,'2'=>0,'3'=>0,'4'=>0,'Q'=>0,'W'=>0,'E'=>0,'R'=>0,'T'=>0,'Y'=>0,'U'=>0,'A'=>0,'S'=>0,'D'=>0];
-        if($stat){$statsData=['1'=>$stat->shooting_on_target,'2'=>$stat->shooting_off_target,'3'=>$stat->goal,'4'=>$stat->penalty_goal,'Q'=>$stat->successful_passes,'W'=>$stat->successful_crosses,'E'=>$stat->assist,'R'=>$stat->chance_created,'T'=>$stat->dribble,'Y'=>$stat->successful_dribble,'U'=>$stat->unsuccessful_dribble,'A'=>$stat->tackles,'S'=>$stat->fouls_committed,'D'=>$stat->interceptions];}
-        return response()->json(['success'=>true,'stats'=>$statsData]);
+        $player = $match->players()->whereKey($playerId)->firstOrFail();
+        $isGoalkeeper = $player->pivot->position === 'GK'
+            || ($player->pivot->position === 'Cadangan' && $player->position === 'GK');
+        $stat = \App\Models\Statistic::where('match_id', $match->id)
+            ->where('player_id', $playerId)
+            ->where('analyst_id', auth()->id())
+            ->first();
+
+        $statsData = [];
+        foreach ($this->statisticKeyMap($isGoalkeeper) as $key => $column) {
+            $statsData[$key] = (int) ($stat?->{$column} ?? 0);
+        }
+
+        return response()->json([
+            'success' => true,
+            'position' => $player->pivot->position,
+            'stats' => $statsData,
+        ]);
     }
 
     public function storeStatistic(Request $request, MatchSession $match)
-    {   
-        $request->validate(['player_id'=>'required|exists:players,id','stat_key'=>'required|string','action'=>'required|in:increment,decrement']);
-        $keyMap=['1'=>'shooting_on_target','2'=>'shooting_off_target','3'=>'goal','4'=>'penalty_goal','Q'=>'successful_passes','W'=>'successful_crosses','E'=>'assist','R'=>'chance_created','T'=>'dribble','Y'=>'successful_dribble','U'=>'unsuccessful_dribble','A'=>'tackles','S'=>'fouls_committed','D'=>'interceptions'];
-        if(!array_key_exists($request->stat_key,$keyMap)){return response()->json(['error'=>'Invalid key'],400);}
-        $column=$keyMap[$request->stat_key];
-        $stat=\App\Models\Statistic::firstOrCreate(['match_id'=>$match->id,'player_id'=>$request->player_id,'analyst_id'=>auth()->id()]);
-        if($request->action==='increment'){$stat->increment($column);}else{if($stat->$column>0){$stat->decrement($column);}}
-        return response()->json(['success'=>true,'current_value'=>$stat->$column]);
+    {
+        $validated = $request->validate([
+            'player_id' => 'required|integer|exists:players,id',
+            'stat_key' => 'required|string',
+            'action' => 'required|in:increment,decrement',
+        ]);
+        $player = $match->players()->whereKey($validated['player_id'])->firstOrFail();
+        $isGoalkeeper = $player->pivot->position === 'GK'
+            || ($player->pivot->position === 'Cadangan' && $player->position === 'GK');
+        $keyMap = $this->statisticKeyMap($isGoalkeeper);
+
+        if (!array_key_exists($validated['stat_key'], $keyMap)) {
+            return response()->json(['error' => 'Invalid statistic for this player position.'], 422);
+        }
+
+        $column = $keyMap[$validated['stat_key']];
+        $stat = \App\Models\Statistic::firstOrCreate([
+            'match_id' => $match->id,
+            'player_id' => $player->id,
+            'analyst_id' => auth()->id(),
+        ]);
+
+        if ($validated['action'] === 'increment') {
+            $stat->increment($column);
+        } elseif ($stat->{$column} > 0) {
+            $stat->decrement($column);
+        }
+
+        return response()->json(['success' => true, 'current_value' => (int) $stat->{$column}]);
+    }
+
+    private function statisticKeyMap(bool $isGoalkeeper): array
+    {
+        if ($isGoalkeeper) {
+            return [
+                'gk_shots_faced' => 'shots_faced',
+                'gk_goals_conceded' => 'goals_conceded',
+                'gk_clean_sheets' => 'clean_sheets',
+                'gk_saves' => 'saves',
+                'gk_penalty_saves' => 'penalty_saves',
+                'gk_high_claims' => 'high_claims',
+                'gk_punches' => 'punches',
+                'gk_sweeper_actions' => 'sweeper_actions',
+                'gk_catches' => 'catches',
+                'gk_crosses_stopped' => 'crosses_stopped',
+                'gk_successful_passes' => 'successful_passes',
+                'gk_accurate_goal_kicks' => 'accurate_goal_kicks',
+                'gk_unsuccessful_passes' => 'unsuccessful_passes',
+                'gk_accurate_throws' => 'accurate_throws',
+            ];
+        }
+
+        return [
+            '1' => 'shooting_on_target',
+            '2' => 'shooting_off_target',
+            '3' => 'goal',
+            '4' => 'penalty_goal',
+            'Q' => 'successful_passes',
+            'W' => 'successful_crosses',
+            'E' => 'assist',
+            'R' => 'chance_created',
+            'T' => 'dribble',
+            'Y' => 'successful_dribble',
+            'U' => 'unsuccessful_dribble',
+            'A' => 'tackles',
+            'S' => 'fouls_committed',
+            'D' => 'interceptions',
+            'F' => 'dribbled_past',
+        ];
     }
 
     public function lockMatch(Request $request, MatchSession $match)
