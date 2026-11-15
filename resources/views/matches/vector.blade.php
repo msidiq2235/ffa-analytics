@@ -75,9 +75,9 @@
                 <button id="btn-action-PASS" onclick="setAction('PASS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-green-50 hover:text-green-600">PASS</button>
                 <button id="btn-action-CROSS" onclick="setAction('CROSS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-purple-50 hover:text-purple-600">CROSS</button>
             </div>
-            <div id="event-subtypes" class="mt-3 hidden border-t border-slate-100 pt-3">
-                <div id="subtype-title" class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">SUBTYPE</div>
-                <div id="subtype-buttons" class="flex flex-wrap gap-2"></div>
+            <div id="event-subtypes" class="mt-3 border-t border-slate-100 pt-3">
+                <div id="subtype-title" class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">PILIH SUBTYPE</div>
+                <div id="subtype-buttons" class="space-y-2"></div>
             </div>
         </div>
 
@@ -317,38 +317,44 @@ function setPlayer(id, number, name) {
     redrawAll();
 }
 
-function renderSubtypeButtons(action) {
+function renderSubtypeButtons() {
     const container = document.getElementById('event-subtypes');
-    const titleEl = document.getElementById('subtype-title');
     const btnWrapper = document.getElementById('subtype-buttons');
-    const config = EVENT_CONFIG[action];
-
-    if (!config) {
-        container.classList.add('hidden');
-        return;
-    }
-
     container.classList.remove('hidden');
-    titleEl.textContent = config.title;
     btnWrapper.innerHTML = '';
 
-    config.subtypes.forEach(item => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.dataset.subtype = item.key;
-        btn.textContent = item.label;
-        btn.onclick = () => setSubtype(item.key);
-        btn.className = 'subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors bg-slate-100 text-slate-500';
-        btnWrapper.appendChild(btn);
+    Object.entries(EVENT_CONFIG).forEach(([action, config]) => {
+        const group = document.createElement('div');
+        group.className = 'flex flex-wrap items-center gap-2';
+
+        const label = document.createElement('span');
+        label.className = 'w-12 shrink-0 text-[9px] font-extrabold tracking-wide text-slate-500';
+        label.textContent = action;
+        group.appendChild(label);
+
+        config.subtypes.forEach(item => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.action = action;
+            btn.dataset.subtype = item.key;
+            btn.textContent = item.label;
+            btn.onclick = () => setAction(action, item.key);
+            btn.className = 'subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors bg-slate-100 text-slate-500';
+            group.appendChild(btn);
+        });
+
+        btnWrapper.appendChild(group);
     });
 
     const legendEl = document.getElementById('vector-legend');
-    legendEl.innerHTML = config.subtypes.map(item =>
-        `<span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded" style="background-color:${item.color}"></i>${item.label}</span>`
+    legendEl.innerHTML = Object.entries(EVENT_CONFIG).flatMap(([action, config]) =>
+        config.subtypes.map(item =>
+            `<span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded" style="background-color:${item.color}"></i>${action} · ${item.label}</span>`
+        )
     ).join('') + `<span class="col-span-2 text-emerald-300 sm:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>`;
 }
 
-function setAction(action) {
+function setAction(action, subtype = EVENT_CONFIG[action]?.defaultSubtype || null) {
     selectedAction = action;
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.classList.remove('bg-red-500', 'bg-green-500', 'bg-purple-500', 'text-white');
@@ -360,9 +366,7 @@ function setAction(action) {
     if (action === 'PASS') activeBtn.classList.add('bg-green-500', 'text-white');
     if (action === 'CROSS') activeBtn.classList.add('bg-purple-500', 'text-white');
 
-    renderSubtypeButtons(action);
-    const defaultSub = EVENT_CONFIG[action]?.defaultSubtype || null;
-    setSubtype(defaultSub);
+    setSubtype(subtype);
     updateIndicator();
     redrawAll();
 }
@@ -373,13 +377,17 @@ function setSubtype(subtype) {
     if (!config) return;
 
     document.querySelectorAll('.subtype-btn').forEach(button => {
-        const item = config.subtypes.find(s => s.key === button.dataset.subtype);
-        const isSelected = button.dataset.subtype === subtype;
+        const item = button.dataset.action === selectedAction
+            ? config.subtypes.find(s => s.key === button.dataset.subtype)
+            : null;
+        const isSelected = button.dataset.action === selectedAction && button.dataset.subtype === subtype;
         button.className = `subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors ${
             isSelected && item ? `ring-1 ${item.badge}` : 'bg-slate-100 text-slate-500'
         }`;
     });
 }
+
+renderSubtypeButtons();
 
 function setPanel(panel) {
     const showSummary = panel === 'summary';

@@ -39,10 +39,12 @@
                     <i data-lucide="arrow-left" class="h-4 w-4"></i>
                     Profil Performa
                 </a>
-                <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[12px] font-bold text-[#1e3a8a] shadow-sm transition hover:bg-blue-50">
-                    <i data-lucide="users-round" class="h-4 w-4"></i>
-                    Laporan Tim
-                </a>
+                @if(auth()->user()->role !== 'Pemain')
+                    <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[12px] font-bold text-[#1e3a8a] shadow-sm transition hover:bg-blue-50">
+                        <i data-lucide="users-round" class="h-4 w-4"></i>
+                        Laporan Tim
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -193,10 +195,12 @@
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
             Kembali ke Performa Pemain
         </a>
-        <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-[12px] font-bold text-slate-600 transition hover:bg-slate-50">
-            <i data-lucide="users-round" class="h-4 w-4"></i>
-            Laporan Seluruh Tim
-        </a>
+        @if(auth()->user()->role !== 'Pemain')
+            <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-[12px] font-bold text-slate-600 transition hover:bg-slate-50">
+                <i data-lucide="users-round" class="h-4 w-4"></i>
+                Laporan Seluruh Tim
+            </a>
+        @endif
     </div>
 </div>
 

@@ -10,6 +10,7 @@
 @php
     $realRole = auth()->user()->role ?? 'Super Admin';
     $activeRole = session('active_role', $realRole);
+    $canUseAnalystFeatures = $realRole === 'Analis';
     $canDeleteMatches = in_array($realRole, ['Super Admin', 'Pelatih'], true);
 @endphp
 
@@ -90,7 +91,7 @@
                         </td>
                         <td class="py-4 px-6">
                             <div class="flex flex-wrap items-center justify-end gap-2">
-                                @if($activeRole === 'Analis')
+                                @if($canUseAnalystFeatures)
                                     <a href="{{ route('matches.vector', $match->id) }}" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-indigo-200 text-indigo-600 text-[11px] font-bold rounded-lg transition-colors">Vektor</a>
                                     <a href="{{ route('matches.live', $match->id) }}" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-amber-200 text-amber-600 text-[11px] font-bold rounded-lg transition-colors">Live Analytics</a>
                                     <a href="{{ route('matches.lineup', $match->id) }}" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-[#1e293b] text-[11px] font-bold rounded-lg transition-colors">Line-Up</a>
@@ -170,7 +171,7 @@
             
             <!-- TOMBOL AKSI BERDASARKAN ROLE -->
             <div class="space-y-3 mt-auto shrink-0">
-                @if($activeRole === 'Analis')
+                @if($canUseAnalystFeatures)
                     <div class="grid grid-cols-2 gap-3">
                         <a href="{{ route('matches.vector', $match->id) }}" class="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white hover:bg-slate-50 border border-indigo-200 text-indigo-600 text-[12px] font-bold rounded-xl transition-colors shadow-sm">
                             Vektor

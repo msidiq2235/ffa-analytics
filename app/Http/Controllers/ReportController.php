@@ -20,6 +20,17 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        if ($user->role === 'Pemain') {
+            $playerIds = Player::where('name', $user->name)->limit(2)->pluck('id');
+
+            if ($playerIds->count() === 1) {
+                return redirect()->route('reports.player.show', $playerIds->first());
+            }
+
+            return redirect()->route('dashboard');
+        }
+
         $tab = $request->query('tab', 'player') === 'match' ? 'match' : 'player';
 
         $players = Player::with('club')
@@ -78,13 +89,22 @@ class ReportController extends Controller
         return compact('match', 'stats', 'teamStats', 'vectors');
     }
 
+    private function authorizeTeamReport(): void
+    {
+        abort_if(auth()->user()->role === 'Pemain', 403);
+    }
+
     public function showMatchReport(MatchSession $match)
     {
+        $this->authorizeTeamReport();
+
         return view('reports.match-detail', $this->matchReportData($match));
     }
 
     public function exportMatchPdf(MatchSession $match)
     {
+        $this->authorizeTeamReport();
+
         $data = $this->matchReportData($match);
 
         return Pdf::loadView('reports.match-pdf', $data)
@@ -160,6 +180,20 @@ class ReportController extends Controller
             }])
             ->orderByDesc('match_date')
             ->get();
+    }
+
+    private function authorizePlayerReport(Player $player): void
+    {
+        $user = auth()->user();
+        if ($user->role !== 'Pemain') {
+            return;
+        }
+
+        $playerIds = Player::where('name', $user->name)->limit(2)->pluck('id');
+        abort_unless(
+            $playerIds->count() === 1 && (int) $playerIds->first() === $player->id,
+            403
+        );
     }
 
     private function playerStatisticGroups(): array
@@ -273,6 +307,7 @@ class ReportController extends Controller
      */
     public function showPlayerReport(Player $player)
     {
+        $this->authorizePlayerReport($player);
         $player->load('club');
 
         $matches = $this->playerMatches($player->id);
@@ -320,6 +355,7 @@ class ReportController extends Controller
 
     public function showPlayerMatchReport(Player $player, MatchSession $match)
     {
+        $this->authorizePlayerReport($player);
         abort_unless(
             $match->players()->where('players.id', $player->id)->exists(),
             404
@@ -357,6 +393,7 @@ class ReportController extends Controller
      */
     public function exportPlayerMatchPdf(Player $player, $matchId)
     {
+        $this->authorizePlayerReport($player);
         $match = MatchSession::findOrFail($matchId);
 
         $joined = $match->players()->where('players.id', $player->id)->exists();
@@ -405,6 +442,7 @@ class ReportController extends Controller
      */
     public function exportPlayerSeasonPdf(Player $player, int $season)
     {
+        $this->authorizePlayerReport($player);
         $player->load('club');
 
         $perMatch = $this->playerStatsPerMatch($player->id);
@@ -452,6 +490,7 @@ class ReportController extends Controller
     public function exportPlayerProfilePdf($player)
     {
         $player = Player::with(['club'])->findOrFail($player);
+        $this->authorizePlayerReport($player);
 
         $perMatch = $this->playerStatsPerMatch($player->id);
         $matches  = $this->playerMatches($player->id);

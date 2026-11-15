@@ -26,6 +26,19 @@ class DashboardController extends Controller
             $data['totalMatches'] = MatchSession::count();
             $data['recentMatches'] = MatchSession::orderBy('match_date', 'desc')->take(5)->get();
             $data['recentPlayers'] = Player::orderBy('created_at', 'desc')->take(5)->get();
+            $data['adminTopPlayers'] = Player::query()
+                ->join('statistics', 'players.id', '=', 'statistics.player_id')
+                ->leftJoin('clubs', 'players.club_id', '=', 'clubs.id')
+                ->selectRaw('players.id, players.name, players.popular_name, players.jersey_number, clubs.name as club_name,
+                    COALESCE(SUM(statistics.goal), 0) as goals,
+                    COALESCE(SUM(statistics.assist), 0) as assists,
+                    COUNT(DISTINCT statistics.match_id) as matches')
+                ->groupBy('players.id', 'players.name', 'players.popular_name', 'players.jersey_number', 'clubs.name')
+                ->orderByDesc('goals')
+                ->orderByDesc('assists')
+                ->orderBy('players.name')
+                ->take(5)
+                ->get();
         } elseif ($activeRole === 'Pelatih') {
             $isAssignedCoach = $user->role === 'Pelatih';
             $clubsQuery = Club::query();
@@ -127,10 +140,61 @@ class DashboardController extends Controller
                 ->when($isOwnAnalyst, fn ($query) => $query->where('analyst_id', $user->id))
                 ->count();
         } elseif ($activeRole === 'Pemain') {
-            $data['totalGoals'] = Statistic::sum('goal');
-            $data['totalAssists'] = Statistic::sum('assist');
-            $data['totalMatches'] = MatchSession::where('status', 'Selesai')->count();
-            $data['recentMatchesList'] = MatchSession::where('status', 'Selesai')->orderBy('match_date', 'desc')->take(5)->get();
+            $playerProfiles = Player::with('club')->where('name', $user->name)->get();
+            $data['playerProfile'] = $playerProfiles->count() === 1 ? $playerProfiles->first() : null;
+            $data['playerProfileAmbiguous'] = $playerProfiles->count() > 1;
+
+            if ($data['playerProfile']) {
+                $player = $data['playerProfile'];
+                $playerMatches = MatchSession::query()
+                    ->whereHas('players', fn ($query) => $query->where('players.id', $player->id))
+                    ->orderByDesc('match_date')
+                    ->get();
+                $playerMatchStats = Statistic::query()
+                    ->where('player_id', $player->id)
+                    ->whereIn('match_id', $playerMatches->modelKeys())
+                    ->selectRaw('match_id,
+                        COALESCE(SUM(goal), 0) as goals,
+                        COALESCE(SUM(assist), 0) as assists,
+                        COALESCE(SUM(shooting_on_target), 0) as shots_on_target,
+                        COALESCE(SUM(shooting_off_target), 0) as shots_off_target,
+                        COALESCE(SUM(successful_passes), 0) as successful_passes,
+                        COALESCE(SUM(successful_dribble), 0) as successful_dribbles,
+                        COALESCE(SUM(tackles), 0) as tackles')
+                    ->groupBy('match_id')
+                    ->get()
+                    ->keyBy('match_id');
+
+                $data['playerDashboardTotals'] = (object) [
+                    'matches' => $playerMatches->where('status', 'Selesai')->count(),
+                    'goals' => (int) $playerMatchStats->sum('goals'),
+                    'assists' => (int) $playerMatchStats->sum('assists'),
+                    'shots' => (int) ($playerMatchStats->sum('shots_on_target') + $playerMatchStats->sum('shots_off_target')),
+                    'passes' => (int) $playerMatchStats->sum('successful_passes'),
+                    'dribbles' => (int) $playerMatchStats->sum('successful_dribbles'),
+                ];
+                $data['playerRecentMatches'] = $playerMatches
+                    ->where('status', 'Selesai')
+                    ->take(5)
+                    ->values();
+                $data['playerNextMatch'] = $playerMatches
+                    ->where('status', 'Upcoming')
+                    ->sortBy('match_date')
+                    ->first();
+                $data['playerMatchStats'] = $playerMatchStats;
+                $data['playerMonthlyTrend'] = collect(range(5, 0))->map(function ($monthsAgo) use ($playerMatches, $playerMatchStats) {
+                    $month = now()->startOfMonth()->subMonths($monthsAgo);
+                    $monthMatches = $playerMatches->filter(
+                        fn ($match) => $match->status === 'Selesai' && $match->match_date->isSameMonth($month)
+                    );
+
+                    return [
+                        'label' => $month->translatedFormat('M'),
+                        'goals' => (int) $monthMatches->sum(fn ($match) => $playerMatchStats->get($match->id)->goals ?? 0),
+                        'assists' => (int) $monthMatches->sum(fn ($match) => $playerMatchStats->get($match->id)->assists ?? 0),
+                    ];
+                });
+            }
         }
 
         return view('dashboard', $data);
