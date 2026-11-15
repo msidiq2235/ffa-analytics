@@ -98,14 +98,50 @@ class ReportController extends Controller
      */
     private function playerStatsPerMatch(int $playerId)
     {
+        $columns = [
+            'goal',
+            'shots',
+            'shooting_on_target',
+            'shooting_off_target',
+            'penalty_goal',
+            'shot_on_target_alternate',
+            'assist',
+            'chance_created',
+            'successful_passes',
+            'successful_crosses',
+            'dribble',
+            'successful_dribble',
+            'unsuccessful_dribble',
+            'tackles',
+            'fouls_committed',
+            'interceptions',
+            'dribbled_past',
+            'shots_faced',
+            'goals_conceded',
+            'clean_sheets',
+            'saves',
+            'penalty_saves',
+            'high_claims',
+            'punches',
+            'sweeper_actions',
+            'catches',
+            'crosses_stopped',
+            'accurate_goal_kicks',
+            'unsuccessful_passes',
+            'accurate_throws',
+        ];
+        $selects = array_map(fn ($column) => "COALESCE(SUM({$column}),0) as {$column}", $columns);
+
         return Statistic::where('player_id', $playerId)
-            ->selectRaw('match_id,
+            ->selectRaw(
+                'match_id, ' . implode(', ', $selects) . ',
                 COALESCE(SUM(goal),0) as total_goals,
                 COALESCE(SUM(assist),0) as total_assists,
                 COALESCE(SUM(shooting_on_target),0) as total_shots_target,
                 COALESCE(SUM(shooting_off_target),0) as total_shots_off,
                 COALESCE(SUM(successful_passes),0) as total_passes,
-                COALESCE(SUM(tackles),0) as total_tackles')
+                COALESCE(SUM(tackles),0) as total_tackles'
+            )
             ->groupBy('match_id')
             ->get()
             ->keyBy('match_id');
@@ -119,8 +155,61 @@ class ReportController extends Controller
         return MatchSession::whereHas('players', function ($q) use ($playerId) {
                 $q->where('players.id', $playerId);
             })
+            ->with(['players' => function ($q) use ($playerId) {
+                $q->where('players.id', $playerId)->withPivot('position');
+            }])
             ->orderByDesc('match_date')
             ->get();
+    }
+
+    private function playerStatisticGroups(): array
+    {
+        return [
+            'Menyerang' => [
+                'goal' => 'Gol',
+                'shots' => 'Total tembakan',
+                'shooting_on_target' => 'Tembakan tepat sasaran',
+                'shooting_off_target' => 'Tembakan tidak tepat sasaran',
+                'penalty_goal' => 'Gol penalti',
+                'shot_on_target_alternate' => 'Tembakan tepat sasaran (alternatif)',
+                'assist' => 'Assist',
+                'chance_created' => 'Peluang tercipta',
+            ],
+            'Umpan' => [
+                'successful_passes' => 'Umpan berhasil',
+                'successful_crosses' => 'Umpan silang berhasil',
+            ],
+            'Penguasaan Bola' => [
+                'dribble' => 'Dribel',
+                'successful_dribble' => 'Dribel berhasil',
+                'unsuccessful_dribble' => 'Dribel gagal',
+            ],
+            'Bertahan' => [
+                'tackles' => 'Tackle',
+                'fouls_committed' => 'Pelanggaran',
+                'interceptions' => 'Intersepsi',
+                'dribbled_past' => 'Dilewati lawan',
+            ],
+            'Goalkeeping' => [
+                'shots_faced' => 'Shots faced',
+                'goals_conceded' => 'Goals conceded',
+                'clean_sheets' => 'Clean sheets',
+                'saves' => 'Saves',
+                'penalty_saves' => 'Penalty saves',
+                'high_claims' => 'High claims',
+            ],
+            'Aerial & Defensive' => [
+                'punches' => 'Punches',
+                'sweeper_actions' => 'Sweeper actions',
+                'catches' => 'Catches',
+                'crosses_stopped' => 'Crosses stopped',
+            ],
+            'Distribusi Kiper' => [
+                'accurate_goal_kicks' => 'Tendangan gawang akurat',
+                'unsuccessful_passes' => 'Umpan tidak berhasil',
+                'accurate_throws' => 'Lemparan akurat',
+            ],
+        ];
     }
 
     /** Musim berjalan Juli - Juni. Mengembalikan tahun mulai musim. */
@@ -170,8 +259,16 @@ class ReportController extends Controller
     {
         $player->load('club');
 
-        $perMatch = $this->playerStatsPerMatch($player->id);
-        $matches  = $this->playerMatches($player->id);
+        $matches = $this->playerMatches($player->id);
+        $perMatch = collect($this->playerStatsPerMatch($player->id)->all())
+            ->only($matches->pluck('id')->all());
+        $statisticGroups = $this->playerStatisticGroups();
+        $statisticTotals = [];
+        foreach ($statisticGroups as $group) {
+            foreach (array_keys($group) as $field) {
+                $statisticTotals[$field] = (int) $perMatch->sum($field);
+            }
+        }
 
         $totals = (object) [
             'goals'   => (int) $perMatch->sum('total_goals'),
@@ -207,7 +304,40 @@ class ReportController extends Controller
 
         return view('reports.player', compact(
             'player', 'totals', 'chartLabels', 'chartValues',
-            'radar', 'matches', 'seasons', 'opponentOf'
+            'radar', 'matches', 'seasons', 'opponentOf', 'perMatch',
+            'statisticGroups', 'statisticTotals'
+        ));
+    }
+
+    public function showPlayerMatchReport(Player $player, MatchSession $match)
+    {
+        abort_unless(
+            $match->players()->where('players.id', $player->id)->exists(),
+            404
+        );
+
+        $player->load('club');
+        $matchStats = $this->playerStatsPerMatch($player->id)->get($match->id);
+        $statisticGroups = $this->playerStatisticGroups();
+        $vectors = VectorDirection::where('match_id', $match->id)
+            ->where('player_id', $player->id)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+        $opponent = $this->opponentOf($match);
+        $lineupPlayer = $match->players()
+            ->where('players.id', $player->id)
+            ->first();
+        $position = $lineupPlayer?->pivot?->position;
+
+        return view('reports.player-match', compact(
+            'player',
+            'match',
+            'matchStats',
+            'statisticGroups',
+            'vectors',
+            'opponent',
+            'position'
         ));
     }
 
@@ -225,8 +355,16 @@ class ReportController extends Controller
 
         $player->load('club');
 
-        $perMatch = $this->playerStatsPerMatch($player->id)->only([$match->id]);
+        $perMatch = collect($this->playerStatsPerMatch($player->id)->all())
+            ->only([$match->id]);
         $matches  = collect([$match]);
+        $statisticGroups = $this->playerStatisticGroups();
+        $statisticTotals = [];
+        foreach ($statisticGroups as $group) {
+            foreach (array_keys($group) as $field) {
+                $statisticTotals[$field] = (int) $perMatch->sum($field);
+            }
+        }
 
         $totals = (object) [
             'goals'        => (int) ($perMatch[$match->id]->total_goals ?? 0),
@@ -236,13 +374,20 @@ class ReportController extends Controller
             'tackles'      => (int) ($perMatch[$match->id]->total_tackles ?? 0),
         ];
 
-        $seasonLabel = $this->seasonLabel($this->seasonStartYear($match->match_date));
-        $reportTitle = 'MATCH REPORT - ' . ($match->title ?? 'Pertandingan');
-        $radar       = $this->buildRadar($perMatch, 1);
-        $opponentOf  = fn ($m) => $this->opponentOf($m);
+        $vectors = VectorDirection::where('match_id', $match->id)
+            ->where('player_id', $player->id)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+        $lineupPlayer = $match->players()
+            ->where('players.id', $player->id)
+            ->first();
+        $position = $lineupPlayer?->pivot?->position;
+        $opponent = $this->opponentOf($match);
 
-        return Pdf::loadView('reports.player_season_pdf', compact(
-            'player', 'matches', 'perMatch', 'totals', 'seasonLabel', 'reportTitle', 'radar', 'opponentOf'
+        return Pdf::loadView('reports.player_match_pdf', compact(
+            'player', 'match', 'perMatch', 'totals', 'statisticGroups',
+            'statisticTotals', 'vectors', 'opponent', 'position'
         ))->stream('Laporan_' . Str::slug($player->name) . '_Match_' . $match->id . '.pdf');
     }
 
@@ -259,6 +404,14 @@ class ReportController extends Controller
             ->values();
 
         abort_if($matches->isEmpty(), 404);
+        $perMatch = collect($perMatch->all())->only($matches->pluck('id')->all());
+        $statisticGroups = $this->playerStatisticGroups();
+        $statisticTotals = [];
+        foreach ($statisticGroups as $group) {
+            foreach (array_keys($group) as $field) {
+                $statisticTotals[$field] = (int) $perMatch->sum($field);
+            }
+        }
 
         $totals = (object) [
             'goals'        => (int) $matches->sum(fn ($m) => $perMatch[$m->id]->total_goals ?? 0),
@@ -269,14 +422,18 @@ class ReportController extends Controller
         ];
 
         $seasonLabel = $this->seasonLabel($season);
+        $reportTitle = 'LAPORAN MUSIM';
 
         // Radar hanya dari pertandingan di musim ini
-        $radar = $this->buildRadar($perMatch->only($matches->pluck('id')->all()), $matches->count());
-
-        $opponentOf = fn ($m) => $this->opponentOf($m);
+        $radar = array_intersect_key(
+            $this->buildRadar($perMatch, $matches->count()),
+            array_flip(['Serangan', 'Bertahan', 'Operan'])
+        );
+        $opponentOf = fn ($match) => $this->opponentOf($match);
 
         return Pdf::loadView('reports.player_season_pdf', compact(
-            'player', 'matches', 'perMatch', 'totals', 'seasonLabel', 'radar', 'opponentOf'
+            'player', 'matches', 'perMatch', 'totals', 'seasonLabel', 'reportTitle',
+            'radar', 'statisticGroups', 'statisticTotals', 'opponentOf'
         ))->stream('Laporan_' . Str::slug($player->name) . '_Musim_' . $season . '.pdf');
     }
 

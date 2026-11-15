@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
     // Rute PDF Profil Umum Pemain (Ditambahkan di sini agar tidak error)
     Route::get('/reports/players/{player}/pdf', [ReportController::class, 'exportPlayerProfilePdf'])->name('reports.player.pdf');
     
+    Route::get('/reports/players/{player}/matches/{match}', [ReportController::class, 'showPlayerMatchReport'])
+        ->name('reports.player.match.show');
     Route::get('/reports/players/{player}/matches/{matchId}/pdf', [ReportController::class, 'exportPlayerMatchPdf'])->name('reports.player.match.pdf');
     Route::get('/reports/players/{player}/seasons/{season}/pdf', [ReportController::class, 'exportPlayerSeasonPdf'])
         ->where('season', '[0-9]{4}')

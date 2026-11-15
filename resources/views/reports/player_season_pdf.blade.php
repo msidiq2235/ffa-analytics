@@ -2,187 +2,215 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Season Report - {{ $player->name }}</title>
+<title>{{ $reportTitle }} - {{ $player->name }}</title>
 <style>
-body{font-family:Helvetica,Arial,sans-serif;font-size:11px;color:#333;margin:0;padding:20px;line-height:1.4;}
-.header{text-align:center;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #ea580c;}
-.header h2{margin:0 0 5px 0;color:#1e293b;font-size:24px;text-transform:uppercase;}
-.header p{margin:0;color:#64748b;font-size:13px;}
-.section-title{background:#ea580c;color:#fff;padding:5px 8px;font-size:11px;font-weight:bold;margin-top:18px;margin-bottom:8px;border-radius:3px;text-transform:uppercase;}
-table{width:100%;border-collapse:collapse;}
-.cards td{border:1px solid #e2e8f0;background:#f8fafc;text-align:center;padding:10px;width:16.66%;}
-.cards .num{font-size:20px;font-weight:bold;color:#1e293b;display:block;}
-.cards .lbl{font-size:8px;color:#64748b;text-transform:uppercase;font-weight:bold;letter-spacing:.5px;}
-.charts td{vertical-align:top;border:1px solid #e2e8f0;padding:6px;text-align:center;}
-.charts img{width:100%;}
-.charts .ct{font-size:10px;font-weight:bold;color:#475569;text-transform:uppercase;margin-bottom:4px;text-align:left;}
-.data th,.data td{border:1px solid #e2e8f0;padding:8px;text-align:center;}
-.data th{background:#f8fafc;color:#475569;font-weight:bold;text-transform:uppercase;font-size:10px;}
-.data td.left-align,.data th.left-align{text-align:left;}
-.data tr{page-break-inside:avoid;}
-.data tfoot td{font-weight:bold;background:#f8fafc;}
-.empty{text-align:center;color:#94a3b8;padding:25px 0;}
-.footer{margin-top:30px;text-align:right;font-size:10px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:6px;}
+@page{margin:24px 28px 30px}
+*{box-sizing:border-box}
+body{font-family:Helvetica,Arial,sans-serif;font-size:10px;color:#24312b;margin:0;line-height:1.35}
+.top-band{height:8px;background:#159447;margin:-24px -28px 16px}
+.brand{width:100%;border-collapse:collapse;margin-bottom:12px}
+.brand td{vertical-align:middle}
+.brand-mark{width:38px;height:38px;border-radius:19px;background:#159447;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding-top:10px}
+.brand-name{padding-left:9px;font-size:10px;font-weight:bold;color:#16783d;letter-spacing:1px}
+.brand-name span{display:block;color:#69766f;font-size:8px;font-weight:normal;letter-spacing:.4px;margin-top:3px}
+.report-tag{text-align:right;color:#16783d;font-size:9px;font-weight:bold;letter-spacing:.8px}
+.report-tag span{display:block;margin-top:4px;color:#69766f;font-size:8px;font-weight:normal;letter-spacing:0}
+.player-card{width:100%;border-collapse:collapse;background:#f1f8f3;border:1px solid #d5e9db}
+.player-card td{padding:10px;vertical-align:middle}
+.player-number{width:74px;text-align:center;background:#159447;color:#fff;font-size:24px;font-weight:bold}
+.player-name{font-size:19px;font-weight:bold;color:#173b28}
+.player-meta{font-size:9px;color:#637169;margin-top:4px}
+.profile-details{width:100%;border-collapse:collapse;margin-top:7px}
+.profile-details td{padding:2px 6px 2px 0;font-size:8px;color:#34443a}
+.profile-details strong{color:#738078;font-weight:normal}
+.title{margin:14px 0 7px;background:#159447;color:#fff;padding:6px 9px;font-size:9px;font-weight:bold;letter-spacing:.5px;text-transform:uppercase}
+.cards{width:100%;border-collapse:separate;border-spacing:5px 0}
+.cards td{background:#f1f8f3;border:1px solid #dcebe0;text-align:center;padding:8px 4px;width:16.66%}
+.cards .num{display:block;font-size:18px;font-weight:bold;color:#16783d}
+.cards .lbl{display:block;font-size:7px;color:#64736a;text-transform:uppercase;font-weight:bold;letter-spacing:.3px;margin-top:2px}
+.two-col{width:100%;border-collapse:separate;border-spacing:7px 0}
+.two-col>tbody>tr>td{width:50%;vertical-align:top;padding:0}
+.panel{border:1px solid #dce7df;padding:8px;background:#fff}
+.panel-title{font-size:9px;font-weight:bold;color:#254631;margin-bottom:5px}
+.panel-subtitle{font-size:8px;color:#748078;margin-bottom:6px}
+.chart-img{width:100%;height:220px}
+.pitch{width:100%;height:220px;display:block;background:#eff8f0}
+.pitch-note{font-size:7px;color:#748078;margin-top:4px}
+.legend{font-size:7px;color:#59675e;padding-top:5px}
+.legend span{display:inline-block;margin-right:10px}
+.dot{display:inline-block;width:6px;height:6px;border-radius:3px;margin-right:3px}
+.empty{height:218px;text-align:center;color:#8a978f;padding-top:95px;background:#f7faf8}
+.report-page{page-break-before:always}
+.page-heading{border-bottom:2px solid #159447;padding-bottom:7px;margin-bottom:10px}
+.page-heading h2{margin:0;color:#173b28;font-size:16px}
+.page-heading p{margin:3px 0 0;color:#748078;font-size:8px}
+.stat-columns{width:100%;border-collapse:separate;border-spacing:6px 0}
+.stat-columns td{width:50%;vertical-align:top;padding:0}
+.stat-group{width:100%;border-collapse:collapse;margin:0 0 9px;page-break-inside:avoid}
+.stat-group th{background:#e8f4eb;color:#176b39;text-align:left;padding:5px 7px;font-size:8px;text-transform:uppercase}
+.stat-group td{border-bottom:1px solid #e8eee9;padding:4px 7px;font-size:8px}
+.stat-group td:last-child{text-align:right;font-weight:bold;color:#263c2d;width:55px}
+.history{width:100%;border-collapse:collapse;margin-top:5px}
+.history th,.history td{border:1px solid #dfe8e1;padding:5px;text-align:center;font-size:8px}
+.history th{background:#e8f4eb;color:#176b39;text-transform:uppercase;font-size:7px}
+.history td:first-child,.history th:first-child{text-align:left}
+.footer{position:fixed;bottom:-17px;left:0;right:0;border-top:1px solid #dce7df;padding-top:5px;color:#849087;font-size:7px}
+.footer .right{float:right}
+.muted{color:#758279}
+table{page-break-inside:auto}
+tr{page-break-inside:avoid}
 </style>
 </head>
-<body>{{-- tambahkan onload="window.print()" jika memakai cetak browser, bukan DomPDF --}}
-
-<div class="header">
-    <h2>SEASON REPORT {{ $seasonLabel }}</h2>
-    <p>{{ $player->name }} (#{{ $player->jersey_number ?? $player->number ?? '-' }}) | {{ $player->position ?? '-' }} | {{ $player->club->name ?? '-' }}</p>
-</div>
-
-<!-- RINGKASAN -->
-<div class="section-title">Ringkasan Statistik</div>
-<table class="cards">
+<body>
+<div class="top-band"></div>
+<table class="brand">
     <tr>
-        <td><span class="num">{{ $totals->goals }}</span><span class="lbl">Total Gol</span></td>
-        <td><span class="num">{{ $totals->assists }}</span><span class="lbl">Total Assist</span></td>
-        <td><span class="num">{{ $matches->count() }}</span><span class="lbl">Pertandingan</span></td>
-        <td><span class="num">{{ $totals->shots_target }}</span><span class="lbl">Shots On</span></td>
-        <td><span class="num">{{ $totals->passes }}</span><span class="lbl">Passes</span></td>
-        <td><span class="num">{{ $totals->tackles }}</span><span class="lbl">Tackles</span></td>
+        <td style="width:38px"><div class="brand-mark">FFA</div></td>
+        <td class="brand-name">FFA ANALYTICS<span>PLAYER PERFORMANCE REPORT</span></td>
+        <td class="report-tag">{{ $reportTitle }}<span>Musim {{ $seasonLabel }}</span></td>
     </tr>
 </table>
 
-<!-- DIAGRAM -->
+<table class="player-card">
+    <tr>
+        <td class="player-number">#{{ $player->jersey_number ?? $player->number ?? '-' }}</td>
+        <td>
+            <div class="player-name">{{ $player->popular_name ?: $player->name }}</div>
+            <div class="player-meta">{{ $player->name }} &nbsp;|&nbsp; {{ $player->position ?? 'Posisi tidak tersedia' }} &nbsp;|&nbsp; {{ $player->club->name ?? 'Tim tidak tersedia' }}</div>
+            <table class="profile-details">
+                <tr>
+                    <td><strong>Jenis kelamin</strong> {{ $player->gender ?? '-' }}</td>
+                    <td><strong>Kaki dominan</strong> {{ $player->dominant_foot ?? '-' }}</td>
+                    <td><strong>Tinggi</strong> {{ $player->height_cm ? $player->height_cm . ' cm' : '-' }}</td>
+                    <td><strong>Berat</strong> {{ $player->weight_kg ? $player->weight_kg . ' kg' : '-' }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<div class="title">Ringkasan Performa</div>
+<table class="cards">
+    <tr>
+        <td><span class="num">{{ $matches->count() }}</span><span class="lbl">Pertandingan</span></td>
+        <td><span class="num">{{ $totals->goals }}</span><span class="lbl">Gol</span></td>
+        <td><span class="num">{{ $totals->assists }}</span><span class="lbl">Assist</span></td>
+        <td><span class="num">{{ $totals->shots_target }}</span><span class="lbl">Tembakan Tepat</span></td>
+        <td><span class="num">{{ $totals->passes }}</span><span class="lbl">Umpan Berhasil</span></td>
+        <td><span class="num">{{ $totals->tackles }}</span><span class="lbl">Tackle</span></td>
+    </tr>
+</table>
+
 @php
-    $f = fn($n) => number_format($n, 1, '.', '');
-
-    /* ---------- LINE CHART: gol & assist per pertandingan ---------- */
-    $labels = []; $gs = []; $as = [];
-    foreach ($matches as $m) {
-        $labels[] = \Carbon\Carbon::parse($m->match_date)->format('d/m');
-        $gs[]     = (int)($perMatch[$m->id]->total_goals ?? 0);
-        $as[]     = (int)($perMatch[$m->id]->total_assists ?? 0);
-    }
-    $cnt = count($labels);
-    $LW = 420; $LH = 240; $lpl = 30; $lpr = 14; $lpt = 32; $lpb = 34;
-    $max  = max(1, ...$gs, ...$as);
-    $step = max(1, (int)ceil($max / 4));
-    $top  = $step * (int)ceil($max / $step);
-    $px = fn($i) => $cnt > 1 ? $lpl + $i * ($LW - $lpl - $lpr) / ($cnt - 1) : $lpl + ($LW - $lpl - $lpr) / 2;
-    $py = fn($v) => $LH - $lpb - ($v / $top) * ($LH - $lpt - $lpb);
-
-    $line  = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$LW.'" height="'.$LH.'" viewBox="0 0 '.$LW.' '.$LH.'">';
-    $line .= '<rect width="'.$LW.'" height="'.$LH.'" fill="#ffffff"/>';
-    $line .= '<rect x="'.$lpl.'" y="10" width="10" height="10" fill="#ea580c"/><text x="'.($lpl + 15).'" y="19" font-size="10" fill="#475569" font-family="Helvetica">Gol</text>';
-    $line .= '<rect x="'.($lpl + 60).'" y="10" width="10" height="10" fill="#4062D6"/><text x="'.($lpl + 75).'" y="19" font-size="10" fill="#475569" font-family="Helvetica">Assist</text>';
-    for ($v = 0; $v <= $top; $v += $step) {
-        $line .= '<line x1="'.$lpl.'" y1="'.$f($py($v)).'" x2="'.($LW - $lpr).'" y2="'.$f($py($v)).'" stroke="#e2e8f0"/>';
-        $line .= '<text x="'.($lpl - 6).'" y="'.$f($py($v) + 3).'" font-size="9" fill="#94a3b8" text-anchor="end" font-family="Helvetica">'.$v.'</text>';
-    }
-    foreach ([[$gs, '#ea580c'], [$as, '#4062D6']] as [$data, $color]) {
-        $pts = [];
-        foreach ($data as $i => $v) { $pts[] = $f($px($i)).','.$f($py($v)); }
-        if ($cnt > 1) {
-            $line .= '<polyline points="'.implode(' ', $pts).'" fill="none" stroke="'.$color.'" stroke-width="2.5"/>';
-        }
-        foreach ($data as $i => $v) {
-            $line .= '<circle cx="'.$f($px($i)).'" cy="'.$f($py($v)).'" r="3.5" fill="'.$color.'"/>';
-        }
-    }
-    $every = $cnt > 8 ? 2 : 1;
-    foreach ($labels as $i => $lb) {
-        if ($i % $every === 0) {
-            $line .= '<text x="'.$f($px($i)).'" y="'.($LH - $lpb + 15).'" font-size="8" fill="#475569" text-anchor="middle" font-family="Helvetica">'.$lb.'</text>';
-        }
-    }
-    $line .= '<line x1="'.$lpl.'" y1="'.($LH - $lpb).'" x2="'.($LW - $lpr).'" y2="'.($LH - $lpb).'" stroke="#94a3b8"/>';
-    $line .= '</svg>';
-    $lineImg = 'data:image/svg+xml;base64,' . base64_encode($line);
-
-    /* ---------- RADAR CHART (butuh $radar dari controller, nilai 0-100) ---------- */
+    $f = fn ($number) => number_format((float) $number, 2, '.', '');
     $radarImg = null;
     if (!empty($radar)) {
-        $RW = 300; $RH = 240; $cx = 150; $cy = 125; $R = 78;
-        $keys = array_keys($radar); $vals = array_values($radar); $N = count($keys);
-        $ang  = fn($i) => -M_PI / 2 + 2 * M_PI * $i / $N;
-        $rad  = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$RW.'" height="'.$RH.'" viewBox="0 0 '.$RW.' '.$RH.'">';
-        $rad .= '<rect width="'.$RW.'" height="'.$RH.'" fill="#ffffff"/>';
+        $width = 300; $height = 220; $cx = 150; $cy = 112; $radius = 72;
+        $keys = array_keys($radar); $values = array_values($radar); $count = count($keys);
+        $angle = fn ($index) => -M_PI / 2 + 2 * M_PI * $index / max($count, 1);
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">';
+        $svg .= '<rect width="'.$width.'" height="'.$height.'" fill="#ffffff"/>';
         foreach ([0.25, 0.5, 0.75, 1] as $ring) {
-            $p = [];
-            for ($i = 0; $i < $N; $i++) { $p[] = $f($cx + $R*$ring*cos($ang($i))).','.$f($cy + $R*$ring*sin($ang($i))); }
-            $rad .= '<polygon points="'.implode(' ', $p).'" fill="none" stroke="#e2e8f0"/>';
+            $points = [];
+            for ($index = 0; $index < $count; $index++) {
+                $points[] = $f($cx + $radius * $ring * cos($angle($index))).','.$f($cy + $radius * $ring * sin($angle($index)));
+            }
+            $svg .= '<polygon points="'.implode(' ', $points).'" fill="none" stroke="#dce8df"/>';
         }
-        $p = [];
-        for ($i = 0; $i < $N; $i++) {
-            $rad .= '<line x1="'.$cx.'" y1="'.$cy.'" x2="'.$f($cx + $R*cos($ang($i))).'" y2="'.$f($cy + $R*sin($ang($i))).'" stroke="#e2e8f0"/>';
-            $v = max(0, min(100, (float)$vals[$i])) / 100;
-            $p[] = $f($cx + $R*$v*cos($ang($i))).','.$f($cy + $R*$v*sin($ang($i)));
-            $anchor = abs(cos($ang($i))) < 0.2 ? 'middle' : (cos($ang($i)) > 0 ? 'start' : 'end');
-            $rad .= '<text x="'.$f($cx + ($R + 12)*cos($ang($i))).'" y="'.$f($cy + ($R + 12)*sin($ang($i)) + 3).'" font-size="9" fill="#475569" text-anchor="'.$anchor.'" font-family="Helvetica">'.htmlspecialchars($keys[$i]).'</text>';
+        $points = [];
+        for ($index = 0; $index < $count; $index++) {
+            $x = $cx + $radius * cos($angle($index));
+            $y = $cy + $radius * sin($angle($index));
+            $svg .= '<line x1="'.$cx.'" y1="'.$cy.'" x2="'.$f($x).'" y2="'.$f($y).'" stroke="#dce8df"/>';
+            $value = max(0, min(100, (float) $values[$index])) / 100;
+            $points[] = $f($cx + $radius * $value * cos($angle($index))).','.$f($cy + $radius * $value * sin($angle($index)));
+            $anchor = abs(cos($angle($index))) < 0.2 ? 'middle' : (cos($angle($index)) > 0 ? 'start' : 'end');
+            $svg .= '<text x="'.$f($cx + ($radius + 12) * cos($angle($index))).'" y="'.$f($cy + ($radius + 12) * sin($angle($index)) + 3).'" font-size="8" fill="#526158" text-anchor="'.$anchor.'" font-family="Helvetica">'.htmlspecialchars($keys[$index], ENT_QUOTES, 'UTF-8').'</text>';
         }
-        $rad .= '<polygon points="'.implode(' ', $p).'" fill="#f97316" fill-opacity="0.3" stroke="#f97316" stroke-width="2"/>';
-        foreach ($p as $pt) { [$ox, $oy] = explode(',', $pt); $rad .= '<circle cx="'.$ox.'" cy="'.$oy.'" r="3" fill="#f97316"/>'; }
-        $rad .= '</svg>';
-        $radarImg = 'data:image/svg+xml;base64,' . base64_encode($rad);
+        $svg .= '<polygon points="'.implode(' ', $points).'" fill="#159447" fill-opacity="0.22" stroke="#159447" stroke-width="2"/>';
+        foreach ($points as $point) {
+            [$x, $y] = explode(',', $point);
+            $svg .= '<circle cx="'.$x.'" cy="'.$y.'" r="3" fill="#159447"/>';
+        }
+        $svg .= '</svg>';
+        $radarImg = 'data:image/svg+xml;base64,'.base64_encode($svg);
     }
 @endphp
 
-<div class="section-title">Diagram Performa</div>
-@if($matches->count() > 0)
-<table class="charts">
-    <tr>
-        <td style="width:58%;">
-            <div class="ct">Gol &amp; Assist Per Pertandingan</div>
-            <img src="{{ $lineImg }}" alt="Grafik performa">
-        </td>
-        <td style="width:42%;">
-            <div class="ct">Radar Atribut Pemain</div>
-            @if($radarImg)
-                <img src="{{ $radarImg }}" alt="Radar atribut">
-            @else
-                <div class="empty">Data atribut belum tersedia.</div>
-            @endif
-        </td>
-    </tr>
-</table>
-@else
-    <div class="empty">Belum ada data statistik.</div>
-@endif
+<div class="title">Profil Performa Musim</div>
+<div class="panel">
+    <div class="panel-title">Ringkasan statistik seluruh pertandingan</div>
+    <div class="panel-subtitle">Grafik merangkum performa pemain selama musim {{ $seasonLabel }}.</div>
+    @if($radarImg)
+        <img class="chart-img" src="{{ $radarImg }}" alt="Profil performa musim">
+    @else
+        <div class="empty">Belum ada data statistik.</div>
+    @endif
+</div>
 
-<!-- TABEL -->
-<div class="section-title">Riwayat Statistik Per Pertandingan</div>
-<table class="data">
-    <thead>
+<div class="report-page">
+    <div class="page-heading">
+        <h2>Rincian Statistik Pemain</h2>
+        <p>{{ $player->popular_name ?: $player->name }} &nbsp;|&nbsp; {{ $reportTitle }} — Musim {{ $seasonLabel }}</p>
+    </div>
+    <table class="cards">
         <tr>
-            <th class="left-align">Pertandingan</th>
-            <th>Tanggal</th>
-            <th>Goals</th>
-            <th>Assists</th>
-            <th>Shots On Target</th>
-            <th>Succ. Passes</th>
-            <th>Tackles</th>
+            <td><span class="num">{{ $matches->count() }}</span><span class="lbl">Pertandingan</span></td>
+            <td><span class="num">{{ $totals->goals }}</span><span class="lbl">Gol</span></td>
+            <td><span class="num">{{ $totals->assists }}</span><span class="lbl">Assist</span></td>
+            <td><span class="num">{{ $totals->shots_target }}</span><span class="lbl">Tembakan Tepat</span></td>
+            <td><span class="num">{{ $totals->passes }}</span><span class="lbl">Umpan Berhasil</span></td>
+            <td><span class="num">{{ $totals->tackles }}</span><span class="lbl">Tackle</span></td>
         </tr>
-    </thead>
-    <tbody>
-        @forelse($matches as $m)
-        <tr>
-            <td class="left-align">{{ $m->title ?? 'Pertandingan' }} (vs {{ $opponentOf($m) }})</td>
-            <td>{{ \Carbon\Carbon::parse($m->match_date)->format('d/m/Y') }}</td>
-            <td>{{ $perMatch[$m->id]->total_goals ?? 0 }}</td>
-            <td>{{ $perMatch[$m->id]->total_assists ?? 0 }}</td>
-            <td>{{ $perMatch[$m->id]->total_shots_target ?? 0 }}</td>
-            <td>{{ $perMatch[$m->id]->total_passes ?? 0 }}</td>
-            <td>{{ $perMatch[$m->id]->total_tackles ?? 0 }}</td>
-        </tr>
-        @empty
-        <tr><td colspan="7" class="empty">Belum ada riwayat pertandingan.</td></tr>
-        @endforelse
-    </tbody>
-    <tfoot>
-        <tr>
-            <td class="left-align" colspan="2">TOTAL ({{ $matches->count() }} match)</td>
-            <td>{{ $totals->goals }}</td>
-            <td>{{ $totals->assists }}</td>
-            <td>{{ $totals->shots_target }}</td>
-            <td>{{ $totals->passes }}</td>
-            <td>{{ $totals->tackles }}</td>
-        </tr>
-    </tfoot>
-</table>
+    </table>
 
-<div class="footer">Generated by FFA Analytics Pro Suite - {{ now()->format('Y-m-d H:i:s') }}</div>
+    @php($groupRows = array_chunk($statisticGroups, 2, true))
+    <table class="stat-columns">
+        @foreach($groupRows as $row)
+            <tr>
+                @foreach($row as $groupName => $metrics)
+                    <td>
+                        <table class="stat-group">
+                            <thead><tr><th colspan="2">{{ $groupName }}</th></tr></thead>
+                            <tbody>
+                                @foreach($metrics as $field => $label)
+                                    <tr>
+                                        <td>{{ $label }}</td>
+                                        <td>{{ number_format($statisticTotals[$field] ?? 0) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </td>
+                @endforeach
+                @if(count($row) < 2)<td></td>@endif
+            </tr>
+        @endforeach
+    </table>
+
+    @if($matches->count() > 1)
+        <div class="title">Ringkasan Per Pertandingan</div>
+        <table class="history">
+            <thead>
+                <tr><th>Pertandingan</th><th>Tanggal</th><th>Gol</th><th>Assist</th><th>Tembakan tepat</th><th>Umpan</th><th>Tackle</th></tr>
+            </thead>
+            <tbody>
+                @foreach($matches as $match)
+                    <tr>
+                        <td>{{ $match->title ?? 'Pertandingan' }} (vs {{ $opponentOf($match) }})</td>
+                        <td>{{ \Carbon\Carbon::parse($match->match_date)->format('d/m/Y') }}</td>
+                        <td>{{ $perMatch[$match->id]->goal ?? 0 }}</td>
+                        <td>{{ $perMatch[$match->id]->assist ?? 0 }}</td>
+                        <td>{{ $perMatch[$match->id]->shooting_on_target ?? 0 }}</td>
+                        <td>{{ $perMatch[$match->id]->successful_passes ?? 0 }}</td>
+                        <td>{{ $perMatch[$match->id]->tackles ?? 0 }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+</div>
+
+<div class="footer">FFA Analytics — dibuat {{ now()->format('d/m/Y H:i') }}<span class="right">Laporan performa pemain</span></div>
 </body>
 </html>
