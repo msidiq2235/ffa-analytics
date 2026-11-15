@@ -80,7 +80,7 @@ class ReportController extends Controller
 
     public function showMatchReport(MatchSession $match)
     {
-        return view('reports.show', $this->matchReportData($match));
+        return view('reports.match-detail', $this->matchReportData($match));
     }
 
     public function exportMatchPdf(MatchSession $match)

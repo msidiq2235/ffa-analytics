@@ -106,6 +106,24 @@ class PlayerPerformanceDetailTest extends TestCase
         $seasonPdf->assertOk()
             ->assertHeader('content-type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $seasonPdf->getContent());
+
+        $teamMatchPdf = $this->get(route('reports.match.pdf', $latestMatch->id));
+        $teamMatchPdf->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $teamMatchPdf->getContent());
+
+        $this->get(route('reports.index', ['tab' => 'match']))
+            ->assertOk()
+            ->assertSee(route('reports.match.detail', $latestMatch->id), false);
+        $this->get(route('reports.match.detail', $latestMatch->id))
+            ->assertOk()
+            ->assertSee('Statistik Pemain')
+            ->assertSee('Performance Player')
+            ->assertSee('Peta Vektor Pertandingan')
+            ->assertSee('PASS');
+        $this->get(route('reports.match.show', $latestMatch->id))
+            ->assertOk()
+            ->assertSee('Statistik Pemain');
     }
 
     private function createMatch(User $creator, string $title, $date): MatchSession

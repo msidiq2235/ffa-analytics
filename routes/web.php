@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
    // Modul Export Laporan
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index'); 
     Route::get('/reports/matches/{match}', [ReportController::class, 'showMatchReport'])->name('reports.match.show');
+    Route::get('/reports/matches/{match}/detail', [ReportController::class, 'showMatchReport'])->name('reports.match.detail');
     Route::get('/reports/matches/{match}/pdf', [ReportController::class, 'exportMatchPdf'])->name('reports.match.pdf');
 
     Route::get('/reports/players/{player}', [ReportController::class, 'showPlayerReport'])->name('reports.player.show');

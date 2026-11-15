@@ -172,7 +172,7 @@
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <a href="{{ route('reports.match.show', $match->id) }}"
+                                        <a href="{{ route('reports.match.detail', $match->id) }}"
                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-colors">
                                             <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                             Lihat
