@@ -96,6 +96,14 @@ tr{page-break-inside:avoid}
 <div class="panel">
     <div class="panel-title">Aksi pemain pada {{ $match->title ?? 'pertandingan ini' }}</div>
     @if($vectors->isNotEmpty())
+        @php
+            $vectorLegend = $vectors
+                ->groupBy(fn ($vector) => $vector->display_label)
+                ->map(fn ($group) => [
+                    'color' => $group->first()->display_color,
+                    'count' => $group->count(),
+                ]);
+        @endphp
         <svg class="pitch" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60">
             <rect x="3" y="3" width="94" height="54" rx="1" fill="#eff8f0" stroke="#94b99d" stroke-width=".7"/>
             <line x1="50" y1="3" x2="50" y2="57" stroke="#94b99d" stroke-width=".6"/>
@@ -111,10 +119,7 @@ tr{page-break-inside:avoid}
                     $startY = 4 + max(0, min(100, (float) $vector->start_y)) * .52;
                     $endX = 4 + max(0, min(100, (float) $vector->end_x)) * .92;
                     $endY = 4 + max(0, min(100, (float) $vector->end_y)) * .52;
-                    $action = strtolower($vector->action_type ?? '');
-                    $color = strpos($action, 'shot') !== false || strpos($action, 'shoot') !== false
-                        ? '#ed7d31'
-                        : (strpos($action, 'pass') !== false ? '#2878c8' : '#9a4bbb');
+                    $color = $vector->display_color;
                     $angle = atan2($endY - $startY, $endX - $startX);
                     $baseX = $endX - 2.1 * cos($angle);
                     $baseY = $endY - 2.1 * sin($angle);
@@ -129,9 +134,9 @@ tr{page-break-inside:avoid}
             @endforeach
         </svg>
         <div class="legend">
-            <span><i class="dot" style="background:#ed7d31"></i>Tembakan</span>
-            <span><i class="dot" style="background:#2878c8"></i>Umpan</span>
-            <span><i class="dot" style="background:#9a4bbb"></i>Aksi lainnya</span>
+            @foreach($vectorLegend as $label => $item)
+                <span><i class="dot" style="background:{{ $item['color'] }}"></i>{{ $label }} ({{ $item['count'] }})</span>
+            @endforeach
         </div>
     @else
         <div class="empty">Belum ada data vektor untuk pemain pada pertandingan ini.</div>

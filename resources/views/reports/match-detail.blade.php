@@ -6,11 +6,6 @@
 @section('content')
 @php
     $matchDate = \Carbon\Carbon::parse($match->match_date);
-    $vectorColors = [
-        'SHOT' => '#2563eb',
-        'PASS' => '#15803d',
-        'CROSS' => '#64748b',
-    ];
 @endphp
 
 <div class="space-y-6">
@@ -133,11 +128,13 @@
                 <p class="mt-1 text-[10px] text-slate-400">Arah tembakan, umpan, dan umpan silang yang direkam.</p>
             </div>
             <div class="flex flex-wrap gap-3 text-[9px] font-bold text-slate-500">
-                @foreach(['SHOT' => 'Tembakan', 'PASS' => 'Umpan', 'CROSS' => 'Umpan silang'] as $action => $label)
-                    <span class="inline-flex items-center gap-1.5">
-                        <span class="h-2 w-2 rounded-full" style="background-color: {{ $vectorColors[$action] }}"></span>
-                        {{ $label }}
-                    </span>
+                @foreach(\App\Models\VectorDirection::SUBTYPE_COLORS as $action => $subtypes)
+                    @foreach($subtypes as $subtype => $color)
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="h-2 w-2 rounded-full" style="background-color: {{ $color }}"></span>
+                            {{ \App\Models\VectorDirection::ACTION_LABELS[$action] }} · {{ str_replace('_', ' ', $subtype) }}
+                        </span>
+                    @endforeach
                 @endforeach
             </div>
         </div>
@@ -154,9 +151,7 @@
                         <rect x="25" y="83" width="50" height="16" fill="none" stroke="#9aafa0" stroke-width=".6"></rect>
                         @foreach($vectors as $vector)
                             @php
-                                $action = strtoupper($vector->action_type ?? '');
-                                $actionKey = array_key_exists($action, $vectorColors) ? $action : 'OTHER';
-                                $color = $vectorColors[$action] ?? '#64748b';
+                                $color = $vector->display_color;
                                 $startX = max(0, min(100, (float) $vector->start_x));
                                 $startY = max(0, min(100, (float) $vector->start_y));
                                 $endX = max(0, min(100, (float) $vector->end_x));
@@ -183,14 +178,13 @@
                     <div class="max-h-[500px] divide-y divide-slate-100 overflow-y-auto">
                         @foreach($vectors as $vector)
                             @php
-                                $action = strtoupper($vector->action_type ?? '');
-                                $color = $vectorColors[$action] ?? '#64748b';
+                                $color = $vector->display_color;
                             @endphp
                             <div class="flex items-start gap-3 py-3">
                                 <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: {{ $color }}"></span>
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center justify-between gap-2">
-                                        <p class="text-[11px] font-extrabold text-slate-700">{{ $vector->action_type }} <span class="font-medium text-slate-400">·</span> {{ $vector->player_name }}</p>
+                                        <p class="text-[11px] font-extrabold text-slate-700">{{ $vector->display_label }} <span class="font-medium text-slate-400">·</span> {{ $vector->player_name }}</p>
                                         <span class="text-[9px] font-semibold text-slate-400">{{ $vector->jersey_number ? '#' . $vector->jersey_number : '' }}</span>
                                     </div>
                                     <p class="mt-1 text-[9px] text-slate-500">Dari ({{ number_format($vector->start_x, 1) }}, {{ number_format($vector->start_y, 1) }}) ke ({{ number_format($vector->end_x, 1) }}, {{ number_format($vector->end_y, 1) }})</p>

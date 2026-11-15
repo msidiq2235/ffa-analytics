@@ -203,15 +203,15 @@ tr{page-break-inside:avoid}
         $pitch .= '<rect x="'.$margin.'" y="'.($pitchHeight/2 - 45).'" width="40" height="90" '.$lineStyle.'/>';
         $pitch .= '<rect x="'.($pitchWidth - $margin - 110).'" y="'.($pitchHeight/2 - 100).'" width="110" height="200" '.$lineStyle.'/>';
         $pitch .= '<rect x="'.($pitchWidth - $margin - 40).'" y="'.($pitchHeight/2 - 45).'" width="40" height="90" '.$lineStyle.'/>';
-        $vectorColors = ['SHOT' => '#15803d', 'PASS' => '#526b59', 'CROSS' => '#9aad9e'];
-        $vectorCounts = ['SHOT' => 0, 'PASS' => 0, 'CROSS' => 0];
+        $vectorLegend = collect($vectors)
+            ->groupBy(fn ($vector) => $vector->display_label)
+            ->map(fn ($group) => [
+                'color' => $group->first()->display_color,
+                'count' => $group->count(),
+            ]);
         foreach ($vectors as $vector) {
             $vector = (object) $vector;
-            $type = strtoupper($vector->action_type ?? '');
-            $color = $vectorColors[$type] ?? '#64736a';
-            if (array_key_exists($type, $vectorCounts)) {
-                $vectorCounts[$type]++;
-            }
+            $color = $vector->display_color;
             $startX = max(0, min(100, (float) $vector->start_x)) / 100 * $pitchWidth;
             $startY = max(0, min(100, (float) $vector->start_y)) / 100 * $pitchHeight;
             $endX = max(0, min(100, (float) $vector->end_x)) / 100 * $pitchWidth;
@@ -232,9 +232,9 @@ tr{page-break-inside:avoid}
             <p class="vector-heading">Arah aksi yang dicatat selama pertandingan</p>
             <img class="pitch-img" src="{{ $pitchImg }}" alt="Peta vektor pertandingan">
             <div class="legend">
-                <span><i style="background:#15803d"></i>Tembakan ({{ $vectorCounts['SHOT'] }})</span>
-                <span><i style="background:#526b59"></i>Umpan ({{ $vectorCounts['PASS'] }})</span>
-                <span><i style="background:#9aad9e"></i>Umpan silang ({{ $vectorCounts['CROSS'] }})</span>
+                @foreach($vectorLegend as $label => $item)
+                    <span><i style="background:{{ $item['color'] }}"></i>{{ $label }} ({{ $item['count'] }})</span>
+                @endforeach
             </div>
         </div>
     </div>

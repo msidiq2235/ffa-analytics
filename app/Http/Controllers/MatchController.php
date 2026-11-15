@@ -17,16 +17,16 @@ class MatchController extends Controller
     {
         $now = now();
         $view = $request->query('view', 'table') === 'card' ? 'card' : 'table';
-        $perPage = $view === 'card' ? 9 : 10; // card: 3x3, tabel: 10 baris
+        $perPage = $view === 'card' ? 9 : 10;
 
         $matchesQuery = MatchSession::query();
-        if (auth()->user()->role === 'Pelatih') {
+        $activeRole = session('active_role', auth()->user()->role);
+
+        if ($activeRole === 'Pelatih') {
             $clubNames = Club::where('coach_id', auth()->id())->pluck('name');
             $matchesQuery->whereIn('title', $clubNames);
         }
 
-        // Urutan: (1) pertandingan Live, (2) jadwal mendatang dari yang paling dekat,
-        // (3) jadwal yang sudah lewat dari yang paling baru.
         $matches = $matchesQuery
             ->orderByRaw("CASE WHEN status = 'Live' THEN 0 WHEN match_date >= ? THEN 1 ELSE 2 END", [$now])
             ->orderByRaw("CASE WHEN match_date >= ? THEN match_date END ASC", [$now])
@@ -48,29 +48,24 @@ class MatchController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title'      => 'required|string|max:255',
             'match_date' => 'required|date',
-            'venue' => 'nullable|string|max:255',
-            'opponent' => 'nullable|string|max:255',
-            'formation' => 'nullable|string|max:50',
+            'venue'      => 'nullable|string|max:255',
+            'opponent'   => 'nullable|string|max:255',
+            'formation'  => 'nullable|string|max:50',
         ]);
 
-        // Menggunakan toDateTimeString() agar jam dan menit ikut tersimpan secara utuh
         $matchDate = Carbon::parse($request->match_date);
         $formattedDate = $matchDate->toDateTimeString();
-
-        // 🌟 OTOMATISASI STATUS: 
-        // Jika tanggal/waktu yang dipilih sudah lewat -> otomatis 'Selesai'
-        // Jika tanggal/waktu masih di masa depan -> otomatis 'Upcoming'
         $status = $matchDate->isPast() ? 'Selesai' : 'Upcoming';
 
         MatchSession::create([
-            'title' => $request->title,
+            'title'      => $request->title,
             'match_date' => $formattedDate,
-            'venue' => $request->venue,
-            'opponent' => $request->opponent,
-            'formation' => $request->formation,
-            'status' => $status, // Terisi otomatis!
+            'venue'      => $request->venue,
+            'opponent'   => $request->opponent,
+            'formation'  => $request->formation,
+            'status'     => $status,
             'created_by' => Auth::id(),
         ]);
 
@@ -87,25 +82,22 @@ class MatchController extends Controller
             : collect();
 
         $match->load('players');
-
         $selectedPlayerIds = $match->players->pluck('id')->toArray();
 
-        return view(
-            'matches.lineup',
-            compact('match', 'players', 'selectedPlayerIds')
-        );
+        return view('matches.lineup', compact('match', 'players', 'selectedPlayerIds'));
     }
 
     public function updateLineup(Request $request, MatchSession $match)
     {
         $request->validate([
             'formation' => 'nullable|string',
-            'players' => 'array'
+            'players'   => 'array',
         ]);
 
         $selectedPlayers = collect($request->input('players', []))
             ->filter(fn ($player) => isset($player['selected']) && (string) $player['selected'] === '1')
             ->keys();
+
         $club = Club::where('name', $match->title)->first();
         $playerRule = $club
             ? Rule::exists('players', 'id')->where('club_id', $club->id)->where('status', 'Aktif')
@@ -123,7 +115,7 @@ class MatchController extends Controller
         )->validate();
 
         $match->update([
-            'formation' => $request->formation
+            'formation' => $request->formation,
         ]);
 
         $syncData = [];
@@ -140,9 +132,19 @@ class MatchController extends Controller
         return redirect()->route('matches.index')->with('success', 'Line-up dan formasi taktik berhasil disimpan!');
     }
 
+    private function isAdminRole(): bool
+    {
+        $activeRole = session('active_role', auth()->user()->role);
+        return in_array($activeRole, ['Super Admin', 'Admin'], true);
+    }
+
     public function live(MatchSession $match)
     {
-        $match->load(['players' => function($query) {
+        if ($this->isAdminRole()) {
+            abort(403, 'Admin tidak memiliki akses untuk melakukan input pada halaman Live Analisis.');
+        }
+
+        $match->load(['players' => function ($query) {
             $query->withPivot('position');
         }]);
 
@@ -157,6 +159,7 @@ class MatchController extends Controller
         $player = $match->players()->whereKey($playerId)->firstOrFail();
         $isGoalkeeper = $player->pivot->position === 'GK'
             || ($player->pivot->position === 'Cadangan' && $player->position === 'GK');
+
         $stat = \App\Models\Statistic::where('match_id', $match->id)
             ->where('player_id', $playerId)
             ->where('analyst_id', auth()->id())
@@ -168,19 +171,24 @@ class MatchController extends Controller
         }
 
         return response()->json([
-            'success' => true,
+            'success'  => true,
             'position' => $player->pivot->position,
-            'stats' => $statsData,
+            'stats'    => $statsData,
         ]);
     }
 
     public function storeStatistic(Request $request, MatchSession $match)
     {
+        if ($this->isAdminRole()) {
+            return response()->json(['error' => 'Admin tidak memiliki akses untuk menyimpan statistik.'], 403);
+        }
+
         $validated = $request->validate([
             'player_id' => 'required|integer|exists:players,id',
-            'stat_key' => 'required|string',
-            'action' => 'required|in:increment,decrement',
+            'stat_key'  => 'required|string',
+            'action'    => 'required|in:increment,decrement',
         ]);
+
         $player = $match->players()->whereKey($validated['player_id'])->firstOrFail();
         $isGoalkeeper = $player->pivot->position === 'GK'
             || ($player->pivot->position === 'Cadangan' && $player->position === 'GK');
@@ -192,8 +200,8 @@ class MatchController extends Controller
 
         $column = $keyMap[$validated['stat_key']];
         $stat = \App\Models\Statistic::firstOrCreate([
-            'match_id' => $match->id,
-            'player_id' => $player->id,
+            'match_id'   => $match->id,
+            'player_id'  => $player->id,
             'analyst_id' => auth()->id(),
         ]);
 
@@ -210,20 +218,20 @@ class MatchController extends Controller
     {
         if ($isGoalkeeper) {
             return [
-                'gk_shots_faced' => 'shots_faced',
-                'gk_goals_conceded' => 'goals_conceded',
-                'gk_clean_sheets' => 'clean_sheets',
-                'gk_saves' => 'saves',
-                'gk_penalty_saves' => 'penalty_saves',
-                'gk_high_claims' => 'high_claims',
-                'gk_punches' => 'punches',
-                'gk_sweeper_actions' => 'sweeper_actions',
-                'gk_catches' => 'catches',
-                'gk_crosses_stopped' => 'crosses_stopped',
-                'gk_successful_passes' => 'successful_passes',
+                'gk_shots_faced'         => 'shots_faced',
+                'gk_goals_conceded'      => 'goals_conceded',
+                'gk_clean_sheets'        => 'clean_sheets',
+                'gk_saves'               => 'saves',
+                'gk_penalty_saves'       => 'penalty_saves',
+                'gk_high_claims'         => 'high_claims',
+                'gk_punches'             => 'punches',
+                'gk_sweeper_actions'     => 'sweeper_actions',
+                'gk_catches'             => 'catches',
+                'gk_crosses_stopped'     => 'crosses_stopped',
+                'gk_successful_passes'   => 'successful_passes',
                 'gk_accurate_goal_kicks' => 'accurate_goal_kicks',
                 'gk_unsuccessful_passes' => 'unsuccessful_passes',
-                'gk_accurate_throws' => 'accurate_throws',
+                'gk_accurate_throws'     => 'accurate_throws',
             ];
         }
 
@@ -248,43 +256,21 @@ class MatchController extends Controller
 
     public function lockMatch(Request $request, MatchSession $match)
     {
+        if ($this->isAdminRole()) {
+            abort(403, 'Admin tidak memiliki akses untuk mengunci pertandingan.');
+        }
+
         $match->update(['status' => 'Selesai']);
         return redirect()->route('matches.index')->with('success', 'Data pertandingan berhasil dikunci dan final!');
     }
 
-    public function storeVector(Request $request, MatchSession $match)
-    {
-        $request->validate([
-            'player_id' => 'required|exists:players,id',
-            'action_type' => 'required|in:SHOT,PASS,CROSS',
-            'subtype' => 'nullable|required_if:action_type,SHOT|in:ON_TARGET,OFF_TARGET,BLOCKED,GOAL',
-            'start_x' => 'required|numeric',
-            'start_y' => 'required|numeric',
-            'end_x' => 'required|numeric',
-            'end_y' => 'required|numeric',
-            'timestamp_mode' => 'required|in:live,manual',
-            'input_time' => 'required_if:timestamp_mode,live|nullable|date',
-            'match_minute' => 'required_if:timestamp_mode,manual|nullable|integer|min:0',
-        ]);
-        $vector = \App\Models\VectorDirection::create([
-            'match_id' => $match->id,
-            'player_id' => $request->player_id,
-            'analyst_id' => auth()->id(),
-            'action_type' => $request->action_type,
-            'subtype' => $request->subtype,
-            'start_x' => $request->start_x,
-            'start_y' => $request->start_y,
-            'end_x' => $request->end_x,
-            'end_y' => $request->end_y,
-            'input_time' => $request->timestamp_mode === 'live' ? Carbon::parse($request->input_time) : null,
-            'match_minute' => $request->timestamp_mode === 'manual' ? $request->match_minute : null,
-        ]);
-        return response()->json(['success' => true, 'data' => $vector]);
-    }
-
     public function vector(MatchSession $match)
     {
-        $match->load(['players' => function($query) {
+        if ($this->isAdminRole()) {
+            abort(403, 'Admin tidak memiliki akses untuk melakukan input pada halaman Vector.');
+        }
+
+        $match->load(['players' => function ($query) {
             $query->withPivot('position');
         }]);
 
@@ -311,11 +297,54 @@ class MatchController extends Controller
         return view('matches.vector', compact('match', 'startingEleven', 'vectors'));
     }
 
+    public function storeVector(Request $request, MatchSession $match)
+    {
+        if ($this->isAdminRole()) {
+            return response()->json(['message' => 'Admin tidak memiliki akses untuk menyimpan data vektor.'], 403);
+        }
+
+        $allowedSubtypes = match ($request->action_type) {
+            'SHOT'  => ['ON_TARGET', 'OFF_TARGET', 'BLOCKED', 'GOAL'],
+            'PASS'  => ['SUCCESS', 'KEY_PASS', 'UNSUCCESSFUL'],
+            'CROSS' => ['SUCCESS', 'ASSIST', 'UNSUCCESSFUL'],
+            default => [],
+        };
+
+        $request->validate([
+            'player_id'      => 'required|exists:players,id',
+            'action_type'    => 'required|in:SHOT,PASS,CROSS',
+            'subtype'        => ['required', 'string', Rule::in($allowedSubtypes)],
+            'start_x'        => 'required|numeric',
+            'start_y'        => 'required|numeric',
+            'end_x'          => 'required|numeric',
+            'end_y'          => 'required|numeric',
+            'timestamp_mode' => 'required|in:live,manual',
+            'input_time'     => 'required_if:timestamp_mode,live|nullable|date',
+            'match_minute'   => 'required_if:timestamp_mode,manual|nullable|integer|min:0',
+        ]);
+
+        $vector = \App\Models\VectorDirection::create([
+            'match_id'     => $match->id,
+            'player_id'    => $request->player_id,
+            'analyst_id'   => auth()->id(),
+            'action_type'  => $request->action_type,
+            'subtype'      => $request->subtype,
+            'start_x'      => $request->start_x,
+            'start_y'      => $request->start_y,
+            'end_x'        => $request->end_x,
+            'end_y'        => $request->end_y,
+            'input_time'   => $request->timestamp_mode === 'live' ? Carbon::parse($request->input_time) : null,
+            'match_minute' => $request->timestamp_mode === 'manual' ? $request->match_minute : null,
+        ]);
+
+        return response()->json(['success' => true, 'data' => $vector]);
+    }
+
     public function edit($id)
     {
         $match = MatchSession::findOrFail($id);
         $clubs = Club::orderBy('name', 'asc')->get();
-        
+
         return view('matches.edit', compact('match', 'clubs'));
     }
 
@@ -329,15 +358,10 @@ class MatchController extends Controller
             'formation'  => 'nullable|string|max:50',
         ]);
 
-        // Menggunakan toDateTimeString() agar jam dan menit ikut tersimpan saat update
         $matchDate = Carbon::parse($request->match_date);
         $formattedDate = $matchDate->toDateTimeString();
-
         $match = MatchSession::findOrFail($id);
 
-        // 🌟 OTOMATISASI STATUS SAAT UPDATE:
-        // Jika status saat ini 'Live', biarkan tetap 'Live'. 
-        // Jika tidak, biarkan sistem yang mengecek tanggalnya secara otomatis.
         $status = $match->status;
         if ($status !== 'Live') {
             $status = $matchDate->isPast() ? 'Selesai' : 'Upcoming';
@@ -348,7 +372,7 @@ class MatchController extends Controller
             'opponent'   => $request->opponent,
             'venue'      => $request->venue,
             'match_date' => $formattedDate,
-            'status'     => $status, // Otomatis menyesuaikan tanggal baru
+            'status'     => $status,
             'formation'  => $request->formation,
         ]);
 

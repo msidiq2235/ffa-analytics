@@ -252,6 +252,22 @@ class ReportController extends Controller
         ];
     }
 
+    private function playerContributionTrend($matches, $perMatch): array
+    {
+        $chartLabels = [];
+        $chartValues = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $chartLabels[] = $month->translatedFormat('M');
+            $chartValues[] = (int) $matches
+                ->filter(fn ($match) => Carbon::parse($match->match_date)->isSameMonth($month))
+                ->sum(fn ($match) => ($perMatch[$match->id]->total_goals ?? 0) + ($perMatch[$match->id]->total_assists ?? 0));
+        }
+
+        return compact('chartLabels', 'chartValues');
+    }
+
     /**
      * Halaman Laporan Performa Pemain (tujuan ikon mata).
      */
@@ -276,16 +292,9 @@ class ReportController extends Controller
             'matches' => $matches->count(),
         ];
 
-        // Grafik 6 bulan terakhir (gol + assist per bulan)
-        $chartLabels = [];
-        $chartValues = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
-            $chartLabels[] = $month->translatedFormat('M');
-            $chartValues[] = (int) $matches
-                ->filter(fn ($m) => Carbon::parse($m->match_date)->isSameMonth($month))
-                ->sum(fn ($m) => ($perMatch[$m->id]->total_goals ?? 0) + ($perMatch[$m->id]->total_assists ?? 0));
-        }
+        $trend = $this->playerContributionTrend($matches, $perMatch);
+        $chartLabels = $trend['chartLabels'];
+        $chartValues = $trend['chartValues'];
 
         $radar = $this->buildRadar($perMatch, $matches->count());
 
@@ -458,8 +467,15 @@ class ReportController extends Controller
 
         $radar      = $this->buildRadar($perMatch, $matches->count());
         $opponentOf = fn ($m) => $this->opponentOf($m);
+        $trend = $this->playerContributionTrend($matches, $perMatch);
+        $chartLabels = $trend['chartLabels'];
+        $chartValues = $trend['chartValues'];
+        $radar = array_intersect_key($radar, array_flip(['Serangan', 'Bertahan', 'Operan']));
 
-        return Pdf::loadView('reports.player_pdf', compact('player', 'matches', 'perMatch', 'totals', 'radar', 'opponentOf'))
+        return Pdf::loadView('reports.player_pdf', compact(
+            'player', 'matches', 'perMatch', 'totals', 'radar', 'opponentOf',
+            'chartLabels', 'chartValues'
+        ))
             ->stream('Laporan_Lengkap_' . Str::slug($player->name) . '.pdf');
     }
 }
