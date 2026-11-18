@@ -3,15 +3,7 @@
 @section('header', 'Detail Performa Pertandingan')
 @section('subheader', 'Statistik dan arah aksi pemain pada pertandingan ini')
 @section('content')
-
-@php
-    $vectorColors = [
-        'SHOT' => '#ef4444',
-        'PASS' => '#22c55e',
-        'CROSS' => '#a855f7',
-    ];
-    $matchDate = \Carbon\Carbon::parse($match->match_date);
-@endphp
+@php $matchDate = \Carbon\Carbon::parse($match->match_date); @endphp
 
 <div class="space-y-6">
     <div class="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#142c56] via-[#1e3a8a] to-[#2563eb] p-6 text-white shadow-lg">
@@ -47,10 +39,12 @@
                     <i data-lucide="arrow-left" class="h-4 w-4"></i>
                     Profil Performa
                 </a>
-                <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[12px] font-bold text-[#1e3a8a] shadow-sm transition hover:bg-blue-50">
-                    <i data-lucide="users-round" class="h-4 w-4"></i>
-                    Laporan Tim
-                </a>
+                @if(auth()->user()->role !== 'Pemain')
+                    <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[12px] font-bold text-[#1e3a8a] shadow-sm transition hover:bg-blue-50">
+                        <i data-lucide="users-round" class="h-4 w-4"></i>
+                        Laporan Tim
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -109,11 +103,13 @@
                 <p class="mt-1 text-[11px] text-slate-400">Arah tembakan, umpan, dan umpan silang yang dicatat pada pertandingan ini.</p>
             </div>
             <div class="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500">
-                @foreach(['SHOT' => 'Tembakan', 'PASS' => 'Umpan', 'CROSS' => 'Umpan silang'] as $action => $label)
-                    <span class="inline-flex items-center gap-1.5">
-                        <span class="h-2.5 w-2.5 rounded-full" style="background-color: {{ $vectorColors[$action] }}"></span>
-                        {{ $label }}
-                    </span>
+                @foreach(\App\Models\VectorDirection::SUBTYPE_COLORS as $action => $subtypes)
+                    @foreach($subtypes as $subtype => $color)
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="h-2.5 w-2.5 rounded-full" style="background-color: {{ $color }}"></span>
+                            {{ \App\Models\VectorDirection::ACTION_LABELS[$action] }} · {{ str_replace('_', ' ', $subtype) }}
+                        </span>
+                    @endforeach
                 @endforeach
             </div>
         </div>
@@ -122,13 +118,6 @@
             <div class="grid grid-cols-1 gap-5 xl:grid-cols-5">
                 <div class="rounded-2xl bg-[#0e5a2c] p-4 xl:col-span-3">
                     <svg viewBox="0 0 100 100" class="mx-auto max-h-[520px] w-full" role="img" aria-label="Diagram arah aksi pemain">
-                        <defs>
-                            @foreach($vectorColors as $action => $color)
-                                <marker id="arrow-{{ strtolower($action) }}" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto" markerUnits="strokeWidth">
-                                    <path d="M0,0 L5,2.5 L0,5 z" fill="{{ $color }}"></path>
-                                </marker>
-                            @endforeach
-                        </defs>
                         <rect x="1" y="1" width="98" height="98" fill="none" stroke="rgba(255,255,255,.55)" stroke-width=".5"></rect>
                         <line x1="1" y1="50" x2="99" y2="50" stroke="rgba(255,255,255,.45)" stroke-width=".5"></line>
                         <circle cx="50" cy="50" r="12" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".5"></circle>
@@ -136,17 +125,31 @@
                         <rect x="25" y="1" width="50" height="16" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".5"></rect>
                         <rect x="25" y="83" width="50" height="16" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".5"></rect>
                         @foreach($vectors as $vector)
-                            @php $vectorColor = $vectorColors[$vector->action_type] ?? '#ffffff'; @endphp
+                            @php
+                                $vectorColor = $vector->display_color;
+                                $startX = max(0, min(100, (float) $vector->start_x));
+                                $startY = max(0, min(100, (float) $vector->start_y));
+                                $endX = max(0, min(100, (float) $vector->end_x));
+                                $endY = max(0, min(100, (float) $vector->end_y));
+                                $angle = atan2($endY - $startY, $endX - $startX);
+                                $baseX = $endX - 2.5 * cos($angle);
+                                $baseY = $endY - 2.5 * sin($angle);
+                                $leftX = $baseX + 1.1 * sin($angle);
+                                $leftY = $baseY - 1.1 * cos($angle);
+                                $rightX = $baseX - 1.1 * sin($angle);
+                                $rightY = $baseY + 1.1 * cos($angle);
+                            @endphp
                             <line
                                 data-vector-id="{{ $vector->id }}"
-                                x1="{{ $vector->start_x }}"
-                                y1="{{ $vector->start_y }}"
-                                x2="{{ $vector->end_x }}"
-                                y2="{{ $vector->end_y }}"
+                                x1="{{ $startX }}"
+                                y1="{{ $startY }}"
+                                x2="{{ $baseX }}"
+                                y2="{{ $baseY }}"
                                 stroke="{{ $vectorColor }}"
                                 stroke-width="1"
-                                marker-end="url(#arrow-{{ strtolower($vector->action_type) }})"
                             ></line>
+                            <polygon points="{{ $endX }},{{ $endY }} {{ $leftX }},{{ $leftY }} {{ $rightX }},{{ $rightY }}" fill="{{ $vectorColor }}"></polygon>
+                            <circle cx="{{ $startX }}" cy="{{ $startY }}" r=".8" fill="{{ $vectorColor }}"></circle>
                         @endforeach
                     </svg>
                 </div>
@@ -157,17 +160,13 @@
                     </div>
                     <div class="max-h-[520px] divide-y divide-slate-100 overflow-y-auto">
                         @foreach($vectors as $vector)
-                            @php $vectorColor = $vectorColors[$vector->action_type] ?? '#64748b'; @endphp
+                            @php $vectorColor = $vector->display_color; @endphp
                             <div class="flex items-start gap-3 py-3">
                                 <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: {{ $vectorColor }}"></span>
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center justify-between gap-2">
                                         <p class="text-[12px] font-extrabold text-slate-700">
-                                            {{ $vector->action_type === 'SHOT' && $vector->subtype ? 'Tembakan · ' . str_replace('_', ' ', $vector->subtype) : match ($vector->action_type) {
-                                                'PASS' => 'Umpan',
-                                                'CROSS' => 'Umpan silang',
-                                                default => $vector->action_type,
-                                            } }}
+                                            {{ $vector->display_label }}
                                         </p>
                                         <span class="text-[10px] font-semibold text-slate-400">
                                             {{ $vector->match_minute !== null ? $vector->match_minute . ' menit' : ($vector->input_time ? \Carbon\Carbon::parse($vector->input_time)->format('H:i:s') : 'Waktu tidak dicatat') }}
@@ -196,10 +195,12 @@
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
             Kembali ke Performa Pemain
         </a>
-        <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-[12px] font-bold text-slate-600 transition hover:bg-slate-50">
-            <i data-lucide="users-round" class="h-4 w-4"></i>
-            Laporan Seluruh Tim
-        </a>
+        @if(auth()->user()->role !== 'Pemain')
+            <a href="{{ route('reports.match.show', $match->id) }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-[12px] font-bold text-slate-600 transition hover:bg-slate-50">
+                <i data-lucide="users-round" class="h-4 w-4"></i>
+                Laporan Seluruh Tim
+            </a>
+        @endif
     </div>
 </div>
 

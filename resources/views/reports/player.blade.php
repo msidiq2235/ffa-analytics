@@ -52,9 +52,9 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('performa.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-[11px] font-bold text-white transition hover:bg-white/20">
+                    <a href="{{ auth()->user()->role === 'Pemain' ? route('dashboard') : route('performa.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-[11px] font-bold text-white transition hover:bg-white/20">
                         <i data-lucide="arrow-left" class="h-4 w-4"></i>
-                        Daftar Pemain
+                        {{ auth()->user()->role === 'Pemain' ? 'Dashboard' : 'Daftar Pemain' }}
                     </a>
                     <a href="#riwayat-pertandingan" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[11px] font-extrabold text-[#1e3a8a] shadow-sm transition hover:bg-blue-50">
                         <i data-lucide="calendar-days" class="h-4 w-4"></i>
@@ -276,9 +276,9 @@
     </section>
 
     <div class="flex justify-start pb-2">
-        <a href="{{ route('performa.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[11px] font-bold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-700">
+        <a href="{{ auth()->user()->role === 'Pemain' ? route('dashboard') : route('performa.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[11px] font-bold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-700">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            Kembali ke daftar pemain
+            {{ auth()->user()->role === 'Pemain' ? 'Kembali ke Dashboard' : 'Kembali ke daftar pemain' }}
         </a>
     </div>
 </div>

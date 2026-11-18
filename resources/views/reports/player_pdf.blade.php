@@ -17,6 +17,10 @@
         .stats-grid td { border: 1px solid #cbd5e1; background: #f8fafc; text-align: center; padding: 8px; width: 33%; }
         .stats-num { font-size: 16px; font-weight: bold; color: #1e293b; display: block; }
         .stats-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+        .chart-grid { width: 100%; border-collapse: separate; border-spacing: 8px 0; }
+        .chart-grid td { width: 50%; vertical-align: top; border: 1px solid #cbd5e1; padding: 8px; }
+        .chart-title { margin: 0 0 5px; color: #334155; font-size: 10px; font-weight: bold; }
+        .chart-img { display: block; width: 100%; height: auto; }
         .footer { margin-top: 30px; text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 8px; }
     </style>
 </head>
@@ -91,6 +95,85 @@
             </td>
         </tr>
     </table>
+
+    @php
+        $chartImage = null;
+        $radarImage = null;
+        if ($matches->isNotEmpty()) {
+            $format = fn ($number) => number_format((float) $number, 2, '.', '');
+            $width = 650; $height = 260; $left = 36; $right = 20; $top = 20; $bottom = 42;
+            $maxValue = max(1, (int) max($chartValues));
+            $step = max(1, (int) ceil($maxValue / 4));
+            $scaleMax = $step * (int) ceil($maxValue / $step);
+            $plotHeight = $height - $top - $bottom;
+            $plotWidth = $width - $left - $right;
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">';
+            $svg .= '<rect width="'.$width.'" height="'.$height.'" fill="#ffffff"/>';
+            for ($value = 0; $value <= $scaleMax; $value += $step) {
+                $y = $height - $bottom - ($value / $scaleMax) * $plotHeight;
+                $svg .= '<line x1="'.$left.'" y1="'.$format($y).'" x2="'.($width - $right).'" y2="'.$format($y).'" stroke="#e2e8f0"/>';
+                $svg .= '<text x="'.($left - 7).'" y="'.$format($y + 3).'" font-size="9" fill="#94a3b8" text-anchor="end" font-family="Helvetica">'.$value.'</text>';
+            }
+            $points = [];
+            foreach ($chartValues as $index => $value) {
+                $x = $left + ($plotWidth * $index / max(count($chartValues) - 1, 1));
+                $y = $height - $bottom - ($value / $scaleMax) * $plotHeight;
+                $points[] = $format($x).','.$format($y);
+                $label = htmlspecialchars($chartLabels[$index], ENT_QUOTES, 'UTF-8');
+                $svg .= '<circle cx="'.$format($x).'" cy="'.$format($y).'" r="4" fill="#2563eb"/>';
+                $svg .= '<text x="'.$format($x).'" y="'.$format($y - 8).'" font-size="8" fill="#334155" text-anchor="middle" font-family="Helvetica">'.$value.'</text>';
+                $svg .= '<text x="'.$format($x).'" y="'.($height - 16).'" font-size="8" fill="#64748b" text-anchor="middle" font-family="Helvetica">'.$label.'</text>';
+            }
+            $svg .= '<polyline points="'.implode(' ', $points).'" fill="none" stroke="#2563eb" stroke-width="3"/>';
+            $svg .= '</svg>';
+            $chartImage = 'data:image/svg+xml;base64,'.base64_encode($svg);
+
+            $radarWidth = 340; $radarHeight = 260; $cx = 170; $cy = 125; $radius = 78;
+            $keys = array_keys($radar); $values = array_values($radar); $count = count($keys);
+            $angle = fn ($index) => -M_PI / 2 + 2 * M_PI * $index / max($count, 1);
+            $radarSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$radarWidth.'" height="'.$radarHeight.'" viewBox="0 0 '.$radarWidth.' '.$radarHeight.'">';
+            $radarSvg .= '<rect width="'.$radarWidth.'" height="'.$radarHeight.'" fill="#ffffff"/>';
+            foreach ([0.25, 0.5, 0.75, 1] as $ring) {
+                $ringPoints = [];
+                for ($index = 0; $index < $count; $index++) {
+                    $ringPoints[] = $format($cx + $radius * $ring * cos($angle($index))).','.$format($cy + $radius * $ring * sin($angle($index)));
+                }
+                $radarSvg .= '<polygon points="'.implode(' ', $ringPoints).'" fill="none" stroke="#e2e8f0"/>';
+            }
+            $radarPoints = [];
+            for ($index = 0; $index < $count; $index++) {
+                $x = $cx + $radius * cos($angle($index));
+                $y = $cy + $radius * sin($angle($index));
+                $radarSvg .= '<line x1="'.$cx.'" y1="'.$cy.'" x2="'.$format($x).'" y2="'.$format($y).'" stroke="#e2e8f0"/>';
+                $value = max(0, min(100, (float) $values[$index])) / 100;
+                $radarPoints[] = $format($cx + $radius * $value * cos($angle($index))).','.$format($cy + $radius * $value * sin($angle($index)));
+                $anchor = abs(cos($angle($index))) < 0.2 ? 'middle' : (cos($angle($index)) > 0 ? 'start' : 'end');
+                $label = htmlspecialchars($keys[$index], ENT_QUOTES, 'UTF-8');
+                $radarSvg .= '<text x="'.$format($cx + ($radius + 12) * cos($angle($index))).'" y="'.$format($cy + ($radius + 12) * sin($angle($index)) + 3).'" font-size="8" fill="#64748b" text-anchor="'.$anchor.'" font-family="Helvetica">'.$label.'</text>';
+            }
+            $radarSvg .= '<polygon points="'.implode(' ', $radarPoints).'" fill="#2563eb" fill-opacity="0.16" stroke="#2563eb" stroke-width="2"/>';
+            $radarSvg .= '</svg>';
+            $radarImage = 'data:image/svg+xml;base64,'.base64_encode($radarSvg);
+        }
+    @endphp
+
+    <div class="section-title">Grafik Performa Pemain</div>
+    @if($chartImage && $radarImage)
+        <table class="chart-grid">
+            <tr>
+                <td>
+                    <p class="chart-title">Kontribusi gol + assist (6 bulan)</p>
+                    <img class="chart-img" src="{{ $chartImage }}" alt="Grafik kontribusi enam bulan">
+                </td>
+                <td>
+                    <p class="chart-title">Profil statistik</p>
+                    <img class="chart-img" src="{{ $radarImage }}" alt="Radar profil statistik">
+                </td>
+            </tr>
+        </table>
+    @else
+        <p>Belum ada data statistik untuk menampilkan grafik.</p>
+    @endif
 
     <!-- RIWAYAT PERTANDINGAN -->
     <div class="section-title">Riwayat Statistik Per Pertandingan</div>

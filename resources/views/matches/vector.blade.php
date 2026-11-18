@@ -67,6 +67,12 @@
                     Cross · Unsuccess
                 </span>
                 <span class="col-span-2 text-emerald-300 sm:col-span-3 lg:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>
+            <div id="vector-legend" class="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-semibold text-slate-300 sm:grid-cols-4">
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-emerald-400"></i>Shot On Target</span>
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-red-400"></i>Shot Off Target</span>
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-amber-400"></i>Blocked</span>
+                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-blue-400"></i>Goal</span>
+                <span class="col-span-2 text-emerald-300 sm:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>
             </div>
         </div>
     </section>
@@ -106,6 +112,9 @@
                     <button type="button" data-action="CROSS" data-subtype="SUCCESS" onclick="setSubtype('SUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">SUCCESS</button>
                     <button type="button" data-action="CROSS" data-subtype="UNSUCCESS" onclick="setSubtype('UNSUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">UNSUCCESS</button>
                 </div>
+            <div id="event-subtypes" class="mt-3 border-t border-slate-100 pt-3">
+                <div id="subtype-title" class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">PILIH SUBTYPE</div>
+                <div id="subtype-buttons" class="space-y-2"></div>
             </div>
         </div>
 
@@ -143,11 +152,11 @@
                         </div>
                         <div class="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[5px] border-blue-500 text-[10px] font-extrabold text-blue-600" id="pass-count">0</div>
-                            <div><div class="text-xs font-semibold text-slate-500">Passes</div><div class="text-[11px] text-slate-400">total recorded</div></div>
+                            <div><div class="text-xs font-semibold text-slate-500">Passes</div><div class="text-[11px] text-slate-400" id="pass-ratio">0 successful</div></div>
                         </div>
                         <div class="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[5px] border-purple-500 text-[10px] font-extrabold text-purple-600" id="cross-count">0</div>
-                            <div><div class="text-xs font-semibold text-slate-500">Crosses</div><div class="text-[11px] text-slate-400">total recorded</div></div>
+                            <div><div class="text-xs font-semibold text-slate-500">Crosses</div><div class="text-[11px] text-slate-400" id="cross-ratio">0 successful</div></div>
                         </div>
                     </div>
                 </div>
@@ -162,10 +171,10 @@
             </div>
 
             <div class="flex shrink-0 gap-2 border-t border-slate-100 bg-slate-50 p-3">
-                <button type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-110">
+                <a href="{{ route('reports.match.pdf', $match->id) }}" target="_blank" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-110">
                     <i data-lucide="download" class="h-4 w-4"></i>EXPORT
-                </button>
-                <button type="button" onclick="submitVectors()" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-700 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-110">
+                </a>
+                <button type="button" id="btn-save-vectors" onclick="submitVectors()" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-700 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-110">
                     <i data-lucide="save" class="h-4 w-4"></i>SAVE
                 </button>
             </div>
@@ -188,10 +197,40 @@
 
 <div id="notification-container" class="fixed right-4 top-4 z-[60] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3" aria-live="polite" aria-atomic="false"></div>
 
-<!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <script>
+const EVENT_CONFIG = {
+    SHOT: {
+        title: 'SHOT SUBTYPE',
+        defaultSubtype: 'ON_TARGET',
+        subtypes: [
+            { key: 'ON_TARGET', label: 'ON TARGET', color: '#4ade80', badge: 'bg-emerald-100 text-emerald-700 ring-emerald-300' },
+            { key: 'OFF_TARGET', label: 'OFF TARGET', color: '#ef4444', badge: 'bg-red-100 text-red-700 ring-red-300' },
+            { key: 'BLOCKED', label: 'BLOCKED', color: '#fbbf24', badge: 'bg-amber-100 text-amber-700 ring-amber-300' },
+            { key: 'GOAL', label: 'GOAL', color: '#3b82f6', badge: 'bg-blue-100 text-blue-700 ring-blue-300' },
+        ]
+    },
+    PASS: {
+        title: 'PASS SUBTYPE',
+        defaultSubtype: 'SUCCESS',
+        subtypes: [
+            { key: 'SUCCESS', label: 'SUCCESS', color: '#22c55e', badge: 'bg-green-100 text-green-700 ring-green-300' },
+            { key: 'KEY_PASS', label: 'KEY PASS', color: '#eab308', badge: 'bg-yellow-100 text-yellow-700 ring-yellow-300' },
+            { key: 'UNSUCCESSFUL', label: 'UNSUCCESSFUL', color: '#fb7185', badge: 'bg-rose-100 text-rose-700 ring-rose-300' },
+        ]
+    },
+    CROSS: {
+        title: 'CROSS SUBTYPE',
+        defaultSubtype: 'SUCCESS',
+        subtypes: [
+            { key: 'SUCCESS', label: 'SUCCESS', color: '#a855f7', badge: 'bg-purple-100 text-purple-700 ring-purple-300' },
+            { key: 'ASSIST', label: 'ASSIST', color: '#06b6d4', badge: 'bg-cyan-100 text-cyan-700 ring-cyan-300' },
+            { key: 'UNSUCCESSFUL', label: 'UNSUCCESSFUL', color: '#f97316', badge: 'bg-orange-100 text-orange-700 ring-orange-300' },
+        ]
+    }
+};
+
 let selectedPlayerId = null;
 let selectedPlayerName = '';
 let selectedAction = null;
@@ -199,6 +238,7 @@ let selectedSubtype = null;
 let liveMode = false;
 let isDrawing = false;
 let dragStartPoint = null;
+let currentPreviewPoint = null;
 let pointerDownPosition = null;
 let suppressNextClick = false;
 let clickTimer = null;
@@ -214,15 +254,19 @@ const summaryCanvas = document.getElementById('summary-canvas');
 const summaryCtx = summaryCanvas.getContext('2d');
 const matchStatus = '{{ $match->status }}';
 const eventList = document.getElementById('event-list');
+const emptyEventList = document.getElementById('empty-event-list');
 const indicator = document.getElementById('active-indicator');
 const manualMinuteModal = document.getElementById('manual-minute-modal');
 const manualMinuteInput = document.getElementById('manual-minute-input');
 
-// Render semua ikon Lucide
 function renderIcons() {
     if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 2 } });
 }
-document.addEventListener('DOMContentLoaded', renderIcons);
+document.addEventListener('DOMContentLoaded', () => {
+    renderIcons();
+    updateEventList();
+    updateSummary();
+});
 
 function calculateGrid() {
     gridPoints = [];
@@ -260,6 +304,16 @@ function redrawAll() {
         drawVectorArrow(ctx, start.x, start.y, end.x, end.y, v.action_type, v.subtype);
     });
 
+    if (isDrawing && dragStartPoint && currentPreviewPoint) {
+        drawArrow(
+            dragStartPoint.x,
+            dragStartPoint.y,
+            currentPreviewPoint.x,
+            currentPreviewPoint.y,
+            getActionColor(selectedAction, selectedSubtype)
+        );
+    }
+
     if (currentStartPoint) {
         ctx.beginPath();
         ctx.arc(currentStartPoint.x, currentStartPoint.y, 10, 0, Math.PI * 2);
@@ -290,8 +344,10 @@ function setPlayer(id, number, name) {
         btn.classList.add('bg-slate-50', 'text-slate-600');
     });
     const activeBtn = document.getElementById('btn-player-' + id);
-    activeBtn.classList.remove('bg-slate-50', 'text-slate-600');
-    activeBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-600');
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-50', 'text-slate-600');
+        activeBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-600');
+    }
     updateIndicator();
     updateSummary();
     updateEventList();
@@ -300,6 +356,44 @@ function setPlayer(id, number, name) {
 
 function setAction(action) {
     const actionChanged = selectedAction !== action;
+function renderSubtypeButtons() {
+    const container = document.getElementById('event-subtypes');
+    const btnWrapper = document.getElementById('subtype-buttons');
+    container.classList.remove('hidden');
+    btnWrapper.innerHTML = '';
+
+    Object.entries(EVENT_CONFIG).forEach(([action, config]) => {
+        const group = document.createElement('div');
+        group.className = 'flex flex-wrap items-center gap-2';
+
+        const label = document.createElement('span');
+        label.className = 'w-12 shrink-0 text-[9px] font-extrabold tracking-wide text-slate-500';
+        label.textContent = action;
+        group.appendChild(label);
+
+        config.subtypes.forEach(item => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.action = action;
+            btn.dataset.subtype = item.key;
+            btn.textContent = item.label;
+            btn.onclick = () => setAction(action, item.key);
+            btn.className = 'subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors bg-slate-100 text-slate-500';
+            group.appendChild(btn);
+        });
+
+        btnWrapper.appendChild(group);
+    });
+
+    const legendEl = document.getElementById('vector-legend');
+    legendEl.innerHTML = Object.entries(EVENT_CONFIG).flatMap(([action, config]) =>
+        config.subtypes.map(item =>
+            `<span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded" style="background-color:${item.color}"></i>${action} · ${item.label}</span>`
+        )
+    ).join('') + `<span class="col-span-2 text-emerald-300 sm:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>`;
+}
+
+function setAction(action, subtype = EVENT_CONFIG[action]?.defaultSubtype || null) {
     selectedAction = action;
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.classList.remove('bg-red-500', 'bg-green-500', 'bg-purple-500', 'text-white');
@@ -315,12 +409,20 @@ function setAction(action) {
         group.classList.toggle('hidden', group.id !== `${action.toLowerCase()}-subtypes`);
     });
     if (actionChanged || !selectedSubtype) setSubtype(subtypeDefaults[action]);
+    if (action === 'SHOT') activeBtn.classList.add('bg-red-500', 'text-white');
+    if (action === 'PASS') activeBtn.classList.add('bg-green-500', 'text-white');
+    if (action === 'CROSS') activeBtn.classList.add('bg-purple-500', 'text-white');
+
+    setSubtype(subtype);
     updateIndicator();
     redrawAll();
 }
 
 function setSubtype(subtype) {
     selectedSubtype = subtype;
+    const config = EVENT_CONFIG[selectedAction];
+    if (!config) return;
+
     document.querySelectorAll('.subtype-btn').forEach(button => {
         const selected = button.dataset.action === selectedAction && button.dataset.subtype === subtype;
         button.classList.toggle('ring-1', selected);
@@ -329,8 +431,17 @@ function setSubtype(subtype) {
         button.classList.toggle('text-blue-700', selected);
         button.classList.toggle('bg-slate-100', !selected);
         button.classList.toggle('text-slate-500', !selected);
+        const item = button.dataset.action === selectedAction
+            ? config.subtypes.find(s => s.key === button.dataset.subtype)
+            : null;
+        const isSelected = button.dataset.action === selectedAction && button.dataset.subtype === subtype;
+        button.className = `subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors ${
+            isSelected && item ? `ring-1 ${item.badge}` : 'bg-slate-100 text-slate-500'
+        }`;
     });
 }
+
+renderSubtypeButtons();
 
 function setPanel(panel) {
     const showSummary = panel === 'summary';
@@ -347,7 +458,7 @@ function setPanel(panel) {
 function toggleLiveMode() {
     liveMode = !liveMode;
     const toggle = document.getElementById('live-mode-toggle');
-    const indicator = document.getElementById('live-mode-indicator');
+    const indicatorEl = document.getElementById('live-mode-indicator');
     const label = document.getElementById('live-mode-label');
 
     toggle.setAttribute('aria-pressed', String(liveMode));
@@ -357,9 +468,9 @@ function toggleLiveMode() {
     toggle.classList.toggle('bg-slate-100', !liveMode);
     toggle.classList.toggle('text-slate-600', !liveMode);
     toggle.classList.toggle('border-slate-200', !liveMode);
-    indicator.classList.toggle('bg-emerald-500', liveMode);
-    indicator.classList.toggle('animate-pulse', liveMode);
-    indicator.classList.toggle('bg-slate-400', !liveMode);
+    indicatorEl.classList.toggle('bg-emerald-500', liveMode);
+    indicatorEl.classList.toggle('animate-pulse', liveMode);
+    indicatorEl.classList.toggle('bg-slate-400', !liveMode);
     label.textContent = liveMode ? 'LIVE ON' : 'LIVE OFF';
 }
 
@@ -368,14 +479,11 @@ function updateIndicator() {
 }
 
 function getActionColor(action, subtype = null) {
-    if (action === 'SHOT') {
-        const subtypeColors = {
-            ON_TARGET: '#4ade80',
-            OFF_TARGET: '#ef4444',
-            BLOCKED: '#fbbf24',
-            GOAL: '#3b82f6'
-        };
-        return subtypeColors[subtype] || '#ef4444';
+    const config = EVENT_CONFIG[action];
+    if (config) {
+        const found = config.subtypes.find(s => s.key === subtype);
+        if (found) return found.color;
+        return config.subtypes[0].color;
     }
     if (action === 'PASS') {
         if (subtype === 'UNSUCCESS') return '#ef4444';
@@ -397,29 +505,69 @@ function getSelectedPlayerVectors() {
         : vectors;
 }
 
+function updateEventList() {
+    const vectors = getSelectedPlayerVectors();
+    eventList.innerHTML = '';
+    emptyEventList.classList.toggle('hidden', vectors.length > 0);
+
+    vectors.slice().reverse().forEach((v, idx) => {
+        const color = getActionColor(v.action_type, v.subtype);
+        const subLabel = v.subtype ? v.subtype.replace(/_/g, ' ') : '-';
+        const timeText = v.match_minute !== null && v.match_minute !== undefined
+            ? `${v.match_minute}'`
+            : (v.input_time ? new Date(v.input_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-');
+        const isPending = !v.id;
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs';
+        row.innerHTML = `
+            <div class="flex items-center gap-2.5 min-w-0">
+                <span class="h-3 w-3 shrink-0 rounded-full" style="background-color:${color}"></span>
+                <div class="truncate">
+                    <span class="font-bold text-slate-700">${v.action_type}</span>
+                    <span class="ml-1 rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 border border-slate-200">${subLabel}</span>
+                    <div class="text-[10px] text-slate-400 truncate">${v.player_name || v.playerName || ''} · Menit ${timeText}</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                ${isPending
+                    ? '<span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">Draft</span>'
+                    : '<span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">Saved</span>'}
+            </div>
+        `;
+        eventList.appendChild(row);
+    });
+}
+
 function updateSummary() {
     const vectors = getSelectedPlayerVectors();
-    const shots = vectors.filter(vector => vector.action_type === 'SHOT');
-    const classifiedShots = shots.filter(vector => vector.subtype);
-    const onTarget = classifiedShots.filter(vector => ['ON_TARGET', 'GOAL'].includes(vector.subtype)).length;
-    const passes = vectors.filter(vector => vector.action_type === 'PASS').length;
-    const crosses = vectors.filter(vector => vector.action_type === 'CROSS').length;
-    const shotPercentage = classifiedShots.length ? Math.round((onTarget / classifiedShots.length) * 100) : 0;
-    const maxTotal = Math.max(shots.length, passes, crosses, 1);
+    const shots = vectors.filter(v => v.action_type === 'SHOT');
+    const onTarget = shots.filter(v => ['ON_TARGET', 'GOAL'].includes(v.subtype)).length;
+
+    const passes = vectors.filter(v => v.action_type === 'PASS');
+    const passSuccess = passes.filter(v => ['SUCCESS', 'KEY_PASS'].includes(v.subtype)).length;
+
+    const crosses = vectors.filter(v => v.action_type === 'CROSS');
+    const crossSuccess = crosses.filter(v => ['SUCCESS', 'ASSIST'].includes(v.subtype)).length;
+
+    const shotPercentage = shots.length ? Math.round((onTarget / shots.length) * 100) : 0;
+    const maxTotal = Math.max(shots.length, passes.length, crosses.length, 1);
 
     document.getElementById('summary-player-label').textContent = selectedPlayerName
         ? `VECTOR MAP — ${selectedPlayerName.toUpperCase()}`
         : 'VECTOR MAP — ALL PLAYERS';
     document.getElementById('shot-percentage').textContent = `${shotPercentage}%`;
-    document.getElementById('shot-ratio').textContent = `${onTarget}/${classifiedShots.length} on target`;
-    document.getElementById('pass-count').textContent = passes;
-    document.getElementById('cross-count').textContent = crosses;
+    document.getElementById('shot-ratio').textContent = `${onTarget}/${shots.length} on target`;
+    document.getElementById('pass-count').textContent = passes.length;
+    document.getElementById('pass-ratio').textContent = `${passSuccess}/${passes.length} successful`;
+    document.getElementById('cross-count').textContent = crosses.length;
+    document.getElementById('cross-ratio').textContent = `${crossSuccess}/${crosses.length} successful`;
     document.getElementById('shot-total').textContent = shots.length;
-    document.getElementById('pass-total').textContent = passes;
-    document.getElementById('cross-total').textContent = crosses;
+    document.getElementById('pass-total').textContent = passes.length;
+    document.getElementById('cross-total').textContent = crosses.length;
     document.getElementById('shot-bar').style.width = `${(shots.length / maxTotal) * 100}%`;
-    document.getElementById('pass-bar').style.width = `${(passes / maxTotal) * 100}%`;
-    document.getElementById('cross-bar').style.width = `${(crosses / maxTotal) * 100}%`;
+    document.getElementById('pass-bar').style.width = `${(passes.length / maxTotal) * 100}%`;
+    document.getElementById('cross-bar').style.width = `${(crosses.length / maxTotal) * 100}%`;
     drawSummary();
 }
 
@@ -429,6 +577,7 @@ function drawSummary() {
     summaryCanvas.height = summaryCanvas.offsetHeight;
     const width = summaryCanvas.width;
     const height = summaryCanvas.height;
+
     summaryCtx.clearRect(0, 0, width, height);
     summaryCtx.fillStyle = '#164a27';
     summaryCtx.fillRect(0, 0, width, height);
@@ -444,6 +593,7 @@ function drawSummary() {
     summaryCtx.stroke();
     summaryCtx.strokeRect(width * 0.06, height * 0.32, width * 0.2, height * 0.36);
     summaryCtx.strokeRect(width * 0.74, height * 0.32, width * 0.2, height * 0.36);
+
     summaryCtx.fillStyle = 'rgba(255,255,255,0.3)';
     for (let column = 1; column <= 8; column++) {
         for (let row = 1; row <= 6; row++) {
@@ -470,13 +620,19 @@ function drawSummary() {
             2,
             7
         );
-    });
-}
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const head = 7;
 
-function getActionIcon(action) {
-    if (action === 'SHOT') return 'crosshair';
-    if (action === 'PASS') return 'move-up-right';
-    return 'corner-up-right';
+        summaryCtx.strokeStyle = getActionColor(vector.action_type, vector.subtype);
+        summaryCtx.lineWidth = 2;
+        summaryCtx.beginPath();
+        summaryCtx.moveTo(fromX, fromY);
+        summaryCtx.lineTo(toX, toY);
+        summaryCtx.lineTo(toX - head * Math.cos(angle - Math.PI / 6), toY - head * Math.sin(angle - Math.PI / 6));
+        summaryCtx.moveTo(toX, toY);
+        summaryCtx.lineTo(toX - head * Math.cos(angle + Math.PI / 6), toY - head * Math.sin(angle + Math.PI / 6));
+        summaryCtx.stroke();
+    });
 }
 
 function getNearestPoint(x, y) {
@@ -543,6 +699,17 @@ function drawVectorArrow(context, fromX, fromY, toX, toY, action, subtype, lineW
     );
     context.stroke();
     context.restore();
+    const angle = Math.atan2(dy, dx);
+
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.lineTo(toX, toY);
+    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.stroke();
 }
 
 function getCanvasPosition(e) {
@@ -553,11 +720,13 @@ function getCanvasPosition(e) {
 function addVector(startPoint, endPoint, playerId, playerName, action, subtype = selectedSubtype) {
     if (!startPoint || !endPoint || (startPoint.x === endPoint.x && startPoint.y === endPoint.y)) return false;
 
+    const resolvedSubtype = subtype || (EVENT_CONFIG[action]?.defaultSubtype ?? null);
     const vector = {
         player_id: playerId,
         playerName: playerName,
         action_type: action,
         subtype,
+        subtype: resolvedSubtype,
         start_x: (startPoint.x / canvas.width) * 100,
         start_y: (startPoint.y / canvas.height) * 100,
         end_x: (endPoint.x / canvas.width) * 100,
@@ -650,26 +819,28 @@ function showNotification(message, type = 'info') {
 }
 
 canvas.addEventListener('pointerdown', (e) => {
-    if(matchStatus === 'Selesai') return showNotification('Pertandingan sudah selesai, sehingga data tidak dapat diubah.', 'warning');
-    if(!selectedPlayerId && !selectedAction) return showNotification('Pilih pemain dan event terlebih dahulu sebelum menggambar vektor.', 'info');
-    if(!selectedPlayerId) return showNotification('Pilih pemain terlebih dahulu sebelum menggambar vektor.', 'info');
-    if(!selectedAction) return showNotification('Pilih event SHOT, PASS, atau CROSS terlebih dahulu.', 'info');
+    if (matchStatus === 'Selesai') {
+        return showNotification('Pertandingan sudah selesai, sehingga data tidak dapat diubah.', 'warning');
+    }
+    if (!selectedPlayerId || !selectedAction) {
+        return showNotification('Pilih pemain dan jenis event (SHOT / PASS / CROSS) terlebih dahulu.', 'warning');
+    }
 
-    const position = getCanvasPosition(e);
-    dragStartPoint = getNearestPoint(position.x, position.y);
-    pointerDownPosition = position;
-    isDrawing = false;
-    if (dragStartPoint) canvas.setPointerCapture(e.pointerId);
+    const pos = getCanvasPosition(e);
+    const nearest = getNearestPoint(pos.x, pos.y);
+    if (!nearest) return;
+
+    pointerDownPosition = pos;
+    dragStartPoint = nearest;
+    currentPreviewPoint = nearest;
+    isDrawing = true;
 });
 
 canvas.addEventListener('pointermove', (e) => {
-    if (!pointerDownPosition || !dragStartPoint) return;
-    const position = getCanvasPosition(e);
-    if (!isDrawing && Math.hypot(position.x - pointerDownPosition.x, position.y - pointerDownPosition.y) > 4) {
-        isDrawing = true;
-    }
-    if (!isDrawing) return;
-
+    if (!isDrawing || !dragStartPoint) return;
+    const pos = getCanvasPosition(e);
+    const nearest = getNearestPoint(pos.x, pos.y);
+    currentPreviewPoint = nearest || pos;
     redrawAll();
     const snapPoint = getNearestPoint(position.x, position.y);
     drawVectorArrow(
@@ -684,22 +855,33 @@ canvas.addEventListener('pointermove', (e) => {
 });
 
 canvas.addEventListener('pointerup', (e) => {
-    if (!pointerDownPosition) return;
-    const wasDragging = isDrawing;
-    const startPoint = dragStartPoint;
-    const position = getCanvasPosition(e);
-    const endPoint = getNearestPoint(position.x, position.y);
-
-    if (wasDragging && startPoint && endPoint) {
-        addVector(startPoint, endPoint, selectedPlayerId, selectedPlayerName, selectedAction, selectedSubtype);
-        suppressNextClick = true;
-        setTimeout(() => { suppressNextClick = false; }, 100);
-        currentStartPoint = null;
-    }
+    if (!isDrawing || !dragStartPoint) return;
+    const pos = getCanvasPosition(e);
+    const endPoint = getNearestPoint(pos.x, pos.y);
+    const movedDistance = pointerDownPosition
+        ? Math.hypot(pos.x - pointerDownPosition.x, pos.y - pointerDownPosition.y)
+        : 0;
 
     isDrawing = false;
+    currentPreviewPoint = null;
+
+    if (movedDistance > 12 && endPoint && (endPoint.x !== dragStartPoint.x || endPoint.y !== dragStartPoint.y)) {
+        suppressNextClick = true;
+        currentStartPoint = null;
+        addVector(dragStartPoint, endPoint, selectedPlayerId, selectedPlayerName, selectedAction, selectedSubtype);
+    }
+
     dragStartPoint = null;
-    pointerDownPosition = null;
+    redrawAll();
+});
+
+canvas.addEventListener('dblclick', (e) => {
+    if (matchStatus === 'Selesai' || !selectedPlayerId || !selectedAction) return;
+    const pos = getCanvasPosition(e);
+    const nearest = getNearestPoint(pos.x, pos.y);
+    if (!nearest) return;
+
+    currentStartPoint = nearest;
     redrawAll();
 });
 
@@ -708,17 +890,11 @@ canvas.addEventListener('click', (e) => {
         suppressNextClick = false;
         return;
     }
-    if (e.detail !== 1) return;
+    if (!currentStartPoint || !selectedPlayerId || !selectedAction) return;
 
-    clearTimeout(clickTimer);
-    clickTimer = setTimeout(() => {
-        if (!currentStartPoint) return;
-        const position = getCanvasPosition(e);
-        const endPoint = getNearestPoint(position.x, position.y);
-        if (!endPoint) return showNotification('Klik salah satu titik pada grid untuk menentukan titik akhir.', 'info');
-        if (endPoint.x === currentStartPoint.x && endPoint.y === currentStartPoint.y) {
-            return showNotification('Titik akhir harus berbeda dari titik awal.', 'warning');
-        }
+    const pos = getCanvasPosition(e);
+    const endPoint = getNearestPoint(pos.x, pos.y);
+    if (!endPoint || (endPoint.x === currentStartPoint.x && endPoint.y === currentStartPoint.y)) return;
 
         const added = addVector(
             currentStartPoint,
@@ -754,26 +930,19 @@ canvas.addEventListener('dblclick', (e) => {
         action_type: selectedAction,
         subtype: selectedSubtype
     };
+    const start = currentStartPoint;
+    currentStartPoint = null;
+    addVector(start, endPoint, selectedPlayerId, selectedPlayerName, selectedAction, selectedSubtype);
     redrawAll();
 });
 
-function updateEventList() {
-    eventList.innerHTML = '';
-    const vectors = getSelectedPlayerVectors();
-    document.getElementById('empty-event-list').classList.toggle('hidden', vectors.length > 0);
-    [...vectors].reverse().forEach(v => {
-        const el = document.createElement('div');
-        el.className = 'bg-white border border-slate-100 rounded-lg p-2.5 text-xs flex justify-between items-center shadow-sm gap-2';
-        const mode = v.timestamp_mode || (v.input_time ? 'live' : 'manual');
-        const player = document.createElement('span');
-        player.className = 'font-bold text-slate-700';
-        player.textContent = v.playerName || v.player_name || 'Pemain';
-        const time = document.createElement('span');
-        time.className = 'block text-[10px] text-slate-400';
-        time.textContent = mode === 'live' ? new Date(v.input_time).toLocaleString() : `Menit ${v.match_minute}`;
-        const details = document.createElement('div');
-        details.className = 'min-w-0';
-        details.append(player, time);
+async function submitVectors() {
+    if (matchStatus === 'Selesai') {
+        return showNotification('Pertandingan sudah selesai, data tidak dapat disimpan.', 'warning');
+    }
+    if (pendingVectors.length === 0) {
+        return showNotification('Tidak ada data vektor baru untuk disimpan.', 'info');
+    }
 
         const action = document.createElement('span');
         action.className = `inline-flex items-center gap-1.5 font-bold ${v.action_type === 'SHOT' ? 'text-red-500' : (v.action_type === 'PASS' ? 'text-green-500' : 'text-purple-500')}`;
@@ -782,58 +951,46 @@ function updateEventList() {
         icon.setAttribute('data-lucide', getActionIcon(v.action_type));
         icon.className = 'h-3.5 w-3.5';
         action.append(icon, document.createTextNode(v.subtype ? `${v.action_type} · ${v.subtype.replace('_', ' ')}` : v.action_type));
+    const saveBtn = document.getElementById('btn-save-vectors');
+    saveBtn.disabled = true;
+    saveBtn.classList.add('opacity-60', 'cursor-not-allowed');
 
-        const modeLabel = document.createElement('span');
-        modeLabel.className = `rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-wide ${mode === 'live' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`;
-        modeLabel.textContent = mode.toUpperCase();
-        const right = document.createElement('div');
-        right.className = 'flex shrink-0 flex-col items-end gap-1';
-        right.append(modeLabel, action);
-        el.append(details, right);
-        eventList.appendChild(el);
-    });
-    // Render ulang ikon untuk item event yang baru dibuat
-    renderIcons();
-}
+    try {
+        while (pendingVectors.length > 0) {
+            const payload = pendingVectors[0];
+            const response = await fetch('{{ route('matches.storeVector', $match->id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(payload)
+            });
 
-function submitVectors() {
-    if (pendingVectors.length === 0) return showNotification('Belum ada vektor baru untuk disimpan.', 'info');
-
-    const saveNextVector = () => {
-        if (pendingVectors.length === 0) {
-            redrawAll();
-            updateEventList();
-            updateSummary();
-            showNotification('Semua vektor berhasil disimpan.', 'success');
-            return;
-        }
-
-        const vector = pendingVectors[0];
-        fetch(`{{ route('matches.storeVector', $match->id) }}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify(vector)
-        }).then(async response => {
-            const data = await response.json();
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Gagal menyimpan vektor.');
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || 'Gagal menyimpan data vektor ke server.');
             }
+
+            const result = await response.json();
             savedVectors.push({
-                ...vector,
-                id: data.data.id,
-                player_name: vector.playerName
+                ...result.data,
+                player_name: payload.playerName
             });
             pendingVectors.shift();
-            saveNextVector();
-        }).catch(error => {
-            showNotification(`Vektor gagal disimpan: ${error.message}`, 'error');
-        });
-    };
+        }
 
-    saveNextVector();
+        updateEventList();
+        updateSummary();
+        redrawAll();
+        showNotification('Semua data vektor berhasil disimpan ke database!', 'success');
+    } catch (error) {
+        showNotification(error.message || 'Terjadi kesalahan saat menyimpan vektor.', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+    }
 }
 
 updateEventList();

@@ -99,6 +99,39 @@ class AnalystDashboardTest extends TestCase
             ->assertSee('Global Player');
     }
 
+    public function test_admin_dashboard_shows_top_player_performance_and_links_to_report(): void
+    {
+        $admin = $this->createUser('Super Admin', 'superadmin@example.com');
+        $analyst = $this->createUser('Analis', 'analyst@example.com');
+        $club = Club::create(['name' => 'Performance FC']);
+        $player = Player::create([
+            'club_id' => $club->id,
+            'name' => 'Top Player',
+            'popular_name' => 'Top Scorer',
+            'jersey_number' => 10,
+            'status' => 'Aktif',
+        ]);
+        $match = $this->createMatch($admin, $club->name, 'Opponent FC', 'Selesai');
+
+        Statistic::create([
+            'match_id' => $match->id,
+            'player_id' => $player->id,
+            'analyst_id' => $analyst->id,
+            'goal' => 3,
+            'assist' => 1,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Performa Pemain Teratas')
+            ->assertSee('Top Scorer')
+            ->assertSee('data-admin-player-goals="3"', false)
+            ->assertSee('data-admin-player-assists="1"', false)
+            ->assertSee('data-admin-player-matches="1"', false)
+            ->assertSee(route('reports.player.show', $player->id), false);
+    }
+
     private function createMatch(User $creator, string $team, string $opponent, string $status): MatchSession
     {
         return MatchSession::create([

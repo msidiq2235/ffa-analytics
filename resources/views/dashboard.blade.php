@@ -245,6 +245,44 @@ $activeRole = $activeRole ?? (auth()->user()->role ?? 'Super Admin');
                     </table>
                 </div>
             </div>
+
+            <!-- Performa Pemain Teratas -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
+                <div class="flex items-center justify-between gap-3 mb-5">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
+                        <div>
+                            <h3 class="font-bold text-[#1e293b] text-[14px]">Performa Pemain Teratas</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Diurutkan berdasarkan gol dan assist</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('performa.index') }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Semua pemain <i data-lucide="arrow-right" class="w-3 h-3"></i></a>
+                </div>
+                <div class="space-y-2">
+                    @forelse($adminTopPlayers as $index => $player)
+                        <a data-admin-top-player="{{ $player->id }}" href="{{ route('reports.player.show', $player->id) }}" class="flex flex-col gap-3 rounded-xl border border-slate-100 p-3 transition-colors hover:border-blue-100 hover:bg-blue-50/30 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {{ $index === 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500' }} text-[11px] font-black">{{ $index + 1 }}</span>
+                                <span class="min-w-0">
+                                    <span class="block truncate text-[12px] font-bold text-[#1e293b]">{{ $player->popular_name ?: $player->name }}</span>
+                                    <span class="mt-0.5 block truncate text-[10px] text-slate-500">{{ $player->club_name ?: 'Tanpa tim' }} · #{{ $player->jersey_number ?: '-' }}</span>
+                                </span>
+                            </div>
+                            <span class="flex shrink-0 items-center gap-4 pl-11 text-center sm:pl-0">
+                                <span><span data-admin-player-goals="{{ $player->goals }}" class="block text-[12px] font-black text-orange-600">{{ $player->goals }}</span><span class="text-[9px] font-bold text-slate-400">Gol</span></span>
+                                <span><span data-admin-player-assists="{{ $player->assists }}" class="block text-[12px] font-black text-violet-600">{{ $player->assists }}</span><span class="text-[9px] font-bold text-slate-400">Assist</span></span>
+                                <span><span data-admin-player-matches="{{ $player->matches }}" class="block text-[12px] font-black text-slate-700">{{ $player->matches }}</span><span class="text-[9px] font-bold text-slate-400">Laga</span></span>
+                                <i data-lucide="arrow-up-right" class="h-4 w-4 text-slate-300"></i>
+                            </span>
+                        </a>
+                    @empty
+                        <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center">
+                            <i data-lucide="chart-no-axes-column-increasing" class="mx-auto h-7 w-7 text-slate-300"></i>
+                            <p class="mt-2 text-[11px] font-semibold text-slate-500">Belum ada statistik performa pemain.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </section>
         </div>
 
         <!-- ================= KOLOM KANAN (1/3) ================= -->
@@ -382,257 +420,8 @@ $activeRole = $activeRole ?? (auth()->user()->role ?? 'Super Admin');
 @include('dashboard.analyst')
 
 @elseif($activeRole === 'Pemain')
-<div class="space-y-6">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] overflow-hidden">
-        <div class="p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative">
-            <div class="w-24 h-24 md:w-32 md:h-32 bg-[#183262] rounded-2xl flex flex-col items-center justify-center text-white shrink-0 shadow-md">
-                <span class="text-2xl md:text-3xl font-black">YA</span>
-            </div>
-            <div class="flex-1 text-center md:text-left mt-2 md:mt-4">
-                <h2 class="text-2xl font-black text-[#1e293b] tracking-tight">Yazid Ardiyan</h2>
-                <div class="flex items-center justify-center md:justify-start gap-3 mt-2">
-                    <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-[11px] font-bold tracking-widest uppercase">#10</span>
-                    <span class="px-2.5 py-1 bg-blue-50 text-[#4062D6] border border-blue-100 rounded text-[11px] font-bold tracking-widest uppercase">ST</span>
-                </div>
-            </div>
-            <div class="absolute top-6 right-8 text-right hidden md:block">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Klub</p>
-                <p class="text-[13px] font-bold text-[#1e293b] flex items-center justify-end gap-1.5"><i data-lucide="shield" class="w-3.5 h-3.5 text-slate-400"></i> GhostClub</p>
-            </div>
-        </div>
-        <div class="bg-slate-50 border-t border-slate-100 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">5 Match Terakhir</span>
-                <div class="flex items-center gap-1.5">
-                    <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">W</div>
-                    <div class="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">L</div>
-                    <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">W</div>
-                    <div class="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center text-[10px] font-bold">D</div>
-                    <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">W</div>
-                </div>
-            </div>
-            <div class="flex items-center gap-4 text-[10px] font-bold text-slate-500">
-                <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div>Menang</div>
-                <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-yellow-500"></div>Seri</div>
-                <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-rose-500"></div>Kalah</div>
-            </div>
-        </div>
-    </div>
+@include('dashboard.player')
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-center">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><i data-lucide="timer" class="w-3.5 h-3.5"></i> Matches Played</p>
-            <h3 class="text-4xl font-black text-[#4062D6]">12</h3>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-center">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><i data-lucide="goal" class="w-3.5 h-3.5"></i> My Goals</p>
-            <h3 class="text-4xl font-black text-[#4062D6]">8</h3>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-center">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><i data-lucide="handshake" class="w-3.5 h-3.5"></i> My Assists</p>
-            <h3 class="text-4xl font-black text-[#4062D6]">4</h3>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] grid grid-cols-2 md:grid-cols-6 divide-y md:divide-y-0 md:divide-x divide-slate-100">
-        <div class="p-4 flex flex-col items-center justify-center text-center">
-            <span class="text-2xl font-black text-orange-500 mb-1">8.4</span>
-            <span class="text-[10px] font-bold text-slate-400">Avg Rating</span>
-        </div>
-        <div class="p-4 flex flex-col items-center justify-center text-center">
-            <span class="text-2xl font-black text-[#4062D6] mb-1">980</span>
-            <span class="text-[10px] font-bold text-slate-400">Menit Main</span>
-        </div>
-        <div class="p-4 flex flex-col items-center justify-center text-center">
-            <span class="text-2xl font-black text-yellow-500 mb-1">1</span>
-            <span class="text-[10px] font-bold text-slate-400">Kartu Kuning</span>
-        </div>
-        <div class="p-4 flex flex-col items-center justify-center text-center">
-            <span class="text-2xl font-black text-rose-500 mb-1">0</span>
-            <span class="text-[10px] font-bold text-slate-400">Kartu Merah</span>
-        </div>
-        <div class="p-4 flex flex-col items-center justify-center text-center">
-            <span class="text-2xl font-black text-emerald-500 mb-1">24</span>
-            <span class="text-[10px] font-bold text-slate-400">Tembakan</span>
-        </div>
-        <div class="p-4 flex flex-col items-center justify-center text-center">
-            <span class="text-2xl font-black text-purple-500 mb-1">18</span>
-            <span class="text-[10px] font-bold text-slate-400">Dribel Sukses</span>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
-            <div class="flex items-center gap-2 mb-6">
-                <i data-lucide="radar" class="w-4 h-4 text-[#4062D6]"></i>
-                <h3 class="font-bold text-[#1e293b] text-[13px]">Radar Atribut Pemain</h3>
-            </div>
-            <div class="relative h-[250px] w-full flex justify-center">
-                <canvas id="radarChart"></canvas>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
-            <div class="flex items-center gap-2 mb-6">
-                <i data-lucide="chart-column" class="w-4 h-4 text-[#4062D6]"></i>
-                <h3 class="font-bold text-[#1e293b] text-[13px]">Gol per Bulan — 2026</h3>
-            </div>
-            <div class="relative h-[250px] w-full">
-                <canvas id="barChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] p-6">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-2">
-                <i data-lucide="history" class="w-5 h-5 text-[#4062D6]"></i>
-                <h3 class="font-bold text-[#1e293b]">Riwayat Pertandingan Anda</h3>
-            </div>
-            <a href="#" class="inline-flex items-center gap-1 text-[11px] font-bold text-[#4062D6] hover:text-[#3251b5]">Semua <i data-lucide="chevron-right" class="w-3 h-3"></i></a>
-        </div>
-        <div class="space-y-3">
-            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                        <i data-lucide="chart-column" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-[13px] font-bold text-[#1e293b]">Liga1 <span class="text-emerald-500 ml-2">Menang 2-1</span></h4>
-                        <p class="text-[11px] text-slate-500 mt-1">29 June 2026 - vs SSB Kretek</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-6">
-                    <div class="flex gap-4 text-center">
-                        <div><p class="text-[13px] font-black text-[#1e293b]">1</p><p class="text-[9px] font-bold text-slate-400">Gol</p></div>
-                        <div><p class="text-[13px] font-black text-[#1e293b]">0</p><p class="text-[9px] font-bold text-slate-400">Assist</p></div>
-                        <div><p class="text-[13px] font-black text-[#1e293b]">8.5</p><p class="text-[9px] font-bold text-slate-400">Rating</p></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 border border-blue-200 text-blue-600 rounded-lg text-[10px] font-bold hover:bg-blue-50"><i data-lucide="file-down" class="w-3 h-3"></i> PDF</a>
-                        <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-[10px] font-bold hover:bg-slate-50"><i data-lucide="eye" class="w-3 h-3"></i> Lihat Evaluasi</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
-                        <i data-lucide="chart-column" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-[13px] font-bold text-[#1e293b]">Liga1 <span class="text-rose-500 ml-2">Kalah 0-2</span></h4>
-                        <p class="text-[11px] text-slate-500 mt-1">14 June 2026 - vs SSB Sleman</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-6">
-                    <div class="flex gap-4 text-center">
-                        <div><p class="text-[13px] font-black text-[#1e293b]">0</p><p class="text-[9px] font-bold text-slate-400">Gol</p></div>
-                        <div><p class="text-[13px] font-black text-[#1e293b]">0</p><p class="text-[9px] font-bold text-slate-400">Assist</p></div>
-                        <div><p class="text-[13px] font-black text-[#1e293b]">6.2</p><p class="text-[9px] font-bold text-slate-400">Rating</p></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 border border-blue-200 text-blue-600 rounded-lg text-[10px] font-bold hover:bg-blue-50"><i data-lucide="file-down" class="w-3 h-3"></i> PDF</a>
-                        <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-[10px] font-bold hover:bg-slate-50"><i data-lucide="eye" class="w-3 h-3"></i> Lihat Evaluasi</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                        <i data-lucide="chart-column" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-[13px] font-bold text-[#1e293b]">Liga1 <span class="text-emerald-500 ml-2">Menang 3-1</span></h4>
-                        <p class="text-[11px] text-slate-500 mt-1">1 June 2026 - vs SSB Bantul</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-6">
-                    <div class="flex gap-4 text-center">
-                        <div><p class="text-[13px] font-black text-[#1e293b]">2</p><p class="text-[9px] font-bold text-slate-400">Gol</p></div>
-                        <div><p class="text-[13px] font-black text-[#1e293b]">1</p><p class="text-[9px] font-bold text-slate-400">Assist</p></div>
-                        <div><p class="text-[13px] font-black text-[#1e293b]">9.0</p><p class="text-[9px] font-bold text-slate-400">Rating</p></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 border border-blue-200 text-blue-600 rounded-lg text-[10px] font-bold hover:bg-blue-50"><i data-lucide="file-down" class="w-3 h-3"></i> PDF</a>
-                        <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-[10px] font-bold hover:bg-slate-50"><i data-lucide="eye" class="w-3 h-3"></i> Lihat Evaluasi</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        if(document.getElementById('radarChart')) {
-            const ctxRadar = document.getElementById('radarChart').getContext('2d');
-            new Chart(ctxRadar, {
-                type: 'radar',
-                data: {
-                    labels: ['Kecepatan', 'Teknik', 'Penyelesaian', 'Dribel', 'Stamina', 'Kerja Tim'],
-                    datasets: [{
-                        label: 'Atribut',
-                        data: [85, 75, 80, 88, 70, 65],
-                        backgroundColor: 'rgba(64, 98, 214, 0.2)',
-                        borderColor: '#4062D6',
-                        pointBackgroundColor: '#4062D6',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#4062D6',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(0,0,0,0.05)' },
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            pointLabels: { font: { size: 10, family: 'Inter' }, color: '#94a3b8' },
-                            ticks: { display: false, min: 0, max: 100 }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        if(document.getElementById('barChart')) {
-            const ctxBar = document.getElementById('barChart').getContext('2d');
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: ['Mar', 'Apr', 'Mei', 'Jun', 'Jul'],
-                    datasets: [{
-                        label: 'Gol',
-                        data: [0, 2, 1, 3, 2],
-                        backgroundColor: ['#e2e8f0', '#bfdbfe', '#e2e8f0', '#bfdbfe', '#4062D6'],
-                        borderRadius: 4,
-                        barThickness: 24
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1, font: { size: 10, family: 'Inter' }, color: '#94a3b8' },
-                            grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }
-                        },
-                        x: {
-                            ticks: { font: { size: 10, family: 'Inter' }, color: '#94a3b8' },
-                            grid: { display: false, drawBorder: false }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-    });
-    </script>
-</div>
 @endif
 
 <!-- Lucide Icons (hapus baris ini jika layouts.app sudah memuat Lucide) -->

@@ -70,6 +70,36 @@ class MatchDeletionTest extends TestCase
         $this->assertDatabaseHas('matches', ['id' => $match->id]);
     }
 
+    public function test_admin_does_not_see_analyst_actions_even_when_switching_active_role(): void
+    {
+        $admin = $this->createUser('Admin', 'admin@example.com');
+        $this->createMatch($admin, 'Any FC');
+
+        $this->actingAs($admin)
+            ->withSession(['active_role' => 'Analis'])
+            ->get(route('matches.index'))
+            ->assertOk()
+            ->assertDontSee('Vektor')
+            ->assertDontSee('Live Analytics');
+
+        $this->get(route('matches.index', ['view' => 'card']))
+            ->assertOk()
+            ->assertDontSee('Vektor')
+            ->assertDontSee('Live Analytics');
+    }
+
+    public function test_analyst_sees_analyst_actions(): void
+    {
+        $analyst = $this->createUser('Analis', 'analyst@example.com');
+        $this->createMatch($analyst, 'Any FC');
+
+        $this->actingAs($analyst)
+            ->get(route('matches.index'))
+            ->assertOk()
+            ->assertSee('Vektor')
+            ->assertSee('Live Analytics');
+    }
+
     private function createMatch(User $creator, string $team): MatchSession
     {
         return MatchSession::create([

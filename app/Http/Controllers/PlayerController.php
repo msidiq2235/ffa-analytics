@@ -208,6 +208,17 @@ class PlayerController extends Controller
 
     public function performance(Request $request)
     {
+        $user = auth()->user();
+        if ($user->role === 'Pemain') {
+            $playerIds = Player::where('name', $user->name)->limit(2)->pluck('id');
+
+            if ($playerIds->count() === 1) {
+                return redirect()->route('reports.player.show', $playerIds->first());
+            }
+
+            return redirect()->route('dashboard');
+        }
+
         $query = Player::with('club');
 
         if ($request->filled('name')) {

@@ -94,8 +94,8 @@ $activeRole = in_array($realRole, ['Super Admin', 'Admin'], true)
 <p class="px-3 text-[10px] font-bold text-blue-200/50 uppercase tracking-widest mb-3 sidebar-title whitespace-nowrap transition-all">Analitik</p>
 <ul class="space-y-1">
 <li>
-<a href="{{ route('performa.index') }}" title="Performance" class="flex items-center gap-3 px-3 py-2.5 rounded-xl sidebar-item transition-all {{ request()->routeIs('performa.index') ? 'bg-white/15 text-white text-xs font-semibold shadow-sm' : 'text-blue-100/70 hover:text-white hover:bg-white/10 text-xs font-medium' }}">
-<i data-lucide="bar-chart-3" class="w-4 h-4 {{ request()->routeIs('performa.index') ? 'text-blue-300' : '' }} shrink-0"></i>
+<a href="{{ route('performa.index') }}" title="Performance" class="flex items-center gap-3 px-3 py-2.5 rounded-xl sidebar-item transition-all {{ request()->routeIs('performa.index', 'performa.show', 'reports.player.*') ? 'bg-white/15 text-white text-xs font-semibold shadow-sm' : 'text-blue-100/70 hover:text-white hover:bg-white/10 text-xs font-medium' }}">
+<i data-lucide="bar-chart-3" class="w-4 h-4 {{ request()->routeIs('performa.index', 'performa.show', 'reports.player.*') ? 'text-blue-300' : '' }} shrink-0"></i>
 <span class="sidebar-text whitespace-nowrap">Performance</span>
 </a>
 </li>

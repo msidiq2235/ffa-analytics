@@ -56,7 +56,7 @@ class PlayerPerformanceDetailTest extends TestCase
         ]);
 
         $olderVector = $this->createVector($analyst, $player, $olderMatch, 'SHOT', 10, 20, 30, 40);
-        $latestVector = $this->createVector($analyst, $player, $latestMatch, 'PASS', 15, 25, 55, 65);
+        $latestVector = $this->createVector($analyst, $player, $latestMatch, 'PASS', 15, 25, 55, 65, 'SUCCESS');
 
         $this->actingAs($analyst)
             ->get(route('reports.player.show', $player))
@@ -84,7 +84,8 @@ class PlayerPerformanceDetailTest extends TestCase
             ->assertSee('Statistik Live Analytics')
             ->assertSee('Goals conceded')
             ->assertSee('Peta Vektor Pemain')
-            ->assertSee('Umpan')
+            ->assertSee('Umpan · SUCCESS')
+            ->assertSee('stroke="#22c55e"', false)
             ->assertSee('data-vector-id="'.$latestVector->id.'"', false)
             ->assertDontSee('data-vector-id="'.$olderVector->id.'"', false);
 
@@ -99,6 +100,11 @@ class PlayerPerformanceDetailTest extends TestCase
         $matchPdf->assertOk()
             ->assertHeader('content-type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $matchPdf->getContent());
+
+        $profilePdf = $this->get(route('reports.player.pdf', $player->id));
+        $profilePdf->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $profilePdf->getContent());
 
         $latestDate = $latestMatch->match_date;
         $season = $latestDate->month >= 7 ? $latestDate->year : $latestDate->year - 1;
@@ -120,7 +126,8 @@ class PlayerPerformanceDetailTest extends TestCase
             ->assertSee('Statistik Pemain')
             ->assertSee('Performance Player')
             ->assertSee('Peta Vektor Pertandingan')
-            ->assertSee('PASS');
+            ->assertSee('Umpan · SUCCESS')
+            ->assertSee('stroke="#22c55e"', false);
         $this->get(route('reports.match.show', $latestMatch->id))
             ->assertOk()
             ->assertSee('Statistik Pemain');
@@ -206,13 +213,15 @@ class PlayerPerformanceDetailTest extends TestCase
         float $startX,
         float $startY,
         float $endX,
-        float $endY
+        float $endY,
+        ?string $subtype = null
     ): VectorDirection {
         return VectorDirection::create([
             'match_id' => $match->id,
             'player_id' => $player->id,
             'analyst_id' => $analyst->id,
             'action_type' => $actionType,
+            'subtype' => $subtype,
             'start_x' => $startX,
             'start_y' => $startY,
             'end_x' => $endX,
