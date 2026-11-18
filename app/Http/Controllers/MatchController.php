@@ -254,10 +254,18 @@ class MatchController extends Controller
 
     public function storeVector(Request $request, MatchSession $match)
     {
+        $allowedSubtypes = [
+            'SHOT' => ['ON_TARGET', 'OFF_TARGET', 'BLOCKED', 'GOAL'],
+            'PASS' => ['SUCCESS', 'UNSUCCESS', 'ASSIST'],
+            'CROSS' => ['SUCCESS', 'UNSUCCESS'],
+        ];
+        $actionType = $request->input('action_type');
+        $subtypes = is_string($actionType) ? ($allowedSubtypes[$actionType] ?? []) : [];
+
         $request->validate([
             'player_id' => 'required|exists:players,id',
-            'action_type' => 'required|in:SHOT,PASS,CROSS',
-            'subtype' => 'nullable|required_if:action_type,SHOT|in:ON_TARGET,OFF_TARGET,BLOCKED,GOAL',
+            'action_type' => ['required', Rule::in(array_keys($allowedSubtypes))],
+            'subtype' => ['required', Rule::in($subtypes)],
             'start_x' => 'required|numeric',
             'start_y' => 'required|numeric',
             'end_x' => 'required|numeric',

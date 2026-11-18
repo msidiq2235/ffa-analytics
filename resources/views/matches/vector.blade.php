@@ -50,17 +50,25 @@
                 <div class="pointer-events-none absolute bottom-[37%] right-[5%] top-[37%] w-[8%] border-2 border-r-0 border-white/40"></div>
                 <canvas id="vectorCanvas" class="absolute inset-0 z-10 h-full w-full touch-none cursor-crosshair"></canvas>
             </div>
-            <div class="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-semibold text-slate-300 sm:grid-cols-4">
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-emerald-400"></i>Shot On Target</span>
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-red-400"></i>Shot Off Target</span>
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-amber-400"></i>Blocked</span>
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-blue-400"></i>Goal</span>
-                <span class="col-span-2 text-emerald-300 sm:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>
+            <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-semibold text-slate-300 sm:grid-cols-3 lg:grid-cols-4">
+                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#4ade80"></i>Shot · On target</span>
+                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#ef4444"></i>Shot · Off target</span>
+                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#fbbf24"></i>Shot · Blocked</span>
+                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#3b82f6"></i>Shot · Goal</span>
+                <span class="inline-flex items-center gap-2"><i class="w-6 border-t-2 border-dashed" style="border-color:#22c55e"></i>Pass · Success</span>
+                <span class="inline-flex items-center gap-2"><i class="w-6 border-t-2 border-dashed" style="border-color:#ef4444"></i>Pass · Unsuccess</span>
+                <span class="inline-flex items-center gap-2"><i class="w-6 border-t-2 border-dashed" style="border-color:#3b82f6"></i>Pass · Assist</span>
+                <span class="inline-flex items-center gap-2">
+                    <svg class="h-3 w-6 shrink-0" viewBox="0 0 26 12" aria-hidden="true"><path d="M1 10 Q13 1 25 6" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/></svg>
+                    Cross · Success
+                </span>
+                <span class="inline-flex items-center gap-2">
+                    <svg class="h-3 w-6 shrink-0" viewBox="0 0 26 12" aria-hidden="true"><path d="M1 2 Q13 11 25 6" fill="none" stroke="#9a3412" stroke-width="2" stroke-linecap="round"/></svg>
+                    Cross · Unsuccess
+                </span>
+                <span class="col-span-2 text-emerald-300 sm:col-span-3 lg:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>
             </div>
         </div>
-        <a href="{{ route('matches.index') }}" class="w-fit rounded-lg bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700">
-            <i data-lucide="arrow-left" class="mr-1 inline h-4 w-4"></i>Kembali
-        </a>
     </section>
 
     <section class="flex min-w-0 flex-col gap-3 md:col-span-5">
@@ -75,13 +83,28 @@
                 <button id="btn-action-PASS" onclick="setAction('PASS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-green-50 hover:text-green-600">PASS</button>
                 <button id="btn-action-CROSS" onclick="setAction('CROSS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-purple-50 hover:text-purple-600">CROSS</button>
             </div>
-            <div id="shot-subtypes" class="mt-3 border-t border-slate-100 pt-3">
+            <div id="shot-subtypes" class="subtype-group mt-3 hidden border-t border-slate-100 pt-3">
                 <div class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">SHOT SUBTYPE</div>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" data-subtype="ON_TARGET" onclick="setSubtype('ON_TARGET')" class="subtype-btn rounded-md bg-emerald-100 px-2.5 py-1.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-300">ON TARGET</button>
-                    <button type="button" data-subtype="OFF_TARGET" onclick="setSubtype('OFF_TARGET')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">OFF TARGET</button>
-                    <button type="button" data-subtype="BLOCKED" onclick="setSubtype('BLOCKED')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">BLOCKED</button>
-                    <button type="button" data-subtype="GOAL" onclick="setSubtype('GOAL')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">GOAL</button>
+                    <button type="button" data-action="SHOT" data-subtype="ON_TARGET" onclick="setSubtype('ON_TARGET')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">ON TARGET</button>
+                    <button type="button" data-action="SHOT" data-subtype="OFF_TARGET" onclick="setSubtype('OFF_TARGET')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">OFF TARGET</button>
+                    <button type="button" data-action="SHOT" data-subtype="BLOCKED" onclick="setSubtype('BLOCKED')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">BLOCKED</button>
+                    <button type="button" data-action="SHOT" data-subtype="GOAL" onclick="setSubtype('GOAL')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">GOAL</button>
+                </div>
+            </div>
+            <div id="pass-subtypes" class="subtype-group mt-3 hidden border-t border-slate-100 pt-3">
+                <div class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">PASS SUBTYPE</div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" data-action="PASS" data-subtype="SUCCESS" onclick="setSubtype('SUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">SUCCESS</button>
+                    <button type="button" data-action="PASS" data-subtype="UNSUCCESS" onclick="setSubtype('UNSUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">UNSUCCESS</button>
+                    <button type="button" data-action="PASS" data-subtype="ASSIST" onclick="setSubtype('ASSIST')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">ASSIST</button>
+                </div>
+            </div>
+            <div id="cross-subtypes" class="subtype-group mt-3 hidden border-t border-slate-100 pt-3">
+                <div class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">CROSS SUBTYPE</div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" data-action="CROSS" data-subtype="SUCCESS" onclick="setSubtype('SUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">SUCCESS</button>
+                    <button type="button" data-action="CROSS" data-subtype="UNSUCCESS" onclick="setSubtype('UNSUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">UNSUCCESS</button>
                 </div>
             </div>
         </div>
@@ -172,7 +195,7 @@
 let selectedPlayerId = null;
 let selectedPlayerName = '';
 let selectedAction = null;
-let selectedSubtype = 'ON_TARGET';
+let selectedSubtype = null;
 let liveMode = false;
 let isDrawing = false;
 let dragStartPoint = null;
@@ -234,7 +257,7 @@ function redrawAll() {
     getSelectedPlayerVectors().forEach(v => {
         const start = getPointFromPct(v.start_x, v.start_y);
         const end = getPointFromPct(v.end_x, v.end_y);
-        drawArrow(start.x, start.y, end.x, end.y, getActionColor(v.action_type, v.subtype));
+        drawVectorArrow(ctx, start.x, start.y, end.x, end.y, v.action_type, v.subtype);
     });
 
     if (currentStartPoint) {
@@ -276,6 +299,7 @@ function setPlayer(id, number, name) {
 }
 
 function setAction(action) {
+    const actionChanged = selectedAction !== action;
     selectedAction = action;
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.classList.remove('bg-red-500', 'bg-green-500', 'bg-purple-500', 'text-white');
@@ -286,8 +310,11 @@ function setAction(action) {
     if(action === 'SHOT') activeBtn.classList.add('bg-red-500', 'text-white');
     if(action === 'PASS') activeBtn.classList.add('bg-green-500', 'text-white');
     if(action === 'CROSS') activeBtn.classList.add('bg-purple-500', 'text-white');
-    document.getElementById('shot-subtypes').classList.toggle('hidden', action !== 'SHOT');
-    if (action === 'SHOT' && !selectedSubtype) setSubtype('ON_TARGET');
+    const subtypeDefaults = { SHOT: 'ON_TARGET', PASS: 'SUCCESS', CROSS: 'SUCCESS' };
+    document.querySelectorAll('.subtype-group').forEach(group => {
+        group.classList.toggle('hidden', group.id !== `${action.toLowerCase()}-subtypes`);
+    });
+    if (actionChanged || !selectedSubtype) setSubtype(subtypeDefaults[action]);
     updateIndicator();
     redrawAll();
 }
@@ -295,20 +322,11 @@ function setAction(action) {
 function setSubtype(subtype) {
     selectedSubtype = subtype;
     document.querySelectorAll('.subtype-btn').forEach(button => {
-        const selected = button.dataset.subtype === subtype;
+        const selected = button.dataset.action === selectedAction && button.dataset.subtype === subtype;
         button.classList.toggle('ring-1', selected);
-        button.classList.toggle('ring-emerald-300', selected && subtype === 'ON_TARGET');
-        button.classList.toggle('ring-red-300', selected && subtype === 'OFF_TARGET');
-        button.classList.toggle('ring-amber-300', selected && subtype === 'BLOCKED');
-        button.classList.toggle('ring-blue-300', selected && subtype === 'GOAL');
-        button.classList.toggle('bg-emerald-100', selected && subtype === 'ON_TARGET');
-        button.classList.toggle('text-emerald-700', selected && subtype === 'ON_TARGET');
-        button.classList.toggle('bg-red-100', selected && subtype === 'OFF_TARGET');
-        button.classList.toggle('text-red-700', selected && subtype === 'OFF_TARGET');
-        button.classList.toggle('bg-amber-100', selected && subtype === 'BLOCKED');
-        button.classList.toggle('text-amber-700', selected && subtype === 'BLOCKED');
-        button.classList.toggle('bg-blue-100', selected && subtype === 'GOAL');
-        button.classList.toggle('text-blue-700', selected && subtype === 'GOAL');
+        button.classList.toggle('ring-blue-300', selected);
+        button.classList.toggle('bg-blue-100', selected);
+        button.classList.toggle('text-blue-700', selected);
         button.classList.toggle('bg-slate-100', !selected);
         button.classList.toggle('text-slate-500', !selected);
     });
@@ -359,8 +377,12 @@ function getActionColor(action, subtype = null) {
         };
         return subtypeColors[subtype] || '#ef4444';
     }
-    if (action === 'PASS') return '#22c55e';
-    if (action === 'CROSS') return '#a855f7';
+    if (action === 'PASS') {
+        if (subtype === 'UNSUCCESS') return '#ef4444';
+        if (subtype === 'ASSIST') return '#3b82f6';
+        return '#22c55e';
+    }
+    if (action === 'CROSS') return subtype === 'UNSUCCESS' ? '#9a3412' : '#a855f7';
     return '#ffffff';
 }
 
@@ -437,17 +459,17 @@ function drawSummary() {
         const fromY = (vector.start_y / 100) * height;
         const toX = (vector.end_x / 100) * width;
         const toY = (vector.end_y / 100) * height;
-        const angle = Math.atan2(toY - fromY, toX - fromX);
-        const head = 7;
-        summaryCtx.strokeStyle = getActionColor(vector.action_type, vector.subtype);
-        summaryCtx.lineWidth = 2;
-        summaryCtx.beginPath();
-        summaryCtx.moveTo(fromX, fromY);
-        summaryCtx.lineTo(toX, toY);
-        summaryCtx.lineTo(toX - head * Math.cos(angle - Math.PI / 6), toY - head * Math.sin(angle - Math.PI / 6));
-        summaryCtx.moveTo(toX, toY);
-        summaryCtx.lineTo(toX - head * Math.cos(angle + Math.PI / 6), toY - head * Math.sin(angle + Math.PI / 6));
-        summaryCtx.stroke();
+        drawVectorArrow(
+            summaryCtx,
+            fromX,
+            fromY,
+            toX,
+            toY,
+            vector.action_type,
+            vector.subtype,
+            2,
+            7
+        );
     });
 }
 
@@ -477,20 +499,50 @@ function getPointFromPct(pctX, pctY) {
     };
 }
 
-function drawArrow(fromX, fromY, toX, toY, color) {
-    const headlen = 12;
+function drawVectorArrow(context, fromX, fromY, toX, toY, action, subtype, lineWidth = 4, headLength = 12) {
     const dx = toX - fromX;
     const dy = toY - fromY;
-    const angle = Math.atan2(dy, dx);
-    ctx.beginPath();
-    ctx.moveTo(fromX, fromY);
-    ctx.lineTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 4;
-    ctx.stroke();
+    const distance = Math.hypot(dx, dy);
+    if (!distance) return;
+
+    const color = getActionColor(action, subtype);
+    let angle = Math.atan2(dy, dx);
+    context.save();
+    context.strokeStyle = color;
+    context.fillStyle = color;
+    context.lineWidth = lineWidth;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.beginPath();
+    context.moveTo(fromX, fromY);
+
+    if (action === 'CROSS') {
+        const curveDirection = subtype === 'UNSUCCESS' ? -1 : 1;
+        const curveAmount = Math.min(distance * 0.22, Math.min(context.canvas.width, context.canvas.height) * 0.12);
+        const controlX = (fromX + toX) / 2 - (dy / distance) * curveAmount * curveDirection;
+        const controlY = (fromY + toY) / 2 + (dx / distance) * curveAmount * curveDirection;
+        context.quadraticCurveTo(controlX, controlY, toX, toY);
+        angle = Math.atan2(toY - controlY, toX - controlX);
+    } else {
+        context.lineTo(toX, toY);
+        if (action === 'PASS') context.setLineDash([lineWidth * 2.5, lineWidth * 1.8]);
+    }
+
+    context.stroke();
+    context.setLineDash([]);
+    context.beginPath();
+    context.moveTo(toX, toY);
+    context.lineTo(
+        toX - headLength * Math.cos(angle - Math.PI / 6),
+        toY - headLength * Math.sin(angle - Math.PI / 6)
+    );
+    context.moveTo(toX, toY);
+    context.lineTo(
+        toX - headLength * Math.cos(angle + Math.PI / 6),
+        toY - headLength * Math.sin(angle + Math.PI / 6)
+    );
+    context.stroke();
+    context.restore();
 }
 
 function getCanvasPosition(e) {
@@ -505,7 +557,7 @@ function addVector(startPoint, endPoint, playerId, playerName, action, subtype =
         player_id: playerId,
         playerName: playerName,
         action_type: action,
-        subtype: action === 'SHOT' ? subtype : null,
+        subtype,
         start_x: (startPoint.x / canvas.width) * 100,
         start_y: (startPoint.y / canvas.height) * 100,
         end_x: (endPoint.x / canvas.width) * 100,
@@ -620,7 +672,15 @@ canvas.addEventListener('pointermove', (e) => {
 
     redrawAll();
     const snapPoint = getNearestPoint(position.x, position.y);
-    drawArrow(dragStartPoint.x, dragStartPoint.y, snapPoint ? snapPoint.x : position.x, snapPoint ? snapPoint.y : position.y, getActionColor(selectedAction, selectedSubtype));
+    drawVectorArrow(
+        ctx,
+        dragStartPoint.x,
+        dragStartPoint.y,
+        snapPoint ? snapPoint.x : position.x,
+        snapPoint ? snapPoint.y : position.y,
+        selectedAction,
+        selectedSubtype
+    );
 });
 
 canvas.addEventListener('pointerup', (e) => {
@@ -692,7 +752,7 @@ canvas.addEventListener('dblclick', (e) => {
         player_id: selectedPlayerId,
         playerName: selectedPlayerName,
         action_type: selectedAction,
-        subtype: selectedAction === 'SHOT' ? selectedSubtype : null
+        subtype: selectedSubtype
     };
     redrawAll();
 });
@@ -717,11 +777,11 @@ function updateEventList() {
 
         const action = document.createElement('span');
         action.className = `inline-flex items-center gap-1.5 font-bold ${v.action_type === 'SHOT' ? 'text-red-500' : (v.action_type === 'PASS' ? 'text-green-500' : 'text-purple-500')}`;
-        if (v.action_type === 'SHOT') action.style.color = getActionColor(v.action_type, v.subtype);
+        action.style.color = getActionColor(v.action_type, v.subtype);
         const icon = document.createElement('i');
         icon.setAttribute('data-lucide', getActionIcon(v.action_type));
         icon.className = 'h-3.5 w-3.5';
-        action.append(icon, document.createTextNode(v.action_type === 'SHOT' && v.subtype ? `SHOT · ${v.subtype.replace('_', ' ')}` : v.action_type));
+        action.append(icon, document.createTextNode(v.subtype ? `${v.action_type} · ${v.subtype.replace('_', ' ')}` : v.action_type));
 
         const modeLabel = document.createElement('span');
         modeLabel.className = `rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-wide ${mode === 'live' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`;
@@ -776,8 +836,6 @@ function submitVectors() {
     saveNextVector();
 }
 
-setAction('SHOT');
-setSubtype('ON_TARGET');
 updateEventList();
 updateSummary();
 </script>

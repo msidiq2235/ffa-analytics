@@ -126,6 +126,67 @@ class PlayerPerformanceDetailTest extends TestCase
             ->assertSee('Statistik Pemain');
     }
 
+    public function test_vector_subtypes_are_saved_and_validated_for_each_event_type(): void
+    {
+        $analyst = User::create([
+            'name' => 'Vector Analyst',
+            'email' => 'vector-analyst@example.com',
+            'password' => 'password',
+            'role' => 'Analis',
+            'status' => 'Aktif',
+        ]);
+        $club = Club::create(['name' => 'Vector FC']);
+        $player = Player::create([
+            'club_id' => $club->id,
+            'name' => 'Vector Player',
+            'status' => 'Aktif',
+            'position' => 'CM',
+        ]);
+        $match = $this->createMatch($analyst, 'Vector Match', now());
+
+        foreach ([
+            ['SHOT', 'GOAL'],
+            ['PASS', 'SUCCESS'],
+            ['PASS', 'UNSUCCESS'],
+            ['PASS', 'ASSIST'],
+            ['CROSS', 'SUCCESS'],
+            ['CROSS', 'UNSUCCESS'],
+        ] as [$action, $subtype]) {
+            $this->actingAs($analyst)
+                ->postJson(route('matches.storeVector', $match), [
+                    'player_id' => $player->id,
+                    'action_type' => $action,
+                    'subtype' => $subtype,
+                    'start_x' => 10,
+                    'start_y' => 20,
+                    'end_x' => 30,
+                    'end_y' => 40,
+                    'timestamp_mode' => 'manual',
+                    'match_minute' => 5,
+                ])
+                ->assertOk()
+                ->assertJsonPath('data.action_type', $action)
+                ->assertJsonPath('data.subtype', $subtype);
+        }
+
+        $this->actingAs($analyst)
+            ->postJson(route('matches.storeVector', $match), [
+                'player_id' => $player->id,
+                'action_type' => 'CROSS',
+                'subtype' => 'ASSIST',
+                'start_x' => 10,
+                'start_y' => 20,
+                'end_x' => 30,
+                'end_y' => 40,
+                'timestamp_mode' => 'manual',
+                'match_minute' => 5,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('subtype');
+
+        $this->assertDatabaseCount('vector_directions', 6);
+    }
+
     private function createMatch(User $creator, string $title, $date): MatchSession
     {
         return MatchSession::create([
