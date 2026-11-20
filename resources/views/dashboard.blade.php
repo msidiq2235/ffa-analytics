@@ -340,7 +340,7 @@ $activeRole = $activeRole ?? (auth()->user()->role ?? 'Super Admin');
                 </div>
                 <div class="grid grid-cols-4 text-center">
                     <div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntTotal }}</p></div>
-                    <div><p class="text-[9px] font-bold text-orange-500 uppercase tracking-widest">Akan</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntUpcoming }}</p></div>
+                    <div><p class="text-[9px] font-bold text-orange-500 uppercase tracking-widest">Mendatang</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntUpcoming }}</p></div>
                     <div><p class="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Live</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntLive }}</p></div>
                     <div><p class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Selesai</p><p class="text-[18px] font-black text-[#1e293b] mt-1">{{ $cntDone }}</p></div>
                 </div>

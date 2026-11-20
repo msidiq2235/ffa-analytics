@@ -40,7 +40,7 @@
             <!-- Nama Tim -->
             <h3 class="text-xl font-bold text-[#1e293b] mb-2">{{ $club->name }}</h3>
             <p class="text-[12px] text-slate-500 mb-6">
-                Penanggung jawab:
+                Penanggung Jawab:
                 <span class="font-semibold text-slate-700">{{ $club->coach?->name ?? 'Belum ditentukan' }}</span>
             </p>
 
