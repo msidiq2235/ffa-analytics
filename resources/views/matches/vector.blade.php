@@ -50,29 +50,9 @@
                 <div class="pointer-events-none absolute bottom-[37%] right-[5%] top-[37%] w-[8%] border-2 border-r-0 border-white/40"></div>
                 <canvas id="vectorCanvas" class="absolute inset-0 z-10 h-full w-full touch-none cursor-crosshair"></canvas>
             </div>
-            <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-semibold text-slate-300 sm:grid-cols-3 lg:grid-cols-4">
-                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#4ade80"></i>Shot · On target</span>
-                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#ef4444"></i>Shot · Off target</span>
-                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#fbbf24"></i>Shot · Blocked</span>
-                <span class="inline-flex items-center gap-2"><i class="h-0.5 w-6 rounded" style="background:#3b82f6"></i>Shot · Goal</span>
-                <span class="inline-flex items-center gap-2"><i class="w-6 border-t-2 border-dashed" style="border-color:#22c55e"></i>Pass · Success</span>
-                <span class="inline-flex items-center gap-2"><i class="w-6 border-t-2 border-dashed" style="border-color:#ef4444"></i>Pass · Unsuccess</span>
-                <span class="inline-flex items-center gap-2"><i class="w-6 border-t-2 border-dashed" style="border-color:#3b82f6"></i>Pass · Assist</span>
-                <span class="inline-flex items-center gap-2">
-                    <svg class="h-3 w-6 shrink-0" viewBox="0 0 26 12" aria-hidden="true"><path d="M1 10 Q13 1 25 6" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/></svg>
-                    Cross · Success
-                </span>
-                <span class="inline-flex items-center gap-2">
-                    <svg class="h-3 w-6 shrink-0" viewBox="0 0 26 12" aria-hidden="true"><path d="M1 2 Q13 11 25 6" fill="none" stroke="#9a3412" stroke-width="2" stroke-linecap="round"/></svg>
-                    Cross · Unsuccess
-                </span>
-                <span class="col-span-2 text-emerald-300 sm:col-span-3 lg:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>
-            <div id="vector-legend" class="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-semibold text-slate-300 sm:grid-cols-4">
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-emerald-400"></i>Shot On Target</span>
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-red-400"></i>Shot Off Target</span>
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-amber-400"></i>Blocked</span>
-                <span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded bg-blue-400"></i>Goal</span>
-                <span class="col-span-2 text-emerald-300 sm:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>
+            <div id="vector-legend" class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-semibold text-slate-300 sm:grid-cols-3 lg:grid-cols-4">
+                <span class="col-span-full text-slate-400">SHOT: garis utuh · PASS: garis putus-putus · CROSS: garis melengkung</span>
+                <span class="col-span-full text-emerald-300">48-POINT GRID · Klik titik awal, lalu klik titik akhir</span>
             </div>
         </div>
     </section>
@@ -89,30 +69,7 @@
                 <button id="btn-action-PASS" onclick="setAction('PASS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-green-50 hover:text-green-600">PASS</button>
                 <button id="btn-action-CROSS" onclick="setAction('CROSS')" class="action-btn rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-purple-50 hover:text-purple-600">CROSS</button>
             </div>
-            <div id="shot-subtypes" class="subtype-group mt-3 hidden border-t border-slate-100 pt-3">
-                <div class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">SHOT SUBTYPE</div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" data-action="SHOT" data-subtype="ON_TARGET" onclick="setSubtype('ON_TARGET')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">ON TARGET</button>
-                    <button type="button" data-action="SHOT" data-subtype="OFF_TARGET" onclick="setSubtype('OFF_TARGET')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">OFF TARGET</button>
-                    <button type="button" data-action="SHOT" data-subtype="BLOCKED" onclick="setSubtype('BLOCKED')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">BLOCKED</button>
-                    <button type="button" data-action="SHOT" data-subtype="GOAL" onclick="setSubtype('GOAL')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">GOAL</button>
-                </div>
-            </div>
-            <div id="pass-subtypes" class="subtype-group mt-3 hidden border-t border-slate-100 pt-3">
-                <div class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">PASS SUBTYPE</div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" data-action="PASS" data-subtype="SUCCESS" onclick="setSubtype('SUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">SUCCESS</button>
-                    <button type="button" data-action="PASS" data-subtype="UNSUCCESS" onclick="setSubtype('UNSUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">UNSUCCESS</button>
-                    <button type="button" data-action="PASS" data-subtype="ASSIST" onclick="setSubtype('ASSIST')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">ASSIST</button>
-                </div>
-            </div>
-            <div id="cross-subtypes" class="subtype-group mt-3 hidden border-t border-slate-100 pt-3">
-                <div class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">CROSS SUBTYPE</div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" data-action="CROSS" data-subtype="SUCCESS" onclick="setSubtype('SUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">SUCCESS</button>
-                    <button type="button" data-action="CROSS" data-subtype="UNSUCCESS" onclick="setSubtype('UNSUCCESS')" class="subtype-btn rounded-md bg-slate-100 px-2.5 py-1.5 text-[9px] font-bold text-slate-500">UNSUCCESS</button>
-                </div>
-            <div id="event-subtypes" class="mt-3 border-t border-slate-100 pt-3">
+            <div id="event-subtypes" class="mt-3 hidden border-t border-slate-100 pt-3">
                 <div id="subtype-title" class="mb-2 text-[10px] font-bold tracking-wider text-slate-400">PILIH SUBTYPE</div>
                 <div id="subtype-buttons" class="space-y-2"></div>
             </div>
@@ -216,8 +173,8 @@ const EVENT_CONFIG = {
         defaultSubtype: 'SUCCESS',
         subtypes: [
             { key: 'SUCCESS', label: 'SUCCESS', color: '#22c55e', badge: 'bg-green-100 text-green-700 ring-green-300' },
-            { key: 'KEY_PASS', label: 'KEY PASS', color: '#eab308', badge: 'bg-yellow-100 text-yellow-700 ring-yellow-300' },
-            { key: 'UNSUCCESSFUL', label: 'UNSUCCESSFUL', color: '#fb7185', badge: 'bg-rose-100 text-rose-700 ring-rose-300' },
+            { key: 'UNSUCCESS', label: 'UNSUCCESS', color: '#ef4444', badge: 'bg-red-100 text-red-700 ring-red-300' },
+            { key: 'ASSIST', label: 'ASSIST', color: '#3b82f6', badge: 'bg-blue-100 text-blue-700 ring-blue-300' },
         ]
     },
     CROSS: {
@@ -225,8 +182,7 @@ const EVENT_CONFIG = {
         defaultSubtype: 'SUCCESS',
         subtypes: [
             { key: 'SUCCESS', label: 'SUCCESS', color: '#a855f7', badge: 'bg-purple-100 text-purple-700 ring-purple-300' },
-            { key: 'ASSIST', label: 'ASSIST', color: '#06b6d4', badge: 'bg-cyan-100 text-cyan-700 ring-cyan-300' },
-            { key: 'UNSUCCESSFUL', label: 'UNSUCCESSFUL', color: '#f97316', badge: 'bg-orange-100 text-orange-700 ring-orange-300' },
+            { key: 'UNSUCCESS', label: 'UNSUCCESS', color: '#9a3412', badge: 'bg-orange-100 text-orange-900 ring-orange-300' },
         ]
     }
 };
@@ -236,15 +192,9 @@ let selectedPlayerName = '';
 let selectedAction = null;
 let selectedSubtype = null;
 let liveMode = false;
-let isDrawing = false;
-let dragStartPoint = null;
-let currentPreviewPoint = null;
-let pointerDownPosition = null;
-let suppressNextClick = false;
-let clickTimer = null;
+let currentStartPoint = null;
 let gridPoints = [];
 let pendingVectors = [];
-let currentStartPoint = null;
 let pendingManualVector = null;
 const savedVectors = @js($vectors);
 
@@ -304,25 +254,17 @@ function redrawAll() {
         drawVectorArrow(ctx, start.x, start.y, end.x, end.y, v.action_type, v.subtype);
     });
 
-    if (isDrawing && dragStartPoint && currentPreviewPoint) {
-        drawArrow(
-            dragStartPoint.x,
-            dragStartPoint.y,
-            currentPreviewPoint.x,
-            currentPreviewPoint.y,
-            getActionColor(selectedAction, selectedSubtype)
-        );
-    }
-
     if (currentStartPoint) {
+        const start = getPointFromPct(currentStartPoint.x, currentStartPoint.y);
         ctx.beginPath();
-        ctx.arc(currentStartPoint.x, currentStartPoint.y, 10, 0, Math.PI * 2);
+        ctx.arc(start.x, start.y, 10, 0, Math.PI * 2);
         ctx.fillStyle = '#facc15';
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         ctx.stroke();
     }
+
 }
 
 function resizeCanvas() {
@@ -337,6 +279,7 @@ window.addEventListener('resize', resizeCanvas);
 setTimeout(resizeCanvas, 100);
 
 function setPlayer(id, number, name) {
+    currentStartPoint = null;
     selectedPlayerId = id;
     selectedPlayerName = name;
     document.querySelectorAll('.player-btn').forEach(btn => {
@@ -354,46 +297,86 @@ function setPlayer(id, number, name) {
     redrawAll();
 }
 
-function setAction(action) {
-    const actionChanged = selectedAction !== action;
 function renderSubtypeButtons() {
     const container = document.getElementById('event-subtypes');
     const btnWrapper = document.getElementById('subtype-buttons');
-    container.classList.remove('hidden');
     btnWrapper.innerHTML = '';
+    const config = EVENT_CONFIG[selectedAction];
+    if (!config) {
+        container.classList.add('hidden');
+        return;
+    }
 
-    Object.entries(EVENT_CONFIG).forEach(([action, config]) => {
-        const group = document.createElement('div');
-        group.className = 'flex flex-wrap items-center gap-2';
-
-        const label = document.createElement('span');
-        label.className = 'w-12 shrink-0 text-[9px] font-extrabold tracking-wide text-slate-500';
-        label.textContent = action;
-        group.appendChild(label);
-
-        config.subtypes.forEach(item => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.dataset.action = action;
-            btn.dataset.subtype = item.key;
-            btn.textContent = item.label;
-            btn.onclick = () => setAction(action, item.key);
-            btn.className = 'subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors bg-slate-100 text-slate-500';
-            group.appendChild(btn);
-        });
-
-        btnWrapper.appendChild(group);
+    container.classList.remove('hidden');
+    document.getElementById('subtype-title').textContent = config.title;
+    config.subtypes.forEach(item => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.action = selectedAction;
+        button.dataset.subtype = item.key;
+        button.textContent = item.label;
+        button.className = 'subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors bg-slate-100 text-slate-500';
+        button.addEventListener('click', () => setSubtype(item.key));
+        btnWrapper.appendChild(button);
     });
 
-    const legendEl = document.getElementById('vector-legend');
-    legendEl.innerHTML = Object.entries(EVENT_CONFIG).flatMap(([action, config]) =>
-        config.subtypes.map(item =>
-            `<span class="inline-flex items-center gap-2"><i class="h-1 w-6 rounded" style="background-color:${item.color}"></i>${action} · ${item.label}</span>`
-        )
-    ).join('') + `<span class="col-span-2 text-emerald-300 sm:col-span-4">48-POINT GRID · Drag dari awal ke akhir · Double klik awal, lalu klik akhir</span>`;
+    updateSubtypeSelection();
 }
 
-function setAction(action, subtype = EVENT_CONFIG[action]?.defaultSubtype || null) {
+function renderVectorLegend() {
+    const legend = document.getElementById('vector-legend');
+    legend.innerHTML = '';
+    const entries = [
+        ['SHOT', 'ON_TARGET', 'Shot · On target', 'solid'],
+        ['SHOT', 'OFF_TARGET', 'Shot · Off target', 'solid'],
+        ['SHOT', 'BLOCKED', 'Shot · Blocked', 'solid'],
+        ['SHOT', 'GOAL', 'Shot · Goal', 'solid'],
+        ['PASS', 'SUCCESS', 'Pass · Success', 'dashed'],
+        ['PASS', 'UNSUCCESS', 'Pass · Unsuccess', 'dashed'],
+        ['PASS', 'ASSIST', 'Pass · Assist', 'dashed'],
+        ['CROSS', 'SUCCESS', 'Cross · Success', 'curve'],
+        ['CROSS', 'UNSUCCESS', 'Cross · Unsuccess', 'curve'],
+    ];
+
+    entries.forEach(([action, subtype, label, style]) => {
+        const entry = document.createElement('span');
+        entry.className = 'inline-flex items-center gap-2';
+        if (style === 'curve') {
+            const curve = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            curve.setAttribute('viewBox', '0 0 26 12');
+            curve.setAttribute('aria-hidden', 'true');
+            curve.classList.add('h-3', 'w-6', 'shrink-0');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', subtype === 'SUCCESS' ? 'M1 10 Q13 1 25 6' : 'M1 2 Q13 11 25 6');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', getActionColor(action, subtype));
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('stroke-linecap', 'round');
+            curve.appendChild(path);
+            entry.appendChild(curve);
+        } else {
+            const line = document.createElement('i');
+            line.className = style === 'dashed'
+                ? 'w-6 border-t-2 border-dashed'
+                : 'h-0.5 w-6 rounded';
+            line.style.borderColor = getActionColor(action, subtype);
+            line.style.backgroundColor = style === 'solid' ? getActionColor(action, subtype) : 'transparent';
+            entry.appendChild(line);
+        }
+        entry.appendChild(document.createTextNode(label));
+        legend.appendChild(entry);
+    });
+
+    const instructions = document.createElement('span');
+    instructions.className = 'col-span-full text-emerald-300';
+    instructions.textContent = '48-POINT GRID · Klik titik awal, lalu klik titik akhir';
+    legend.appendChild(instructions);
+}
+
+function setAction(action) {
+    if (!EVENT_CONFIG[action]) return;
+    const actionChanged = selectedAction !== action;
+    if (actionChanged) currentStartPoint = null;
     selectedAction = action;
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.classList.remove('bg-red-500', 'bg-green-500', 'bg-purple-500', 'text-white');
@@ -404,44 +387,36 @@ function setAction(action, subtype = EVENT_CONFIG[action]?.defaultSubtype || nul
     if(action === 'SHOT') activeBtn.classList.add('bg-red-500', 'text-white');
     if(action === 'PASS') activeBtn.classList.add('bg-green-500', 'text-white');
     if(action === 'CROSS') activeBtn.classList.add('bg-purple-500', 'text-white');
-    const subtypeDefaults = { SHOT: 'ON_TARGET', PASS: 'SUCCESS', CROSS: 'SUCCESS' };
-    document.querySelectorAll('.subtype-group').forEach(group => {
-        group.classList.toggle('hidden', group.id !== `${action.toLowerCase()}-subtypes`);
-    });
-    if (actionChanged || !selectedSubtype) setSubtype(subtypeDefaults[action]);
-    if (action === 'SHOT') activeBtn.classList.add('bg-red-500', 'text-white');
-    if (action === 'PASS') activeBtn.classList.add('bg-green-500', 'text-white');
-    if (action === 'CROSS') activeBtn.classList.add('bg-purple-500', 'text-white');
-
-    setSubtype(subtype);
+    if (actionChanged || !selectedSubtype) {
+        selectedSubtype = EVENT_CONFIG[action].defaultSubtype;
+    }
+    renderSubtypeButtons();
     updateIndicator();
     redrawAll();
 }
 
 function setSubtype(subtype) {
+    const config = EVENT_CONFIG[selectedAction];
+    if (!config || !config.subtypes.some(item => item.key === subtype)) return;
+    if (selectedSubtype !== subtype) currentStartPoint = null;
     selectedSubtype = subtype;
+    updateSubtypeSelection();
+    redrawAll();
+}
+
+function updateSubtypeSelection() {
     const config = EVENT_CONFIG[selectedAction];
     if (!config) return;
-
     document.querySelectorAll('.subtype-btn').forEach(button => {
-        const selected = button.dataset.action === selectedAction && button.dataset.subtype === subtype;
-        button.classList.toggle('ring-1', selected);
-        button.classList.toggle('ring-blue-300', selected);
-        button.classList.toggle('bg-blue-100', selected);
-        button.classList.toggle('text-blue-700', selected);
-        button.classList.toggle('bg-slate-100', !selected);
-        button.classList.toggle('text-slate-500', !selected);
-        const item = button.dataset.action === selectedAction
-            ? config.subtypes.find(s => s.key === button.dataset.subtype)
-            : null;
-        const isSelected = button.dataset.action === selectedAction && button.dataset.subtype === subtype;
+        const isSelected = button.dataset.action === selectedAction && button.dataset.subtype === selectedSubtype;
+        const item = config.subtypes.find(subtype => subtype.key === button.dataset.subtype);
         button.className = `subtype-btn rounded-md px-2.5 py-1.5 text-[9px] font-bold transition-colors ${
             isSelected && item ? `ring-1 ${item.badge}` : 'bg-slate-100 text-slate-500'
         }`;
     });
 }
 
-renderSubtypeButtons();
+renderVectorLegend();
 
 function setPanel(panel) {
     const showSummary = panel === 'summary';
@@ -481,7 +456,8 @@ function updateIndicator() {
 function getActionColor(action, subtype = null) {
     const config = EVENT_CONFIG[action];
     if (config) {
-        const found = config.subtypes.find(s => s.key === subtype);
+        const normalizedSubtype = subtype === 'UNSUCCESSFUL' ? 'UNSUCCESS' : subtype === 'KEY_PASS' ? 'SUCCESS' : subtype;
+        const found = config.subtypes.find(s => s.key === normalizedSubtype);
         if (found) return found.color;
         return config.subtypes[0].color;
     }
@@ -545,10 +521,10 @@ function updateSummary() {
     const onTarget = shots.filter(v => ['ON_TARGET', 'GOAL'].includes(v.subtype)).length;
 
     const passes = vectors.filter(v => v.action_type === 'PASS');
-    const passSuccess = passes.filter(v => ['SUCCESS', 'KEY_PASS'].includes(v.subtype)).length;
+    const passSuccess = passes.filter(v => ['SUCCESS', 'ASSIST', 'KEY_PASS'].includes(v.subtype)).length;
 
     const crosses = vectors.filter(v => v.action_type === 'CROSS');
-    const crossSuccess = crosses.filter(v => ['SUCCESS', 'ASSIST'].includes(v.subtype)).length;
+    const crossSuccess = crosses.filter(v => v.subtype === 'SUCCESS').length;
 
     const shotPercentage = shots.length ? Math.round((onTarget / shots.length) * 100) : 0;
     const maxTotal = Math.max(shots.length, passes.length, crosses.length, 1);
@@ -620,18 +596,6 @@ function drawSummary() {
             2,
             7
         );
-        const angle = Math.atan2(toY - fromY, toX - fromX);
-        const head = 7;
-
-        summaryCtx.strokeStyle = getActionColor(vector.action_type, vector.subtype);
-        summaryCtx.lineWidth = 2;
-        summaryCtx.beginPath();
-        summaryCtx.moveTo(fromX, fromY);
-        summaryCtx.lineTo(toX, toY);
-        summaryCtx.lineTo(toX - head * Math.cos(angle - Math.PI / 6), toY - head * Math.sin(angle - Math.PI / 6));
-        summaryCtx.moveTo(toX, toY);
-        summaryCtx.lineTo(toX - head * Math.cos(angle + Math.PI / 6), toY - head * Math.sin(angle + Math.PI / 6));
-        summaryCtx.stroke();
     });
 }
 
@@ -699,17 +663,6 @@ function drawVectorArrow(context, fromX, fromY, toX, toY, action, subtype, lineW
     );
     context.stroke();
     context.restore();
-    const angle = Math.atan2(dy, dx);
-
-    ctx.beginPath();
-    ctx.moveTo(fromX, fromY);
-    ctx.lineTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 4;
-    ctx.stroke();
 }
 
 function getCanvasPosition(e) {
@@ -725,7 +678,6 @@ function addVector(startPoint, endPoint, playerId, playerName, action, subtype =
         player_id: playerId,
         playerName: playerName,
         action_type: action,
-        subtype,
         subtype: resolvedSubtype,
         start_x: (startPoint.x / canvas.width) * 100,
         start_y: (startPoint.y / canvas.height) * 100,
@@ -818,121 +770,38 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-canvas.addEventListener('pointerdown', (e) => {
+canvas.addEventListener('click', (e) => {
     if (matchStatus === 'Selesai') {
         return showNotification('Pertandingan sudah selesai, sehingga data tidak dapat diubah.', 'warning');
     }
-    if (!selectedPlayerId || !selectedAction) {
-        return showNotification('Pilih pemain dan jenis event (SHOT / PASS / CROSS) terlebih dahulu.', 'warning');
+    if (!selectedPlayerId || !selectedAction || !selectedSubtype) {
+        return showNotification('Pilih pemain, event, dan subevent terlebih dahulu.', 'warning');
     }
 
     const pos = getCanvasPosition(e);
     const nearest = getNearestPoint(pos.x, pos.y);
-    if (!nearest) return;
-
-    pointerDownPosition = pos;
-    dragStartPoint = nearest;
-    currentPreviewPoint = nearest;
-    isDrawing = true;
-});
-
-canvas.addEventListener('pointermove', (e) => {
-    if (!isDrawing || !dragStartPoint) return;
-    const pos = getCanvasPosition(e);
-    const nearest = getNearestPoint(pos.x, pos.y);
-    currentPreviewPoint = nearest || pos;
-    redrawAll();
-    const snapPoint = getNearestPoint(position.x, position.y);
-    drawVectorArrow(
-        ctx,
-        dragStartPoint.x,
-        dragStartPoint.y,
-        snapPoint ? snapPoint.x : position.x,
-        snapPoint ? snapPoint.y : position.y,
-        selectedAction,
-        selectedSubtype
-    );
-});
-
-canvas.addEventListener('pointerup', (e) => {
-    if (!isDrawing || !dragStartPoint) return;
-    const pos = getCanvasPosition(e);
-    const endPoint = getNearestPoint(pos.x, pos.y);
-    const movedDistance = pointerDownPosition
-        ? Math.hypot(pos.x - pointerDownPosition.x, pos.y - pointerDownPosition.y)
-        : 0;
-
-    isDrawing = false;
-    currentPreviewPoint = null;
-
-    if (movedDistance > 12 && endPoint && (endPoint.x !== dragStartPoint.x || endPoint.y !== dragStartPoint.y)) {
-        suppressNextClick = true;
-        currentStartPoint = null;
-        addVector(dragStartPoint, endPoint, selectedPlayerId, selectedPlayerName, selectedAction, selectedSubtype);
+    if (!nearest) {
+        return showNotification('Klik salah satu titik pada grid untuk menentukan posisi.', 'info');
     }
 
-    dragStartPoint = null;
-    redrawAll();
-});
-
-canvas.addEventListener('dblclick', (e) => {
-    if (matchStatus === 'Selesai' || !selectedPlayerId || !selectedAction) return;
-    const pos = getCanvasPosition(e);
-    const nearest = getNearestPoint(pos.x, pos.y);
-    if (!nearest) return;
-
-    currentStartPoint = nearest;
-    redrawAll();
-});
-
-canvas.addEventListener('click', (e) => {
-    if (suppressNextClick) {
-        suppressNextClick = false;
+    if (!currentStartPoint) {
+        currentStartPoint = {
+            x: (nearest.x / canvas.width) * 100,
+            y: (nearest.y / canvas.height) * 100
+        };
+        indicator.textContent = `${selectedPlayerName} · Titik awal dipilih, klik titik akhir`;
+        redrawAll();
         return;
     }
-    if (!currentStartPoint || !selectedPlayerId || !selectedAction) return;
 
-    const pos = getCanvasPosition(e);
-    const endPoint = getNearestPoint(pos.x, pos.y);
-    if (!endPoint || (endPoint.x === currentStartPoint.x && endPoint.y === currentStartPoint.y)) return;
+    const startPoint = getPointFromPct(currentStartPoint.x, currentStartPoint.y);
+    if (Math.hypot(nearest.x - startPoint.x, nearest.y - startPoint.y) < 1) {
+        return showNotification('Pilih titik akhir yang berbeda dari titik awal.', 'info');
+    }
 
-        const added = addVector(
-            currentStartPoint,
-            endPoint,
-            currentStartPoint.player_id,
-            currentStartPoint.playerName,
-            currentStartPoint.action_type,
-            currentStartPoint.subtype
-        );
-        if (added) {
-            currentStartPoint = null;
-            redrawAll();
-        }
-    }, 250);
-});
-
-canvas.addEventListener('dblclick', (e) => {
-    e.preventDefault();
-    clearTimeout(clickTimer);
-    if(matchStatus === 'Selesai') return showNotification('Pertandingan sudah selesai, sehingga data tidak dapat diubah.', 'warning');
-    if(!selectedPlayerId && !selectedAction) return showNotification('Pilih pemain dan event terlebih dahulu sebelum menggambar vektor.', 'info');
-    if(!selectedPlayerId) return showNotification('Pilih pemain terlebih dahulu sebelum menggambar vektor.', 'info');
-    if(!selectedAction) return showNotification('Pilih event SHOT, PASS, atau CROSS terlebih dahulu.', 'info');
-
-    const position = getCanvasPosition(e);
-    const startPoint = getNearestPoint(position.x, position.y);
-    if (!startPoint) return showNotification('Double klik salah satu titik pada grid untuk menentukan titik awal.', 'info');
-
-    currentStartPoint = {
-        ...startPoint,
-        player_id: selectedPlayerId,
-        playerName: selectedPlayerName,
-        action_type: selectedAction,
-        subtype: selectedSubtype
-    };
-    const start = currentStartPoint;
     currentStartPoint = null;
-    addVector(start, endPoint, selectedPlayerId, selectedPlayerName, selectedAction, selectedSubtype);
+    addVector(startPoint, nearest, selectedPlayerId, selectedPlayerName, selectedAction, selectedSubtype);
+    updateIndicator();
     redrawAll();
 });
 
@@ -944,13 +813,6 @@ async function submitVectors() {
         return showNotification('Tidak ada data vektor baru untuk disimpan.', 'info');
     }
 
-        const action = document.createElement('span');
-        action.className = `inline-flex items-center gap-1.5 font-bold ${v.action_type === 'SHOT' ? 'text-red-500' : (v.action_type === 'PASS' ? 'text-green-500' : 'text-purple-500')}`;
-        action.style.color = getActionColor(v.action_type, v.subtype);
-        const icon = document.createElement('i');
-        icon.setAttribute('data-lucide', getActionIcon(v.action_type));
-        icon.className = 'h-3.5 w-3.5';
-        action.append(icon, document.createTextNode(v.subtype ? `${v.action_type} · ${v.subtype.replace('_', ' ')}` : v.action_type));
     const saveBtn = document.getElementById('btn-save-vectors');
     saveBtn.disabled = true;
     saveBtn.classList.add('opacity-60', 'cursor-not-allowed');

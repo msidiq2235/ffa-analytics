@@ -150,6 +150,18 @@ class PlayerPerformanceDetailTest extends TestCase
             'position' => 'CM',
         ]);
         $match = $this->createMatch($analyst, 'Vector Match', now());
+        $match->players()->attach($player->id, ['position' => 'CM']);
+
+        $this->actingAs($analyst)
+            ->get(route('matches.vector', $match))
+            ->assertOk()
+            ->assertSee('id="event-subtypes" class="mt-3 hidden', false)
+            ->assertSee('Cross · Unsuccess')
+            ->assertSee('Pass · Assist')
+            ->assertDontSee('id="shot-subtypes"', false)
+            ->assertSee("canvas.addEventListener('click'", false)
+            ->assertDontSee("canvas.addEventListener('pointerdown'", false)
+            ->assertDontSee("canvas.addEventListener('pointermove'", false);
 
         foreach ([
             ['SHOT', 'GOAL'],

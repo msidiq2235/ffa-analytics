@@ -302,8 +302,8 @@ class MatchController extends Controller
 
         $allowedSubtypes = match ($request->action_type) {
             'SHOT'  => ['ON_TARGET', 'OFF_TARGET', 'BLOCKED', 'GOAL'],
-            'PASS'  => ['SUCCESS', 'KEY_PASS', 'UNSUCCESSFUL'],
-            'CROSS' => ['SUCCESS', 'ASSIST', 'UNSUCCESSFUL'],
+            'PASS'  => ['SUCCESS', 'UNSUCCESS', 'ASSIST'],
+            'CROSS' => ['SUCCESS', 'UNSUCCESS'],
             default => [],
         };
 
